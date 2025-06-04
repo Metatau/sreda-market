@@ -136,7 +136,8 @@ export class DatabaseStorage implements IStorage {
       .from(properties)
       .where(and(...conditions));
 
-    let baseQuery = db
+    // Build query with pagination
+    const baseQuery = db
       .select({
         property: properties,
         region: regions,
@@ -150,16 +151,11 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions))
       .orderBy(desc(properties.createdAt));
 
-    let finalQuery = baseQuery;
-    if (pagination) {
-      finalQuery = baseQuery.limit(pagination.perPage).offset((pagination.page - 1) * pagination.perPage);
-    } else {
-      finalQuery = baseQuery.limit(100);
-    }
+    const queryResults = pagination 
+      ? await baseQuery.limit(pagination.perPage).offset((pagination.page - 1) * pagination.perPage)
+      : await baseQuery.limit(100);
 
-    const results = await finalQuery;
-
-    const propertiesWithRelations: PropertyWithRelations[] = results.map(result => ({
+    const propertiesWithRelations: PropertyWithRelations[] = queryResults.map(result => ({
       ...result.property,
       region: result.region || undefined,
       propertyClass: result.propertyClass || undefined,
@@ -202,7 +198,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchProperties(query: string, filters?: PropertyFilters): Promise<PropertyWithRelations[]> {
-    let dbQuery = db
+    const conditions = [
+      eq(properties.isActive, true),
+      ilike(properties.title, `%${query}%`)
+    ];
+
+    // Apply additional filters
+    if (filters?.regionId) {
+      conditions.push(eq(properties.regionId, filters.regionId));
+    }
+
+    const baseSearchQuery = db
       .select({
         property: properties,
         region: regions,
@@ -213,19 +219,9 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(regions, eq(properties.regionId, regions.id))
       .leftJoin(propertyClasses, eq(properties.propertyClassId, propertyClasses.id))
       .leftJoin(propertyAnalytics, eq(properties.id, propertyAnalytics.propertyId))
-      .where(
-        and(
-          eq(properties.isActive, true),
-          ilike(properties.title, `%${query}%`)
-        )
-      );
+      .where(and(...conditions));
 
-    // Apply additional filters
-    if (filters?.regionId) {
-      dbQuery = dbQuery.where(and(eq(properties.isActive, true), eq(properties.regionId, filters.regionId)));
-    }
-
-    const results = await dbQuery.limit(50);
+    const results = await baseSearchQuery.limit(50);
 
     return results.map(result => ({
       ...result.property,
