@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateAIResponse, generatePropertyRecommendations, analyzePropertyInvestment } from "./services/openai";
-import { investmentAnalyticsService } from "./services/investmentAnalyticsService";
+import { simpleInvestmentAnalyticsService } from "./services/simpleInvestmentAnalytics";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid property ID" });
       }
 
-      const analytics = await investmentAnalyticsService.getAnalyticsByPropertyId(propertyId);
+      const analytics = await simpleInvestmentAnalyticsService.getAnalytics(propertyId);
       res.json(analytics);
     } catch (error) {
       console.error("Error fetching investment analytics:", error);
@@ -318,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid property ID" });
       }
 
-      const analytics = await investmentAnalyticsService.calculateFullAnalytics(propertyId);
+      const analytics = await simpleInvestmentAnalyticsService.calculateAnalytics(propertyId);
       res.json(analytics);
     } catch (error) {
       console.error("Error calculating investment analytics:", error);
@@ -333,7 +333,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const { propertyIds } = batchSchema.parse(req.body);
-      const results = await investmentAnalyticsService.batchCalculateAnalytics(propertyIds);
+      
+      const results = [];
+      for (const propertyId of propertyIds) {
+        try {
+          const analytics = await simpleInvestmentAnalyticsService.calculateAnalytics(propertyId);
+          results.push({ propertyId, status: 'success', analytics });
+        } catch (error) {
+          results.push({ 
+            propertyId, 
+            status: 'error', 
+            error: error instanceof Error ? error.message : 'Unknown error' 
+          });
+        }
+      }
+      
       res.json({ results });
     } catch (error) {
       console.error("Error in batch calculation:", error);

@@ -92,30 +92,42 @@ export class InvestmentAnalyticsService {
 
     // Определяем комплексные метрики
     const investmentRating = this.calculateInvestmentRating(
-      rentalScenario.rentalRoiAnnual || 0,
-      flippingScenario.flipRoi || 0,
+      parseFloat(rentalScenario.rentalRoiAnnual || '0'),
+      parseFloat(flippingScenario.flipRoi || '0'),
       safeHavenScenario.safeHavenScore || 5
     );
 
     const riskLevel = this.calculateRiskLevel(
-      priceDynamics.priceVolatility || 0,
+      parseFloat(priceDynamics.priceVolatility || '0'),
       safeHavenScenario.liquidityScore || 5
     );
 
     const recommendedStrategy = this.getRecommendedStrategy(
-      rentalScenario.rentalRoiAnnual || 0,
-      flippingScenario.flipRoi || 0,
-      priceForecasting.priceForecast3y || 0
+      parseFloat(rentalScenario.rentalRoiAnnual || '0'),
+      parseFloat(flippingScenario.flipRoi || '0'),
+      parseFloat(priceForecasting.priceForecast3y || '0')
     );
 
     // Сохраняем результаты в базу
     const analyticsData: InsertInvestmentAnalytics = {
       propertyId,
-      ...priceDynamics,
-      ...rentalScenario,
-      ...flippingScenario,
-      ...safeHavenScenario,
-      ...priceForecasting,
+      priceChange1y: priceDynamics.priceChange1y,
+      priceChange3m: priceDynamics.priceChange3m,
+      priceVolatility: priceDynamics.priceVolatility,
+      rentalYield: rentalScenario.rentalYield,
+      rentalIncomeMonthly: rentalScenario.rentalIncomeMonthly,
+      rentalRoiAnnual: rentalScenario.rentalRoiAnnual,
+      rentalPaybackYears: rentalScenario.rentalPaybackYears,
+      flipPotentialProfit: flippingScenario.flipPotentialProfit,
+      flipRoi: flippingScenario.flipRoi,
+      flipTimeframeMonths: flippingScenario.flipTimeframeMonths,
+      renovationCostEstimate: flippingScenario.renovationCostEstimate,
+      safeHavenScore: safeHavenScenario.safeHavenScore,
+      capitalPreservationIndex: safeHavenScenario.capitalPreservationIndex,
+      liquidityScore: safeHavenScenario.liquidityScore,
+      priceForecast3y: priceForecasting.priceForecast3y,
+      infrastructureImpactScore: priceForecasting.infrastructureImpactScore,
+      developmentRiskScore: priceForecasting.developmentRiskScore,
       investmentRating,
       riskLevel,
       recommendedStrategy,
@@ -124,10 +136,6 @@ export class InvestmentAnalyticsService {
     const [result] = await db
       .insert(investmentAnalytics)
       .values(analyticsData)
-      .onConflictDoUpdate({
-        target: investmentAnalytics.propertyId,
-        set: analyticsData
-      })
       .returning();
 
     return result;
