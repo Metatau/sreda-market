@@ -93,10 +93,37 @@ export class SimpleInvestmentAnalyticsService {
       recommendedStrategy,
     };
 
-    // Save to database
+    // Save to database using upsert (insert or update)
     const [result] = await db
       .insert(investmentAnalytics)
       .values(analyticsData)
+      .onConflictDoUpdate({
+        target: investmentAnalytics.propertyId,
+        set: {
+          priceChange1y: analyticsData.priceChange1y,
+          priceChange3m: analyticsData.priceChange3m,
+          priceVolatility: analyticsData.priceVolatility,
+          rentalYield: analyticsData.rentalYield,
+          rentalIncomeMonthly: analyticsData.rentalIncomeMonthly,
+          rentalRoiAnnual: analyticsData.rentalRoiAnnual,
+          rentalPaybackYears: analyticsData.rentalPaybackYears,
+          flipPotentialProfit: analyticsData.flipPotentialProfit,
+          flipRoi: analyticsData.flipRoi,
+          flipTimeframeMonths: analyticsData.flipTimeframeMonths,
+          renovationCostEstimate: analyticsData.renovationCostEstimate,
+          safeHavenScore: analyticsData.safeHavenScore,
+          capitalPreservationIndex: analyticsData.capitalPreservationIndex,
+          liquidityScore: analyticsData.liquidityScore,
+          priceForecast3y: analyticsData.priceForecast3y,
+          infrastructureImpactScore: analyticsData.infrastructureImpactScore,
+          developmentRiskScore: analyticsData.developmentRiskScore,
+          investmentRating: analyticsData.investmentRating,
+          riskLevel: analyticsData.riskLevel,
+          recommendedStrategy: analyticsData.recommendedStrategy,
+          calculatedAt: new Date(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        }
+      })
       .returning();
 
     return result;
