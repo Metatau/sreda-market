@@ -4,6 +4,8 @@ import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home";
+import MapPage from "@/pages/MapPage";
+import { NotFound } from "@/pages/not-found";
 import InvestmentAnalyticsDemo from "@/pages/InvestmentAnalyticsDemo";
 import { Favorites } from "@/pages/Favorites";
 import { Comparison } from "@/pages/Comparison";
@@ -16,6 +18,7 @@ function App() {
       <AuthProvider>
         <Switch>
           <Route path="/" component={Home} />
+          <Route path="/map" component={MapPage} />
           <Route path="/analytics" component={InvestmentAnalyticsDemo} />
           <Route path="/favorites" component={Favorites} />
           <Route path="/comparison" component={Comparison} />

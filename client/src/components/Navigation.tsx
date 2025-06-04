@@ -18,6 +18,12 @@ export function Navigation() {
       description: 'Карта и поиск недвижимости'
     },
     {
+      path: '/map',
+      label: 'Карта объектов',
+      icon: <Building className="w-4 h-4" />,
+      description: 'Интерактивная карта недвижимости'
+    },
+    {
       path: '/analytics',
       label: 'Инвестиционная аналитика',
       icon: <BarChart3 className="w-4 h-4" />,
