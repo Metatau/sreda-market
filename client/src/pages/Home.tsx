@@ -20,7 +20,7 @@ export default function Home() {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { data: regions = [] } = useRegions();
-  const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 20);
+  const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
 
   const properties = propertiesData?.properties || [];
@@ -32,7 +32,10 @@ export default function Home() {
     setCurrentPage(1);
   };
 
-  const selectedRegionName = regions.find(r => r.id.toString() === selectedRegion)?.name || "России";
+  // Динамически определяем название региона на основе фильтров
+  const selectedRegionName = filters.regionId 
+    ? regions.find(r => r.id === filters.regionId)?.name || "выбранном регионе"
+    : "России";
 
   return (
     <div className="min-h-screen bg-gray-50">
