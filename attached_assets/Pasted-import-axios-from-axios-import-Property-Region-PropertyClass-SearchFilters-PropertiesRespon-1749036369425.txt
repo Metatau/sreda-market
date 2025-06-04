@@ -1,0 +1,89 @@
+import axios from 'axios';
+import { Property, Region, PropertyClass, SearchFilters, PropertiesResponse } from '@/types';
+
+const api = axios.create({
+  baseURL: '/api/v1',
+  timeout: 10000,
+});
+
+// Interceptors для обработки ошибок
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+export const propertyApi = {
+  // Получение списка объектов
+  getProperties: async (params?: {
+    page?: number;
+    per_page?: number;
+    region_id?: number;
+    property_class_id?: number;
+    min_price?: number;
+    max_price?: number;
+    rooms?: number;
+  }): Promise<PropertiesResponse> => {
+    const response = await api.get('/properties', { params });
+    return response.data;
+  },
+
+  // Получение объекта по ID
+  getProperty: async (id: number): Promise<Property> => {
+    const response = await api.get(`/properties/${id}`);
+    return response.data;
+  },
+
+  // Поиск объектов
+  searchProperties: async (filters: SearchFilters): Promise<{ properties: Property[]; total: number }> => {
+    const response = await api.post('/properties/search', filters);
+    return response.data;
+  },
+
+  // Данные для карты
+  getMapData: async (params?: {
+    region_id?: number;
+    property_class_id?: number;
+  }): Promise<GeoJSON.FeatureCollection> => {
+    const response = await api.get('/properties/map-data', { params });
+    return response.data;
+  },
+};
+
+export const regionApi = {
+  // Получение списка регионов
+  getRegions: async (): Promise<Region[]> => {
+    const response = await api.get('/regions');
+    return response.data;
+  },
+
+  // Получение региона по ID
+  getRegion: async (id: number): Promise<Region & { statistics: any }> => {
+    const response = await api.get(`/regions/${id}`);
+    return response.data;
+  },
+};
+
+export const analyticsApi = {
+  // Аналитика по районам
+  getDistrictAnalytics: async (): Promise<any[]> => {
+    const response = await api.get('/analytics/districts');
+    return response.data;
+  },
+
+  // Инвестиционная карта
+  getInvestmentMap: async (): Promise<any[]> => {
+    const response = await api.get('/analytics/investment-map');
+    return response.data;
+  },
+};
+
+export const chatApi = {
+  // Отправка сообщения в чат
+  sendMessage: async (message: string): Promise<{ response: string }> => {
+    const response = await api.post('/chat', { message });
+    return response.data;
+  },
+};

@@ -1,0 +1,29 @@
+-- Заполнение таблицы регионов
+INSERT INTO regions (name, region_type, coordinates, timezone) VALUES
+('Москва', 'city', ST_GeomFromText('POINT(37.6176 55.7558)', 4326), 'Europe/Moscow'),
+('Санкт-Петербург', 'city', ST_GeomFromText('POINT(30.3351 59.9311)', 4326), 'Europe/Moscow'),
+('Московская область', 'region', ST_GeomFromText('POINT(37.6176 55.7558)', 4326), 'Europe/Moscow'),
+('Ленинградская область', 'region', ST_GeomFromText('POINT(30.3351 59.9311)', 4326), 'Europe/Moscow'),
+('Калининград', 'city', ST_GeomFromText('POINT(20.4522 54.7104)', 4326), 'Europe/Kaliningrad'),
+('Казань', 'city', ST_GeomFromText('POINT(49.1221 55.7887)', 4326), 'Europe/Moscow'),
+('Пермь', 'city', ST_GeomFromText('POINT(56.2431 58.0105)', 4326), 'Asia/Yekaterinburg'),
+('Екатеринбург', 'city', ST_GeomFromText('POINT(60.6122 56.8431)', 4326), 'Asia/Yekaterinburg'),
+('Сочи', 'city', ST_GeomFromText('POINT(39.7257 43.6028)', 4326), 'Europe/Moscow'),
+('Краснодар', 'city', ST_GeomFromText('POINT(38.9769 45.0328)', 4326), 'Europe/Moscow'),
+('Уфа', 'city', ST_GeomFromText('POINT(55.9578 54.7431)', 4326), 'Asia/Yekaterinburg'),
+('Новосибирск', 'city', ST_GeomFromText('POINT(82.9346 55.0084)', 4326), 'Asia/Novosibirsk'),
+('Красноярск', 'city', ST_GeomFromText('POINT(92.8932 56.0184)', 4326), 'Asia/Krasnoyarsk'),
+('Тюмень', 'city', ST_GeomFromText('POINT(65.5272 57.1522)', 4326), 'Asia/Yekaterinburg');
+
+-- Заполнение классификации недвижимости
+INSERT INTO property_classes (name, min_price_per_sqm, max_price_per_sqm, description, criteria) VALUES
+('Эконом', 0, 80000, 'Доступное жилье, базовая инфраструктура', 
+ '{"materials": ["панель", "кирпич"], "year_built": [1960, 2010], "amenities": "basic"}'),
+('Стандарт', 80000, 120000, 'Современное жилье со стандартной отделкой',
+ '{"materials": ["кирпич", "монолит"], "year_built": [1990, 2020], "amenities": "standard"}'),
+('Комфорт', 120000, 180000, 'Улучшенная планировка и инфраструктура',
+ '{"materials": ["монолит", "кирпич"], "year_built": [2000, 2025], "amenities": "improved"}'),
+('Бизнес', 180000, 300000, 'Премиальное расположение и отделка',
+ '{"materials": ["монолит"], "year_built": [2010, 2025], "amenities": "premium"}'),
+('Элит', 300000, 999999999, 'Эксклюзивная недвижимость высшего класса',
+ '{"materials": ["монолит"], "individual_design": true, "amenities": "luxury"}');

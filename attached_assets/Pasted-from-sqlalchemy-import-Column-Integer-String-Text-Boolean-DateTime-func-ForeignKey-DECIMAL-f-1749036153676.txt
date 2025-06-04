@@ -1,0 +1,80 @@
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, func, ForeignKey, DECIMAL
+from geoalchemy2 import Geometry
+from backend.database import db
+
+class Property(db.Model):
+    __tablename__ = 'properties'
+    
+    id = Column(Integer, primary_key=True)
+    external_id = Column(String(255), unique=True)
+    region_id = Column(Integer, ForeignKey('regions.id'))
+    property_class_id = Column(Integer, ForeignKey('property_classes.id'))
+    title = Column(String(500), nullable=False)
+    description = Column(Text)
+    price = Column(Integer, nullable=False)
+    price_per_sqm = Column(Integer)
+    area = Column(DECIMAL(8,2))
+    rooms = Column(Integer)
+    floor = Column(Integer)
+    total_floors = Column(Integer)
+    address = Column(String(500), nullable=False)
+    district = Column(String(255))
+    metro_station = Column(String(255))
+    coordinates = Column(Geometry('POINT', srid=4326))
+    property_type = Column(String(50), default='apartment')
+    source = Column(String(50), default='ads-api.ru')
+    url = Column(String(1000))
+    phone = Column(String(50))
+    auto_classified = Column(Boolean, default=False)
+    manual_override = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.current_timestamp())
+    updated_at = Column(DateTime, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    
+    # Relationships
+    region = db.relationship('Region', back_populates='properties')
+    property_class = db.relationship('PropertyClass', back_populates='properties')
+    analytics = db.relationship('PropertyAnalytics', back_populates='property', uselist=False)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'external_id': self.external_id,
+            'title': self.title,
+            'description': self.description,
+            'price': self.price,
+            'price_per_sqm': self.price_per_sqm,
+            'area': float(self.area) if self.area else None,
+            'rooms': self.rooms,
+            'floor': self.floor,
+            'total_floors': self.total_floors,
+            'address': self.address,
+            'district': self.district,
+            'metro_station': self.metro_station,
+            'coordinates': [self.coordinates.x, self.coordinates.y] if self.coordinates else None,
+            'property_type': self.property_type,
+            'region': self.region.to_dict() if self.region else None,
+            'property_class': self.property_class.to_dict() if self.property_class else None,
+            'url': self.url,
+            'phone': self.phone,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+    
+    @classmethod
+    def search_properties(cls, filters=None):
+        """Поиск объектов с фильтрами"""
+        query = cls.query.filter_by(is_active=True)
+        
+        if filters:
+            if filters.get('region_id'):
+                query = query.filter(cls.region_id == filters['region_id'])
+            if filters.get('property_class_id'):
+                query = query.filter(cls.property_class_id == filters['property_class_id'])
+            if filters.get('min_price'):
+                query = query.filter(cls.price >= filters['min_price'])
+            if filters.get('max_price'):
+                query = query.filter(cls.price <= filters['max_price'])
+            if filters.get('rooms'):
+                query = query.filter(cls.rooms == filters['rooms'])
+        
+        return query.order_by(cls.created_at.desc())

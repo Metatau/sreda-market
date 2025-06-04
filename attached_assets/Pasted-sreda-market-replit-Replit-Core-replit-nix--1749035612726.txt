@@ -1,0 +1,49 @@
+sreda-market/
+├── .replit                    # Конфигурация Replit Core
+├── replit.nix                 # Системные пакеты
+├── pyproject.toml             # Python зависимости
+├── package.json               # Node.js зависимости
+├── frontend/                  # React приложение
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/           # Базовые UI компоненты
+│   │   │   ├── Map/          # Картографические компоненты
+│   │   │   ├── Property/     # Компоненты объектов
+│   │   │   ├── Analytics/    # Аналитические дашборды
+│   │   │   ├── Chat/         # AI чат-интерфейс
+│   │   │   └── Payment/      # Платежные компоненты
+│   │   ├── features/
+│   │   │   ├── regions/      # Региональная функциональность
+│   │   │   ├── classification/ # Классификация недвижимости
+│   │   │   └── search/       # Поиск и фильтры
+│   │   ├── services/         # API клиенты
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── types/            # TypeScript определения
+│   │   └── utils/            # Вспомогательные функции
+├── backend/                   # Flask API
+│   ├── app.py                # Главный файл приложения
+│   ├── models/               # SQLAlchemy модели
+│   │   ├── region.py
+│   │   ├── property.py
+│   │   ├── property_class.py
+│   │   └── user.py
+│   ├── routes/               # API маршруты
+│   │   ├── properties.py
+│   │   ├── regions.py
+│   │   ├── analytics.py
+│   │   ├── chat.py
+│   │   └── payments.py
+│   ├── services/             # Бизнес-логика
+│   │   ├── parser_service.py
+│   │   ├── geocoding_service.py
+│   │   ├── analytics_service.py
+│   │   ├── ai_service.py
+│   │   └── payment_service.py
+│   └── utils/                # Вспомогательные функции
+├── database/
+│   ├── migrations/           # Миграции БД
+│   ├── seeds/               # Начальные данные
+│   └── schema.sql           # Схема базы данных
+├── tests/                   # Автотесты
+├── docs/                    # Документация API
+└── .env.example            # Шаблон переменных окружения

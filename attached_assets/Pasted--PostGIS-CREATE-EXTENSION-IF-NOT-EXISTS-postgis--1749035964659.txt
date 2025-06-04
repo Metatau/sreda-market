@@ -1,0 +1,122 @@
+-- Включение расширения PostGIS для географических данных
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- Таблица регионов
+CREATE TABLE regions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    region_type VARCHAR(20) NOT NULL CHECK (region_type IN ('city', 'region')),
+    coordinates GEOMETRY(POINT, 4326),
+    timezone VARCHAR(50) DEFAULT 'Europe/Moscow',
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица классов недвижимости
+CREATE TABLE property_classes (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL UNIQUE CHECK (name IN ('Эконом', 'Стандарт', 'Комфорт', 'Бизнес', 'Элит')),
+    min_price_per_sqm INTEGER NOT NULL,
+    max_price_per_sqm INTEGER NOT NULL,
+    description TEXT,
+    criteria JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Основная таблица объектов недвижимости
+CREATE TABLE properties (
+    id SERIAL PRIMARY KEY,
+    external_id VARCHAR(255) UNIQUE,
+    region_id INTEGER REFERENCES regions(id) ON DELETE SET NULL,
+    property_class_id INTEGER REFERENCES property_classes(id) ON DELETE SET NULL,
+    title VARCHAR(500) NOT NULL,
+    description TEXT,
+    price INTEGER NOT NULL CHECK (price > 0),
+    price_per_sqm INTEGER,
+    area DECIMAL(8,2),
+    rooms INTEGER,
+    floor INTEGER,
+    total_floors INTEGER,
+    address VARCHAR(500) NOT NULL,
+    district VARCHAR(255),
+    metro_station VARCHAR(255),
+    coordinates GEOMETRY(POINT, 4326),
+    property_type VARCHAR(50) DEFAULT 'apartment',
+    source VARCHAR(50) DEFAULT 'ads-api.ru',
+    url VARCHAR(1000),
+    phone VARCHAR(50),
+    auto_classified BOOLEAN DEFAULT false,
+    manual_override BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица аналитических данных
+CREATE TABLE property_analytics (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,
+    region_id INTEGER REFERENCES regions(id),
+    roi DECIMAL(5,2),
+    liquidity_score INTEGER CHECK (liquidity_score BETWEEN 1 AND 10),
+    investment_rating VARCHAR(10),
+    price_growth_rate DECIMAL(5,2),
+    market_trend VARCHAR(20),
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица пользователей
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(20),
+    telegram_id BIGINT UNIQUE,
+    preferred_region_id INTEGER REFERENCES regions(id),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица избранных объектов
+CREATE TABLE user_favorites (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, property_id)
+);
+
+-- Таблица истории поиска
+CREATE TABLE search_history (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    search_query JSONB NOT NULL,
+    results_count INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица логов API
+CREATE TABLE api_logs (
+    id SERIAL PRIMARY KEY,
+    service_name VARCHAR(50) NOT NULL,
+    endpoint VARCHAR(255),
+    request_data JSONB,
+    response_data JSONB,
+    status_code INTEGER,
+    execution_time_ms INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Индексы для оптимизации
+CREATE INDEX idx_properties_region ON properties(region_id);
+CREATE INDEX idx_properties_class ON properties(property_class_id);
+CREATE INDEX idx_properties_price ON properties(price);
+CREATE INDEX idx_properties_coordinates ON properties USING GIST(coordinates);
+CREATE INDEX idx_properties_created_at ON properties(created_at);
+CREATE INDEX idx_properties_active ON properties(is_active);
+CREATE INDEX idx_analytics_region ON property_analytics(region_id);
+CREATE INDEX idx_user_favorites_user ON user_favorites(user_id);

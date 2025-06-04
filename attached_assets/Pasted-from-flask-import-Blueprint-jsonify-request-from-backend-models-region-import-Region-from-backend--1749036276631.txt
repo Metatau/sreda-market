@@ -1,0 +1,61 @@
+from flask import Blueprint, jsonify, request
+from backend.models.region import Region
+from backend.models.property import Property
+from sqlalchemy import func
+
+regions_bp = Blueprint('regions', __name__)
+
+@regions_bp.route('/api/v1/regions', methods=['GET'])
+def get_regions():
+    """Получение списка всех активных регионов"""
+    regions = Region.get_active_regions()
+    return jsonify([region.to_dict() for region in regions])
+
+@regions_bp.route('/api/v1/regions/<int:region_id>', methods=['GET'])
+def get_region(region_id):
+    """Получение информации о конкретном регионе"""
+    region = Region.query.get_or_404(region_id)
+    
+    # Статистика по региону
+    stats = db.session.query(
+        func.count(Property.id).label('total_properties'),
+        func.avg(Property.price).label('avg_price'),
+        func.avg(Property.price_per_sqm).label('avg_price_per_sqm'),
+        func.min(Property.price).label('min_price'),
+        func.max(Property.price).label('max_price')
+    ).filter(
+        Property.region_id == region_id,
+        Property.is_active == True
+    ).first()
+    
+    region_data = region.to_dict()
+    region_data['statistics'] = {
+        'total_properties': stats.total_properties or 0,
+        'avg_price': int(stats.avg_price) if stats.avg_price else 0,
+        'avg_price_per_sqm': int(stats.avg_price_per_sqm) if stats.avg_price_per_sqm else 0,
+        'min_price': stats.min_price or 0,
+        'max_price': stats.max_price or 0
+    }
+    
+    return jsonify(region_data)
+
+@regions_bp.route('/api/v1/regions/<int:region_id>/properties', methods=['GET'])
+def get_region_properties(region_id):
+    """Получение объектов недвижимости в регионе"""
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+    
+    properties = Property.query.filter(
+        Property.region_id == region_id,
+        Property.is_active == True
+    ).paginate(page=page, per_page=per_page, error_out=False)
+    
+    return jsonify({
+        'properties': [prop.to_dict() for prop in properties.items],
+        'pagination': {
+            'page': page,
+            'per_page': per_page,
+            'total': properties.total,
+            'pages': properties.pages
+        }
+    })

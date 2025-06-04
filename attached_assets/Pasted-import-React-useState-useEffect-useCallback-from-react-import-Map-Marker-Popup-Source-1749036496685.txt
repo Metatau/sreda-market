@@ -1,0 +1,195 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import Map, { Marker, Popup, Source, Layer } from 'react-map-gl';
+import { useQuery } from '@tanstack/react-query';
+import { propertyApi } from '@/services/api';
+import { Property } from '@/types';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+interface PropertyMapProps {
+  selectedRegionId?: number;
+  selectedPropertyClassId?: number;
+  onPropertySelect?: (property: Property) => void;
+}
+
+export const PropertyMap: React.FC<PropertyMapProps> = ({
+  selectedRegionId,
+  selectedPropertyClassId,
+  onPropertySelect,
+}) => {
+  const [viewState, setViewState] = useState({
+    longitude: 37.6176,
+    latitude: 55.7558,
+    zoom: 10,
+  });
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+
+  // Получение данных для карты
+  const { data: mapData, isLoading } = useQuery({
+    queryKey: ['mapData', selectedRegionId, selectedPropertyClassId],
+    queryFn: () => propertyApi.getMapData({
+      region_id: selectedRegionId,
+      property_class_id: selectedPropertyClassId,
+    }),
+    enabled: true,
+  });
+
+  // Обновление центра карты при смене региона
+  useEffect(() => {
+    if (selectedRegionId && mapData?.features.length > 0) {
+      const bounds = mapData.features.reduce(
+        (acc, feature) => {
+          const [lng, lat] = feature.geometry.coordinates;
+          return {
+            minLng: Math.min(acc.minLng, lng),
+            maxLng: Math.max(acc.maxLng, lng),
+            minLat: Math.min(acc.minLat, lat),
+            maxLat: Math.max(acc.maxLat, lat),
+          };
+        },
+        { minLng: Infinity, maxLng: -Infinity, minLat: Infinity, maxLat: -Infinity }
+      );
+
+      setViewState({
+        longitude: (bounds.minLng + bounds.maxLng) / 2,
+        latitude: (bounds.minLat + bounds.maxLat) / 2,
+        zoom: 11,
+      });
+    }
+  }, [selectedRegionId, mapData]);
+
+  const handleMarkerClick = useCallback((property: Property) => {
+    setSelectedProperty(property);
+    onPropertySelect?.(property);
+  }, [onPropertySelect]);
+
+  // Конфигурация тепловой карты
+  const heatmapLayer = {
+    id: 'heatmap',
+    type: 'heatmap' as const,
+    source: 'properties',
+    maxzoom: 15,
+    paint: {
+      'heatmap-weight': [
+        'interpolate',
+        ['linear'],
+        ['get', 'price'],
+        0, 0,
+        50000000, 1
+      ],
+      'heatmap-intensity': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        0, 1,
+        15, 3
+      ],
+      'heatmap-color': [
+        'interpolate',
+        ['linear'],
+        ['heatmap-density'],
+        0, 'rgba(33,102,172,0)',
+        0.2, 'rgb(103,169,207)',
+        0.4, 'rgb(209,229,240)',
+        0.6, 'rgb(253,219,199)',
+        0.8, 'rgb(239,138,98)',
+        1, 'rgb(178,24,43)'
+      ],
+      'heatmap-radius': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        0, 2,
+        15, 20
+      ]
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+        <div className="text-gray-500">Загрузка карты...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-96 rounded-lg overflow-hidden">
+      {/* Переключатель тепловой карты */}
+      <div className="absolute top-4 right-4 z-10 bg-white rounded-lg shadow-md p-2">
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={showHeatmap}
+            onChange={(e) => setShowHeatmap(e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-sm">Тепловая карта</span>
+        </label>
+      </div>
+
+      <Map
+        {...viewState}
+        onMove={evt => setViewState(evt.viewState)}
+        mapboxAccessToken={import.meta.env.VITE_MAPBOX_TOKEN}
+        style={{ width: '100%', height: '100%' }}
+        mapStyle="mapbox://styles/mapbox/streets-v12"
+      >
+        {/* Тепловая карта */}
+        {showHeatmap && mapData && (
+          <Source id="properties" type="geojson" data={mapData}>
+            <Layer {...heatmapLayer} />
+          </Source>
+        )}
+
+        {/* Маркеры объектов */}
+        {!showHeatmap && mapData?.features.map((feature) => (
+          <Marker
+            key={feature.properties.id}
+            longitude={feature.geometry.coordinates[0]}
+            latitude={feature.geometry.coordinates[1]}
+            onClick={() => handleMarkerClick(feature.properties as any)}
+          >
+            <div className="bg-blue-500 text-white px-2 py-1 rounded-lg text-xs font-semibold shadow-lg cursor-pointer hover:bg-blue-600 transition-colors">
+              {(feature.properties.price / 1000000).toFixed(1)}M ₽
+            </div>
+          </Marker>
+        ))}
+
+        {/* Popup с информацией об объекте */}
+        {selectedProperty && selectedProperty.coordinates && (
+          <Popup
+            longitude={selectedProperty.coordinates[0]}
+            latitude={selectedProperty.coordinates[1]}
+            onClose={() => setSelectedProperty(null)}
+            closeButton={true}
+            closeOnClick={false}
+          >
+            <div className="p-3 max-w-sm">
+              <h3 className="font-semibold text-sm mb-2">{selectedProperty.title}</h3>
+              <div className="space-y-1 text-xs text-gray-600">
+                <p><strong>Цена:</strong> {selectedProperty.price.toLocaleString()} ₽</p>
+                {selectedProperty.price_per_sqm && (
+                  <p><strong>За м²:</strong> {selectedProperty.price_per_sqm.toLocaleString()} ₽</p>
+                )}
+                {selectedProperty.rooms && (
+                  <p><strong>Комнат:</strong> {selectedProperty.rooms}</p>
+                )}
+                <p><strong>Адрес:</strong> {selectedProperty.address}</p>
+                {selectedProperty.property_class && (
+                  <p><strong>Класс:</strong> {selectedProperty.property_class.name}</p>
+                )}
+              </div>
+              <button
+                onClick={() => onPropertySelect?.(selectedProperty)}
+                className="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition-colors"
+              >
+                Подробнее
+              </button>
+            </div>
+          </Popup>
+        )}
+      </Map>
+    </div>
+  );
+};
