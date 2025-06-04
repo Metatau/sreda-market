@@ -157,7 +157,14 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
               )}
             </div>
 
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+            <Button 
+              size="sm" 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect?.(property);
+              }}
+            >
               Подробнее
             </Button>
           </div>

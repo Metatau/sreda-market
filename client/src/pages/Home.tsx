@@ -39,18 +39,19 @@ export default function Home() {
   };
 
   const handlePropertySelect = async (property: Property) => {
+    console.log('Property selected:', property.id);
     setSelectedProperty(property);
+    setIsAnalyticsModalOpen(true);
     
-    // Try to get existing analytics first
-    if (!property.investmentAnalytics) {
+    // Calculate analytics if not available
+    if (!analyticsData) {
       try {
+        console.log('Calculating analytics for property:', property.id);
         await calculateAnalytics.mutateAsync(property.id);
       } catch (error) {
         console.error('Failed to calculate analytics:', error);
       }
     }
-    
-    setIsAnalyticsModalOpen(true);
   };
 
   // Динамически определяем название региона на основе фильтров с правильными падежами
@@ -281,7 +282,7 @@ export default function Home() {
       />
 
       {/* Investment Analytics Modal */}
-      {selectedProperty && analyticsData && (
+      {selectedProperty && (
         <InvestmentAnalyticsModal
           isOpen={isAnalyticsModalOpen}
           onClose={() => {
@@ -289,7 +290,7 @@ export default function Home() {
             setSelectedProperty(null);
           }}
           property={selectedProperty}
-          analytics={analyticsData}
+          analytics={analyticsData || {}}
         />
       )}
     </div>
