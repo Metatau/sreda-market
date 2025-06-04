@@ -3,11 +3,13 @@ import {
   propertyClasses,
   properties,
   propertyAnalytics,
+  investmentAnalytics,
   chatMessages,
   type Region,
   type PropertyClass,
   type Property,
   type PropertyAnalytics,
+  type InvestmentAnalytics,
   type ChatMessage,
   type InsertRegion,
   type InsertPropertyClass,
@@ -66,6 +68,7 @@ export interface PropertyWithRelations extends Property {
   region?: Region;
   propertyClass?: PropertyClass;
   analytics?: PropertyAnalytics;
+  investmentAnalytics?: InvestmentAnalytics;
 }
 
 export interface MapDataPoint {
@@ -146,11 +149,13 @@ export class DatabaseStorage implements IStorage {
         region: regions,
         propertyClass: propertyClasses,
         analytics: propertyAnalytics,
+        investmentAnalytics: investmentAnalytics,
       })
       .from(properties)
       .leftJoin(regions, eq(properties.regionId, regions.id))
       .leftJoin(propertyClasses, eq(properties.propertyClassId, propertyClasses.id))
       .leftJoin(propertyAnalytics, eq(properties.id, propertyAnalytics.propertyId))
+      .leftJoin(investmentAnalytics, eq(properties.id, investmentAnalytics.propertyId))
       .where(and(...conditions))
       .orderBy(desc(properties.createdAt));
 
@@ -163,6 +168,7 @@ export class DatabaseStorage implements IStorage {
       region: result.region || undefined,
       propertyClass: result.propertyClass || undefined,
       analytics: result.analytics || undefined,
+      investmentAnalytics: result.investmentAnalytics || undefined,
     }));
 
     return {
