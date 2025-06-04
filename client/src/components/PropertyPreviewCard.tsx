@@ -130,9 +130,9 @@ export const PropertyPreviewCard: React.FC<PropertyPreviewCardProps> = ({
             {analytics.investmentRating && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge className={`ml-2 cursor-help ${getRatingColor(analytics.investmentRating)}`}>
+                  <div className={`ml-2 cursor-help inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getRatingColor(analytics.investmentRating)}`}>
                     {analytics.investmentRating}
-                  </Badge>
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <div className="space-y-2">

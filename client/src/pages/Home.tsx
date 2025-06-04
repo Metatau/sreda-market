@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Navigation } from "@/components/Navigation";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
 import { PropertyMap } from "@/components/PropertyMap";
@@ -41,6 +42,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <Navigation />
+      
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
