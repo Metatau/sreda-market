@@ -1,7 +1,11 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import type { Property } from "@/types";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MapPin, Bed, Square, TrendingUp, TrendingDown, Calculator } from 'lucide-react';
+import { formatPrice, formatArea, formatPercentage } from '@/utils/formatters';
+import { RISK_LEVELS, INVESTMENT_STRATEGIES } from '@/constants';
+import type { Property } from '@/types';
 
 interface PropertyCardProps {
   property: Property;
@@ -40,6 +44,16 @@ const getInvestmentRatingColor = (rating: string) => {
   };
   return colors[rating as keyof typeof colors] || 'bg-gray-600 text-white';
 };
+
+const getRiskLevelStyle = (riskLevel?: string) => {
+    if (!riskLevel || !(riskLevel in RISK_LEVELS)) return '';
+    return RISK_LEVELS[riskLevel as keyof typeof RISK_LEVELS].color;
+  };
+
+  const getStrategyName = (strategy?: string) => {
+    if (!strategy || !(strategy in INVESTMENT_STRATEGIES)) return 'N/A';
+    return INVESTMENT_STRATEGIES[strategy as keyof typeof INVESTMENT_STRATEGIES].name;
+  };
 
 export function PropertyCard({ property, onSelect }: PropertyCardProps) {
   const handleClick = () => {
