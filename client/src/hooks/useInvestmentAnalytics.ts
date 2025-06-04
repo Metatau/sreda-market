@@ -40,9 +40,18 @@ export function useCalculateInvestmentAnalytics() {
 
   return useMutation({
     mutationFn: async (propertyId: number): Promise<InvestmentAnalytics> => {
-      return apiRequest(`/api/investment-analytics/${propertyId}/calculate`, {
+      const response = await fetch(`/api/investment-analytics/${propertyId}/calculate`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to calculate analytics');
+      }
+      
+      return response.json();
     },
     onSuccess: (data, propertyId) => {
       queryClient.invalidateQueries({
@@ -60,10 +69,19 @@ export function useBatchCalculateAnalytics() {
 
   return useMutation({
     mutationFn: async (propertyIds: number[]): Promise<{ results: any[] }> => {
-      return apiRequest('/api/investment-analytics/batch-calculate', {
+      const response = await fetch('/api/investment-analytics/batch-calculate', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ propertyIds }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to batch calculate analytics');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

@@ -126,10 +126,10 @@ export const investmentAnalytics = pgTable("investment_analytics", {
   priceVolatility: decimal("price_volatility", { precision: 5, scale: 2 }), // Волатильность цены
   
   // Сценарий аренды
-  rentalYield: decimal("rental_yield", { precision: 5, scale: 2 }), // Рентабельность аренды в %
+  rentalYield: decimal("rental_yield", { precision: 8, scale: 2 }), // Рентабельность аренды в %
   rentalIncomeMonthly: integer("rental_income_monthly"), // Ежемесячный доход
-  rentalRoiAnnual: decimal("rental_roi_annual", { precision: 5, scale: 2 }), // ROI аренды годовой
-  rentalPaybackYears: decimal("rental_payback_years", { precision: 4, scale: 2 }), // Срок окупаемости
+  rentalRoiAnnual: decimal("rental_roi_annual", { precision: 8, scale: 2 }), // ROI аренды годовой
+  rentalPaybackYears: decimal("rental_payback_years", { precision: 8, scale: 2 }), // Срок окупаемости
   
   // Сценарий флиппинга
   flipPotentialProfit: integer("flip_potential_profit"), // Потенциальная прибыль
