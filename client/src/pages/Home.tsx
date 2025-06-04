@@ -146,6 +146,11 @@ export default function Home() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     За последние 24 часа
+                    {newPropertiesData?.timestamp && (
+                      <span className="block mt-1 text-green-600">
+                        ● Обновлено {new Date(newPropertiesData.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    )}
                   </p>
                 </CardContent>
               </Card>

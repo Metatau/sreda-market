@@ -386,16 +386,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
-      const newPropertiesCount = await storage.getNewPropertiesCount(twentyFourHoursAgo);
+      const regionId = req.query.regionId ? parseInt(req.query.regionId as string) : undefined;
+      
+      const newPropertiesCount = await storage.getNewPropertiesCount(twentyFourHoursAgo, regionId);
       
       res.json({ 
         count: newPropertiesCount,
         period: "24h",
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        regionId: regionId || null
       });
     } catch (error) {
       console.error("Error fetching new properties count:", error);
       res.status(500).json({ error: "Failed to fetch new properties count" });
+    }
+  });
+
+  // Daily update status endpoint
+  app.get("/api/analytics/update-status", async (req, res) => {
+    try {
+      const status = await import("./services/dailyUpdateService").then(m => m.dailyUpdateService.getUpdateStatus());
+      res.json(status);
+    } catch (error) {
+      console.error("Error fetching update status:", error);
+      res.status(500).json({ error: "Failed to fetch update status" });
     }
   });
 

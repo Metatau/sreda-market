@@ -43,7 +43,7 @@ export interface IStorage {
   getChatHistory(sessionId: string, limit?: number): Promise<ChatMessage[]>;
   
   // Analytics
-  getNewPropertiesCount(since: Date): Promise<number>;
+  getNewPropertiesCount(since: Date, regionId?: number): Promise<number>;
 }
 
 export interface PropertyFilters {
@@ -325,11 +325,17 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  async getNewPropertiesCount(since: Date): Promise<number> {
+  async getNewPropertiesCount(since: Date, regionId?: number): Promise<number> {
+    const conditions = [gte(properties.createdAt, since)];
+    
+    if (regionId) {
+      conditions.push(eq(properties.regionId, regionId));
+    }
+    
     const result = await db
       .select({ count: sql<number>`COUNT(*)` })
       .from(properties)
-      .where(gte(properties.createdAt, since));
+      .where(and(...conditions));
     
     return result[0]?.count || 0;
   }
