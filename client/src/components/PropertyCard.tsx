@@ -61,7 +61,14 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
           alt={property.title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
         />
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 flex gap-2">
+          {/* Investment Rating Badge */}
+          {property.investmentAnalytics?.investmentRating && (
+            <Badge className={`${getInvestmentRatingColor(property.investmentAnalytics.investmentRating)} font-bold text-sm px-3 py-1`}>
+              {property.investmentAnalytics.investmentRating}
+            </Badge>
+          )}
+          {/* Property Class Badge */}
           <Badge className={`${colorClass} font-medium`}>
             {propertyClassName}
           </Badge>
@@ -132,16 +139,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             )}
           </div>
           
-          <div className="flex items-center justify-between">
-            {/* Investment Rating */}
-            {property.investmentAnalytics?.investmentRating ? (
-              <Badge className={`${getInvestmentRatingColor(property.investmentAnalytics.investmentRating)} font-bold text-xs px-2 py-1`}>
-                {property.investmentAnalytics.investmentRating}
-              </Badge>
-            ) : (
-              <div></div>
-            )}
-            
+          <div className="flex justify-end">
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
               Подробнее
             </Button>
