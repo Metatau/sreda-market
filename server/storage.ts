@@ -324,6 +324,15 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(chatMessages.createdAt))
       .limit(limit);
   }
+
+  async getNewPropertiesCount(since: Date): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(properties)
+      .where(gte(properties.createdAt, since));
+    
+    return result[0]?.count || 0;
+  }
 }
 
 export const storage = new DatabaseStorage();

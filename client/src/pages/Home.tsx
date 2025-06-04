@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProperties, useRegions } from "@/hooks/useProperties";
+import { useNewProperties } from "@/hooks/useNewProperties";
 import { TrendingUp, BarChart3, Building2, Clock } from "lucide-react";
 import type { SearchFilters, Property } from "@/types";
 
@@ -20,6 +21,7 @@ export default function Home() {
 
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 20);
+  const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
 
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
@@ -139,7 +141,9 @@ export default function Home() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">12</div>
+                  <div className="text-2xl font-bold">
+                    {isLoadingNewProperties ? "..." : newPropertiesData?.count || 0}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     За последние 24 часа
                   </p>
