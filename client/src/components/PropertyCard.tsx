@@ -133,7 +133,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             )}
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             {/* Investment Rating */}
             {property.investmentAnalytics?.investmentRating ? (
               <Badge className={`${getInvestmentRatingColor(property.investmentAnalytics.investmentRating)} font-bold text-sm px-3 py-1`}>
