@@ -11,11 +11,33 @@ import type {
 
 const API_BASE = "/api";
 
+class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public data?: any
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new ApiError(
+      errorData.error || `HTTP ${response.status}`,
+      response.status,
+      errorData
+    );
+  }
+  return response.json();
+}
+
 export const regionApi = {
   getRegions: async (): Promise<Region[]> => {
     const response = await fetch(`${API_BASE}/regions`);
-    if (!response.ok) throw new Error("Failed to fetch regions");
-    return response.json();
+    return handleResponse<Region[]>(response);
   },
 
   getRegion: async (id: number): Promise<Region & { analytics: any }> => {

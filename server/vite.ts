@@ -8,7 +8,18 @@ import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
 
-export function log(message: string, source = "express") {
+export enum LogLevel {
+  ERROR = 0,
+  WARN = 1,
+  INFO = 2,
+  DEBUG = 3,
+}
+
+const LOG_LEVEL = process.env.LOG_LEVEL === 'debug' ? LogLevel.DEBUG : LogLevel.INFO;
+
+export function log(message: string, level: LogLevel = LogLevel.INFO, source = "express") {
+  if (level > LOG_LEVEL) return;
+  
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -16,7 +27,8 @@ export function log(message: string, source = "express") {
     hour12: true,
   });
 
-  console.log(`${formattedTime} [${source}] ${message}`);
+  const levelName = LogLevel[level];
+  console.log(`${formattedTime} [${source}] [${levelName}] ${message}`);
 }
 
 export async function setupVite(app: Express, server: Server) {

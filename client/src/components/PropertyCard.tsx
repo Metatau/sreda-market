@@ -25,7 +25,7 @@ const getPropertyImage = (property: Property) => {
     "Бизнес": "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
     "Элит": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
   };
-  
+
   return images[property.propertyClass?.name as keyof typeof images] || images["Стандарт"];
 };
 
@@ -67,9 +67,9 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             {propertyClassName}
           </Badge>
         </div>
-        
 
-        
+
+
         <Button
           variant="ghost"
           size="sm"
@@ -82,22 +82,22 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
           <i className="far fa-heart"></i>
         </Button>
       </div>
-      
+
       <CardContent className="p-5">
         <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{property.title}</h3>
-        
+
         <div className="flex items-center text-sm text-gray-600 mb-3">
           <i className="fas fa-map-marker-alt mr-1"></i>
           <span className="truncate">{property.address}</span>
         </div>
-        
+
         <div className="flex items-center justify-between mb-4">
           <div className="text-2xl font-bold text-gray-900">{property.price.toLocaleString()} ₽</div>
           {property.pricePerSqm && (
             <div className="text-sm text-gray-500">{property.pricePerSqm.toLocaleString()} ₽/м²</div>
           )}
         </div>
-        
+
         <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
           {property.area && (
             <span><i className="fas fa-expand-arrows-alt mr-1"></i>{property.area} м²</span>
@@ -109,7 +109,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             <span><i className="fas fa-building mr-1"></i>{property.floor}/{property.totalFloors} эт.</span>
           )}
         </div>
-        
+
         {/* Investment Metrics */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-center space-x-4">
@@ -132,7 +132,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center justify-between">
             {/* Investment Rating */}
             <div className="flex-1">
@@ -142,7 +142,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
                 </Badge>
               )}
             </div>
-            
+
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
               Подробнее
             </Button>

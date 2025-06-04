@@ -305,6 +305,12 @@ export type InsertPropertyAnalytics = typeof propertyAnalytics.$inferInsert;
 export type PriceHistory = typeof priceHistory.$inferSelect;
 export type InsertPriceHistory = typeof priceHistory.$inferInsert;
 
+export type InvestmentAnalytics = typeof investmentAnalytics.$inferSelect;
+export type InsertInvestmentAnalytics = typeof investmentAnalytics.$inferInsert;
+
+export type InfrastructureProject = typeof infrastructureProjects.$inferSelect;
+export type InsertInfrastructureProject = typeof infrastructureProjects.$inferInsert;y = typeof priceHistory.$inferInsert;
+
 export type RegionalCosts = typeof regionalCosts.$inferSelect;
 export type InsertRegionalCosts = typeof regionalCosts.$inferInsert;
 

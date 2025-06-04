@@ -50,6 +50,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/regions/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      
+      // Validate input
+      if (isNaN(id) || id <= 0) {
+        return res.status(400).json({ error: "Invalid region ID" });
+      }
+      
       const region = await storage.getRegion(id);
       if (!region) {
         return res.status(404).json({ error: "Region not found" });
@@ -57,7 +63,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(region);
     } catch (error) {
       console.error("Error fetching region:", error);
-      res.status(500).json({ error: "Failed to fetch region" });
+      res.status(500).json({ 
+        error: "Failed to fetch region",
+        ...(process.env.NODE_ENV === 'development' && { details: error instanceof Error ? error.message : 'Unknown error' })
+      });
     }
   });
 
