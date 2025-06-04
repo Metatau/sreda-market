@@ -6,6 +6,7 @@ import { AIChat } from "@/components/AIChat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProperties, useRegions } from "@/hooks/useProperties";
 import type { SearchFilters, Property } from "@/types";
@@ -15,6 +16,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("moscow");
   const [currentPage, setCurrentPage] = useState(1);
+  const [viewMode, setViewMode] = useState<"list" | "analytics">("list");
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   const { data: regions = [] } = useRegions();
@@ -91,81 +93,116 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Недвижимость в России
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Найдено {pagination?.total || 0} объектов
-                </p>
+            <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as any)} className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Недвижимость в России
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Найдено {pagination?.total || 0} объектов
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <TabsList className="grid w-full max-w-xs grid-cols-2">
+                    <TabsTrigger value="list" className="flex items-center space-x-2">
+                      <i className="fas fa-list"></i>
+                      <span>Список</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="analytics" className="flex items-center space-x-2">
+                      <i className="fas fa-chart-line"></i>
+                      <span>Аналитика</span>
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <Select defaultValue="price_asc">
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Сортировка" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
+                      <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
+                      <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
+                      <SelectItem value="area">По площади</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <Select defaultValue="price_asc">
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Сортировка" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
-                    <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
-                    <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
-                    <SelectItem value="area">По площади</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              <TabsContent value="list" className="space-y-6">
+                {/* Property Grid */}
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, i) => (
+                      <Card key={i} className="animate-pulse">
+                        <CardContent className="p-4">
+                          <div className="h-40 bg-gray-200 rounded mb-4"></div>
+                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {properties.map((property) => (
+                      <PropertyCard
+                        key={property.id}
+                        property={property}
+                      />
+                    ))}
+                  </div>
+                )}
 
-            {/* Property Grid */}
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-4">
-                      <div className="h-40 bg-gray-200 rounded mb-4"></div>
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {properties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                  />
-                ))}
-              </div>
-            )}
+                {/* Pagination */}
+                {pagination && pagination.totalPages > 1 && (
+                  <div className="flex justify-center space-x-2 mt-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Назад
+                    </Button>
+                    
+                    <span className="flex items-center px-3 text-sm text-gray-600">
+                      {currentPage} из {pagination.totalPages}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
+                      disabled={currentPage === pagination.totalPages}
+                    >
+                      Далее
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
 
-            {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
-              <div className="flex justify-center space-x-2 mt-8">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Назад
-                </Button>
-                
-                <span className="flex items-center px-3 text-sm text-gray-600">
-                  {currentPage} из {pagination.totalPages}
-                </span>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
-                  disabled={currentPage === pagination.totalPages}
-                >
-                  Далее
-                </Button>
-              </div>
-            )}
+              <TabsContent value="analytics" className="space-y-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-center">
+                      <h3 className="text-xl font-semibold mb-4">Аналитическая панель</h3>
+                      <p className="text-gray-600 mb-6">
+                        Детальная инвестиционная аналитика доступна на отдельной странице
+                      </p>
+                      <Button 
+                        onClick={() => window.location.href = '/analytics'}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <i className="fas fa-chart-line mr-2"></i>
+                        Перейти к полной аналитике
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
