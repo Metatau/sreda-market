@@ -50,14 +50,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i className="fas fa-building text-white text-lg"></i>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">SREDA Market</h1>
-                <p className="text-xs text-gray-500">ИИ-сервис недвижимости</p>
-              </div>
+            <div className="flex items-center">
+              <h1 className="text-xl font-bold text-gray-900">AI Real Estate</h1>
             </div>
 
             {/* Search Bar */}
