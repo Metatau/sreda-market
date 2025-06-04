@@ -106,6 +106,36 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProperties(filters?: PropertyFilters, pagination?: Pagination): Promise<{ properties: PropertyWithRelations[]; total: number }> {
+    const conditions = [eq(properties.isActive, true)];
+
+    // Apply filters
+    if (filters) {
+      if (filters.regionId) {
+        conditions.push(eq(properties.regionId, filters.regionId));
+      }
+      if (filters.propertyClassId) {
+        conditions.push(eq(properties.propertyClassId, filters.propertyClassId));
+      }
+      if (filters.minPrice) {
+        conditions.push(gte(properties.price, filters.minPrice));
+      }
+      if (filters.maxPrice) {
+        conditions.push(lte(properties.price, filters.maxPrice));
+      }
+      if (filters.rooms) {
+        conditions.push(eq(properties.rooms, filters.rooms));
+      }
+      if (filters.propertyType) {
+        conditions.push(eq(properties.propertyType, filters.propertyType));
+      }
+    }
+
+    // Get total count
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(properties)
+      .where(and(...conditions));
+
     let query = db
       .select({
         property: properties,
@@ -117,38 +147,9 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(regions, eq(properties.regionId, regions.id))
       .leftJoin(propertyClasses, eq(properties.propertyClassId, propertyClasses.id))
       .leftJoin(propertyAnalytics, eq(properties.id, propertyAnalytics.propertyId))
-      .where(eq(properties.isActive, true));
+      .where(and(...conditions))
+      .orderBy(desc(properties.createdAt));
 
-    // Apply filters
-    if (filters) {
-      if (filters.regionId) {
-        query = query.where(and(eq(properties.isActive, true), eq(properties.regionId, filters.regionId)));
-      }
-      if (filters.propertyClassId) {
-        query = query.where(and(eq(properties.isActive, true), eq(properties.propertyClassId, filters.propertyClassId)));
-      }
-      if (filters.minPrice) {
-        query = query.where(and(eq(properties.isActive, true), gte(properties.price, filters.minPrice)));
-      }
-      if (filters.maxPrice) {
-        query = query.where(and(eq(properties.isActive, true), lte(properties.price, filters.maxPrice)));
-      }
-      if (filters.rooms) {
-        query = query.where(and(eq(properties.isActive, true), eq(properties.rooms, filters.rooms)));
-      }
-      if (filters.propertyType) {
-        query = query.where(and(eq(properties.isActive, true), eq(properties.propertyType, filters.propertyType)));
-      }
-    }
-
-    // Get total count
-    const [{ count }] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(properties)
-      .where(eq(properties.isActive, true));
-
-    // Apply pagination and ordering
-    query = query.orderBy(desc(properties.createdAt));
     if (pagination) {
       query = query.limit(pagination.perPage).offset((pagination.page - 1) * pagination.perPage);
     }
@@ -232,7 +233,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMapData(filters?: PropertyFilters): Promise<MapDataPoint[]> {
-    let query = db
+    const conditions = [
+      eq(properties.isActive, true),
+      sql`${properties.coordinates} IS NOT NULL`
+    ];
+
+    // Apply filters
+    if (filters?.regionId) {
+      conditions.push(eq(properties.regionId, filters.regionId));
+    }
+    if (filters?.propertyClassId) {
+      conditions.push(eq(properties.propertyClassId, filters.propertyClassId));
+    }
+
+    const query = db
       .select({
         id: properties.id,
         title: properties.title,
@@ -245,15 +259,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(properties)
       .leftJoin(propertyClasses, eq(properties.propertyClassId, propertyClasses.id))
-      .where(and(eq(properties.isActive, true), sql`${properties.coordinates} IS NOT NULL`));
-
-    // Apply filters
-    if (filters?.regionId) {
-      query = query.where(and(eq(properties.isActive, true), eq(properties.regionId, filters.regionId)));
-    }
-    if (filters?.propertyClassId) {
-      query = query.where(and(eq(properties.isActive, true), eq(properties.propertyClassId, filters.propertyClassId)));
-    }
+      .where(and(...conditions));
 
     const results = await query.limit(1000);
 
