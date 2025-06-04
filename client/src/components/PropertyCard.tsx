@@ -29,6 +29,18 @@ const getPropertyImage = (property: Property) => {
   return images[property.propertyClass?.name as keyof typeof images] || images["Стандарт"];
 };
 
+const getInvestmentRatingColor = (rating: string) => {
+  const colors = {
+    'A+': 'bg-green-600 text-white',
+    'A': 'bg-green-500 text-white',
+    'B+': 'bg-blue-600 text-white',
+    'B': 'bg-blue-500 text-white',
+    'C+': 'bg-orange-600 text-white',
+    'C': 'bg-red-600 text-white'
+  };
+  return colors[rating as keyof typeof colors] || 'bg-gray-600 text-white';
+};
+
 export function PropertyCard({ property, onSelect }: PropertyCardProps) {
   const handleClick = () => {
     onSelect?.(property);
@@ -54,6 +66,16 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             {propertyClassName}
           </Badge>
         </div>
+        
+        {/* Investment Rating */}
+        {property.analytics?.investmentRating && (
+          <div className="absolute top-3 right-12">
+            <Badge className={`${getInvestmentRatingColor(property.analytics.investmentRating)} font-bold text-xs px-2 py-1`}>
+              {property.analytics.investmentRating}
+            </Badge>
+          </div>
+        )}
+        
         <Button
           variant="ghost"
           size="sm"
