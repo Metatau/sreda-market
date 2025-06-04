@@ -2,8 +2,12 @@ import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { Home, BarChart3, Building } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { LoginButton } from "@/components/Auth/LoginButton";
+import { UserProfile } from "@/components/Auth/UserProfile";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navigation() {
+  const { isAuthenticated, loading } = useAuth();
   const [location] = useLocation();
 
   const navItems = [
@@ -47,6 +51,28 @@ export function Navigation() {
               </Link>
             ))}
           </div>
+
+          <div className="flex items-center space-x-2">
+          {loading ? (
+            <div className="w-8 h-8 flex items-center justify-center">
+              <i className="fas fa-spinner fa-spin text-gray-400"></i>
+            </div>
+          ) : isAuthenticated ? (
+            <>
+              <Button variant="outline" size="sm">
+                <i className="fas fa-heart mr-2"></i>
+                Избранное
+              </Button>
+              <Button variant="outline" size="sm">
+                <i className="fas fa-balance-scale mr-2"></i>
+                Сравнение
+              </Button>
+              <UserProfile />
+            </>
+          ) : (
+            <LoginButton />
+          )}
+        </div>
         </div>
       </div>
     </nav>

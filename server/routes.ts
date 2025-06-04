@@ -3,12 +3,37 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generateAIResponse, generatePropertyRecommendations, analyzePropertyInvestment } from "./services/openai";
 import { simpleInvestmentAnalyticsService } from "./services/simpleInvestmentAnalytics";
+import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware/auth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // Authentication routes
+  app.get("/api/auth/status", (req, res) => {
+    const userId = req.headers['x-replit-user-id'];
+    const userName = req.headers['x-replit-user-name'];
+    const userRoles = req.headers['x-replit-user-roles'];
+
+    if (userId && userName) {
+      res.json({
+        authenticated: true,
+        userId,
+        userName,
+        userRoles: userRoles || '',
+      });
+    } else {
+      res.json({ authenticated: false });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    // Since we're using Repl Auth, logout is handled client-side
+    // This endpoint exists for consistency
+    res.json({ success: true });
   });
 
   // Regions
@@ -195,8 +220,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat
-  app.post("/api/chat", async (req, res) => {
+  // AI Chat (requires authentication)
+  app.post("/api/chat", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const chatSchema = z.object({
         message: z.string(),
@@ -234,8 +259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Property Recommendations
-  app.post("/api/ai/recommendations", async (req, res) => {
+  // AI Property Recommendations (requires authentication)
+  app.post("/api/ai/recommendations", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const recommendationSchema = z.object({
         budget: z.number().optional(),
