@@ -133,15 +133,15 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             )}
           </div>
           
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between">
             {/* Investment Rating */}
-            {property.investmentAnalytics?.investmentRating ? (
-              <Badge className={`${getInvestmentRatingColor(property.investmentAnalytics.investmentRating)} font-bold text-sm px-3 py-1`}>
-                {property.investmentAnalytics.investmentRating}
-              </Badge>
-            ) : (
-              <div></div>
-            )}
+            <div className="flex-1">
+              {property.investmentAnalytics?.investmentRating && (
+                <Badge className={`${getInvestmentRatingColor(property.investmentAnalytics.investmentRating)} font-bold text-sm px-3 py-1`}>
+                  {property.investmentAnalytics.investmentRating}
+                </Badge>
+              )}
+            </div>
             
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
               Подробнее
