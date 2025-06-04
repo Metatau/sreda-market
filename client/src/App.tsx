@@ -4,7 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home";
-import { InvestmentAnalyticsDemo } from "@/pages/InvestmentAnalyticsDemo";
+import InvestmentAnalyticsDemo from "@/pages/InvestmentAnalyticsDemo";
 import { Favorites } from "@/pages/Favorites";
 import { Comparison } from "@/pages/Comparison";
 import { Profile } from "@/pages/Profile";
