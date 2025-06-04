@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { TrendingUp, TrendingDown, Home, RotateCcw, Shield } from "lucide-react";
 
 interface Property {
@@ -99,26 +100,52 @@ export const PropertyPreviewCard: React.FC<PropertyPreviewCardProps> = ({
     }
   };
 
+  const getRatingDescription = (rating: string) => {
+    switch (rating) {
+      case 'A+': return 'Превосходные инвестиционные перспективы. Высокая доходность, низкие риски, отличная ликвидность.';
+      case 'A': return 'Отличные инвестиционные возможности. Хорошая доходность и стабильные перспективы роста.';
+      case 'B+': return 'Хорошие инвестиционные характеристики. Приемлемая доходность, сбалансированные риски.';
+      case 'B': return 'Удовлетворительные показатели. Средняя доходность, умеренные риски.';
+      case 'C+': return 'Ниже средних показателей. Низкая доходность, повышенные риски.';
+      case 'C': return 'Слабые инвестиционные перспективы. Очень низкая доходность или убыточность, высокие риски.';
+      default: return 'Рейтинг не определен. Требуется дополнительный анализ.';
+    }
+  };
+
   return (
-    <Card 
-      className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
-      onClick={onClick}
-    >
-      <CardContent className="p-6">
-        {/* Заголовок и рейтинг */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
-              {property.title}
-            </h3>
-            <p className="text-sm text-gray-600 truncate">{property.address}</p>
+    <TooltipProvider>
+      <Card 
+        className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+        onClick={onClick}
+      >
+        <CardContent className="p-6">
+          {/* Заголовок и рейтинг */}
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
+                {property.title}
+              </h3>
+              <p className="text-sm text-gray-600 truncate">{property.address}</p>
+            </div>
+            {analytics.investmentRating && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge className={`ml-2 cursor-help ${getRatingColor(analytics.investmentRating)}`}>
+                    {analytics.investmentRating}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <div className="space-y-2">
+                    <div className="font-semibold">Рейтинг {analytics.investmentRating}</div>
+                    <div className="text-sm">{getRatingDescription(analytics.investmentRating)}</div>
+                    <div className="text-xs text-gray-400 mt-2">
+                      Рейтинг основан на доходности аренды, ROI флиппинга и безопасности инвестиций
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
-          {analytics.investmentRating && (
-            <Badge className={`ml-2 ${getRatingColor(analytics.investmentRating)}`}>
-              {analytics.investmentRating}
-            </Badge>
-          )}
-        </div>
 
         {/* Основная цена */}
         <div className="mb-4">
@@ -210,7 +237,8 @@ export const PropertyPreviewCard: React.FC<PropertyPreviewCardProps> = ({
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 };
