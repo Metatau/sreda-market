@@ -3,12 +3,14 @@ import { Navigation } from "@/components/Navigation";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
 import { AIChat } from "@/components/AIChat";
+import { InvestmentAnalyticsModal } from "@/components/InvestmentAnalyticsModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProperties, useRegions } from "@/hooks/useProperties";
 import { useNewProperties } from "@/hooks/useNewProperties";
+import { useInvestmentAnalytics, useCalculateInvestmentAnalytics } from "@/hooks/useInvestmentAnalytics";
 import { TrendingUp, BarChart3, Building2, Clock } from "lucide-react";
 import type { SearchFilters, Property } from "@/types";
 
@@ -18,10 +20,14 @@ export default function Home() {
   const [selectedRegion, setSelectedRegion] = useState<string>("moscow");
   const [currentPage, setCurrentPage] = useState(1);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
 
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
+  const { data: analyticsData } = useInvestmentAnalytics(selectedProperty?.id || 0);
+  const calculateAnalytics = useCalculateInvestmentAnalytics();
 
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
@@ -30,6 +36,21 @@ export default function Home() {
     e.preventDefault();
     setFilters({ ...filters, query: searchQuery });
     setCurrentPage(1);
+  };
+
+  const handlePropertySelect = async (property: Property) => {
+    setSelectedProperty(property);
+    
+    // Try to get existing analytics first
+    if (!property.investmentAnalytics) {
+      try {
+        await calculateAnalytics.mutateAsync(property.id);
+      } catch (error) {
+        console.error('Failed to calculate analytics:', error);
+      }
+    }
+    
+    setIsAnalyticsModalOpen(true);
   };
 
   // Динамически определяем название региона на основе фильтров с правильными падежами
@@ -218,6 +239,7 @@ export default function Home() {
                   <PropertyCard
                     key={property.id}
                     property={property}
+                    onSelect={handlePropertySelect}
                   />
                 ))}
               </div>
@@ -257,6 +279,19 @@ export default function Home() {
         isOpen={isChatOpen} 
         onToggle={() => setIsChatOpen(!isChatOpen)} 
       />
+
+      {/* Investment Analytics Modal */}
+      {selectedProperty && analyticsData && (
+        <InvestmentAnalyticsModal
+          isOpen={isAnalyticsModalOpen}
+          onClose={() => {
+            setIsAnalyticsModalOpen(false);
+            setSelectedProperty(null);
+          }}
+          property={selectedProperty}
+          analytics={analyticsData}
+        />
+      )}
     </div>
   );
 }
