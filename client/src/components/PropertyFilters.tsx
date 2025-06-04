@@ -28,6 +28,16 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
   const { data: regions = [] } = useRegions();
   const { data: propertyClasses = [] } = usePropertyClasses();
 
+  // Сортируем регионы по важности (крупные города первыми)
+  const sortedRegions = [...regions].sort((a, b) => {
+    const order = [
+      'Москва', 'Санкт-Петербург', 'Новосибирск', 'Екатеринбург',
+      'Нижний Новгород', 'Казань', 'Челябинск', 'Омск', 'Самара',
+      'Ростов-на-Дону', 'Уфа', 'Красноярск', 'Воронеж', 'Пермь'
+    ];
+    return order.indexOf(a.name) - order.indexOf(b.name);
+  });
+
   const handleFilterChange = (key: keyof SearchFilters, value: any) => {
     onFiltersChange({
       ...filters,
@@ -83,7 +93,7 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Все регионы</SelectItem>
-              {regions.map((region) => (
+              {sortedRegions.map((region) => (
                 <SelectItem key={region.id} value={region.id.toString()}>
                   {region.name}
                 </SelectItem>
