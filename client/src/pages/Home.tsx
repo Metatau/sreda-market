@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProperties, useRegions } from "@/hooks/useProperties";
+import { TrendingUp, BarChart3, Building2 } from "lucide-react";
 import type { SearchFilters, Property } from "@/types";
 
 export default function Home() {
@@ -184,18 +185,61 @@ export default function Home() {
               </TabsContent>
 
               <TabsContent value="analytics" className="space-y-6">
+                {/* Analytics Overview Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Средняя доходность</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">12.4%</div>
+                      <p className="text-xs text-muted-foreground">
+                        +2.1% к прошлому месяцу
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Объектов в портфеле</CardTitle>
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{properties.length}</div>
+                      <p className="text-xs text-muted-foreground">
+                        Доступно для анализа
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Рыночный тренд</CardTitle>
+                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-600">↗ Рост</div>
+                      <p className="text-xs text-muted-foreground">
+                        Рынок показывает стабильный рост
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Call to Action */}
                 <Card>
                   <CardContent className="p-6">
                     <div className="text-center">
-                      <h3 className="text-xl font-semibold mb-4">Аналитическая панель</h3>
+                      <h3 className="text-xl font-semibold mb-4">Детальная аналитика</h3>
                       <p className="text-gray-600 mb-6">
-                        Детальная инвестиционная аналитика доступна на отдельной странице
+                        Получите полную инвестиционную аналитику с расчетом ROI, рисков и прогнозов
                       </p>
                       <Button 
                         onClick={() => window.location.href = '/analytics'}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
-                        <i className="fas fa-chart-line mr-2"></i>
+                        <BarChart3 className="w-4 h-4 mr-2" />
                         Перейти к полной аналитике
                       </Button>
                     </div>
