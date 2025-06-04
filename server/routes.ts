@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateAIPropertyRecommendations, generateAIResponse } from "./services/openai";
+import { generateAIResponse, generatePropertyRecommendations, analyzePropertyInvestment } from "./services/openai";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -85,6 +85,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/properties/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid property ID" });
+      }
       const property = await storage.getProperty(id);
       if (!property) {
         return res.status(404).json({ error: "Property not found" });
@@ -230,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const preferences = recommendationSchema.parse(req.body);
       
-      const recommendations = await generateAIPropertyRecommendations(preferences);
+      const recommendations = await generatePropertyRecommendations(preferences);
       
       res.json(recommendations);
     } catch (error) {
