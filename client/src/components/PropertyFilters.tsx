@@ -77,12 +77,12 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
         {/* Region Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Регион</label>
-          <Select value={filters.regionId?.toString() || ""} onValueChange={(value) => handleFilterChange('regionId', value ? parseInt(value) : null)}>
+          <Select value={filters.regionId?.toString() || "all"} onValueChange={(value) => handleFilterChange('regionId', value === "all" ? null : parseInt(value))}>
             <SelectTrigger>
               <SelectValue placeholder="Все регионы" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все регионы</SelectItem>
+              <SelectItem value="all">Все регионы</SelectItem>
               {regions.map((region) => (
                 <SelectItem key={region.id} value={region.id.toString()}>
                   {region.name}

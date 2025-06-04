@@ -136,7 +136,7 @@ export class DatabaseStorage implements IStorage {
       .from(properties)
       .where(and(...conditions));
 
-    let query = db
+    let baseQuery = db
       .select({
         property: properties,
         region: regions,
@@ -150,11 +150,14 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions))
       .orderBy(desc(properties.createdAt));
 
+    let finalQuery = baseQuery;
     if (pagination) {
-      query = query.limit(pagination.perPage).offset((pagination.page - 1) * pagination.perPage);
+      finalQuery = baseQuery.limit(pagination.perPage).offset((pagination.page - 1) * pagination.perPage);
+    } else {
+      finalQuery = baseQuery.limit(100);
     }
 
-    const results = await query;
+    const results = await finalQuery;
 
     const propertiesWithRelations: PropertyWithRelations[] = results.map(result => ({
       ...result.property,

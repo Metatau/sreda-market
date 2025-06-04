@@ -141,22 +141,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert to GeoJSON format
       const geoJson = {
         type: "FeatureCollection" as const,
-        features: mapData.map(point => ({
-          type: "Feature" as const,
-          geometry: {
-            type: "Point" as const,
-            coordinates: point.coordinates.split(',').map(Number), // Assuming "lng,lat" format
-          },
-          properties: {
-            id: point.id,
-            title: point.title,
-            price: point.price,
-            pricePerSqm: point.pricePerSqm,
-            propertyClass: point.propertyClass,
-            rooms: point.rooms,
-            area: point.area,
-          },
-        })),
+        features: mapData.map(point => {
+          // Parse coordinates from PostGIS POINT format
+          const coordMatch = point.coordinates.match(/POINT\(([^)]+)\)/);
+          let coordinates = [37.6176, 55.7558]; // Default to Moscow coordinates
+          
+          if (coordMatch && coordMatch[1]) {
+            const [lng, lat] = coordMatch[1].split(' ').map(Number);
+            if (!isNaN(lng) && !isNaN(lat)) {
+              coordinates = [lng, lat];
+            }
+          }
+          
+          return {
+            type: "Feature" as const,
+            geometry: {
+              type: "Point" as const,
+              coordinates,
+            },
+            properties: {
+              id: point.id,
+              title: point.title,
+              price: point.price,
+              pricePerSqm: point.pricePerSqm,
+              propertyClass: point.propertyClass,
+              rooms: point.rooms,
+              area: point.area,
+            },
+          };
+        }),
       };
 
       res.json(geoJson);
