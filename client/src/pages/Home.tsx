@@ -36,7 +36,6 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <Navigation />
-      
       {/* Header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,7 +80,6 @@ export default function Home() {
           </div>
         </div>
       </header>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
@@ -111,7 +109,7 @@ export default function Home() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Объектов в портфеле</CardTitle>
+                  <CardTitle className="text-sm font-medium">Новые объекты</CardTitle>
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -215,7 +213,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
       {/* AI Chat */}
       <AIChat 
         isOpen={isChatOpen} 
