@@ -101,6 +101,18 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
     }
   };
 
+  const getRatingDescription = (rating: string) => {
+    switch (rating) {
+      case 'A+': return 'Превосходные инвестиционные перспективы. Высокая доходность, низкие риски, отличная ликвидность.';
+      case 'A': return 'Отличные инвестиционные возможности. Хорошая доходность и стабильные перспективы роста.';
+      case 'B+': return 'Хорошие инвестиционные характеристики. Приемлемая доходность, сбалансированные риски.';
+      case 'B': return 'Удовлетворительные показатели. Средняя доходность, умеренные риски.';
+      case 'C+': return 'Ниже средних показателей. Низкая доходность, повышенные риски.';
+      case 'C': return 'Слабые инвестиционные перспективы. Очень низкая доходность или убыточность, высокие риски.';
+      default: return 'Рейтинг не определен. Требуется дополнительный анализ.';
+    }
+  };
+
   const ScenarioComparison = () => {
     const scenarios = [
       {
@@ -392,44 +404,58 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
-            Инвестиционная аналитика
-          </DialogTitle>
-          <p className="text-sm text-gray-600">{property.address}</p>
-        </DialogHeader>
+    <TooltipProvider>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              Инвестиционная аналитика
+            </DialogTitle>
+            <p className="text-sm text-gray-600">{property.address}</p>
+          </DialogHeader>
 
-        {/* Основные метрики в шапке */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="text-center p-3 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
-              {analytics.rentalYield || '0'}%
+          {/* Основные метрики в шапке */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {analytics.rentalYield || '0'}%
+              </div>
+              <div className="text-xs text-gray-600">Доходность аренды</div>
             </div>
-            <div className="text-xs text-gray-600">Доходность аренды</div>
-          </div>
-          <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">
-              {analytics.flipRoi || '0'}%
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">
+                {analytics.flipRoi || '0'}%
+              </div>
+              <div className="text-xs text-gray-600">ROI флиппинга</div>
             </div>
-            <div className="text-xs text-gray-600">ROI флиппинга</div>
-          </div>
-          <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">
-              +{analytics.priceForecast3y || '0'}%
+            <div className="text-center p-3 bg-purple-50 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">
+                +{analytics.priceForecast3y || '0'}%
+              </div>
+              <div className="text-xs text-gray-600">Прогноз 3 года</div>
             </div>
-            <div className="text-xs text-gray-600">Прогноз 3 года</div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              {analytics.investmentRating && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className={`text-2xl font-bold px-3 py-1 cursor-help ${getRatingColor(analytics.investmentRating)}`}>
+                      {analytics.investmentRating}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <div className="space-y-2">
+                      <div className="font-semibold">Рейтинг {analytics.investmentRating}</div>
+                      <div className="text-sm">{getRatingDescription(analytics.investmentRating)}</div>
+                      <div className="text-xs text-gray-400 mt-2">
+                        Рассчитывается на основе доходности аренды, ROI флиппинга и безопасности инвестиций
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              <div className="text-xs text-gray-600 mt-1">Рейтинг</div>
+            </div>
           </div>
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            {analytics.investmentRating && (
-              <Badge className={`text-2xl font-bold px-3 py-1 ${getRatingColor(analytics.investmentRating)}`}>
-                {analytics.investmentRating}
-              </Badge>
-            )}
-            <div className="text-xs text-gray-600 mt-1">Рейтинг</div>
-          </div>
-        </div>
 
         {/* Табы с детальной информацией */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -456,7 +482,8 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
             <CostBreakdown />
           </TabsContent>
         </Tabs>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </TooltipProvider>
   );
 };
