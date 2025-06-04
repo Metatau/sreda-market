@@ -295,6 +295,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Investment Analytics Routes
+  app.get("/api/investment-analytics/:propertyId", async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.propertyId);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ error: "Invalid property ID" });
+      }
+
+      const analytics = await investmentAnalyticsService.getAnalyticsByPropertyId(propertyId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching investment analytics:", error);
+      res.status(500).json({ error: "Failed to fetch investment analytics" });
+    }
+  });
+
+  app.post("/api/investment-analytics/:propertyId/calculate", async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.propertyId);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ error: "Invalid property ID" });
+      }
+
+      const analytics = await investmentAnalyticsService.calculateFullAnalytics(propertyId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error calculating investment analytics:", error);
+      res.status(500).json({ error: "Failed to calculate investment analytics" });
+    }
+  });
+
+  app.post("/api/investment-analytics/batch-calculate", async (req, res) => {
+    try {
+      const batchSchema = z.object({
+        propertyIds: z.array(z.number()),
+      });
+
+      const { propertyIds } = batchSchema.parse(req.body);
+      const results = await investmentAnalyticsService.batchCalculateAnalytics(propertyIds);
+      res.json({ results });
+    } catch (error) {
+      console.error("Error in batch calculation:", error);
+      res.status(500).json({ error: "Failed to batch calculate analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

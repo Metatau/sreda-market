@@ -164,12 +164,12 @@ export class InvestmentAnalyticsService {
 
     // Возвращаем дефолтные значения, если нет данных
     return costs ? costs : {
-      taxRate: 0.001,
+      taxRate: "0.001",
       maintenanceCostPerSqm: 1000,
       utilityCostPerSqm: 2000,
-      managementFeePercent: 8.00,
+      managementFeePercent: "8.00",
       insuranceCostPerSqm: 100,
-      repairReservePercent: 5.00,
+      repairReservePercent: "5.00",
     };
   }
 
@@ -220,12 +220,19 @@ export class InvestmentAnalyticsService {
     const annualRental = monthlyRental * 12;
 
     // Расчет расходов
-    const annualTax = propertyPrice * (Number(regionalCosts.taxRate) || 0.001);
-    const maintenanceCost = (regionalCosts.maintenanceCostPerSqm || 1000) * area;
-    const utilityCost = (regionalCosts.utilityCostPerSqm || 2000) * area * 12;
-    const managementFee = annualRental * (Number(regionalCosts.managementFeePercent) || 8) / 100;
-    const insuranceCost = (regionalCosts.insuranceCostPerSqm || 100) * area;
-    const repairReserve = annualRental * (Number(regionalCosts.repairReservePercent) || 5) / 100;
+    const taxRate = typeof regionalCosts.taxRate === 'string' ? Number(regionalCosts.taxRate) : (regionalCosts.taxRate || 0.001);
+    const maintenanceCostPerSqm = regionalCosts.maintenanceCostPerSqm || 1000;
+    const utilityCostPerSqm = regionalCosts.utilityCostPerSqm || 2000;
+    const managementFeePercent = typeof regionalCosts.managementFeePercent === 'string' ? Number(regionalCosts.managementFeePercent) : (regionalCosts.managementFeePercent || 8);
+    const insuranceCostPerSqm = regionalCosts.insuranceCostPerSqm || 100;
+    const repairReservePercent = typeof regionalCosts.repairReservePercent === 'string' ? Number(regionalCosts.repairReservePercent) : (regionalCosts.repairReservePercent || 5);
+
+    const annualTax = propertyPrice * taxRate;
+    const maintenanceCost = maintenanceCostPerSqm * area;
+    const utilityCost = utilityCostPerSqm * area * 12;
+    const managementFee = annualRental * managementFeePercent / 100;
+    const insuranceCost = insuranceCostPerSqm * area;
+    const repairReserve = annualRental * repairReservePercent / 100;
 
     const totalExpenses = annualTax + maintenanceCost + utilityCost + managementFee + insuranceCost + repairReserve;
     const netAnnualIncome = annualRental - totalExpenses;
@@ -320,8 +327,7 @@ export class InvestmentAnalyticsService {
       .where(
         and(
           eq(infrastructureProjects.regionId, propertyData.regionId),
-          gte(infrastructureProjects.completionDate, new Date()),
-          lte(infrastructureProjects.completionDate, new Date(Date.now() + 3 * 365 * 24 * 60 * 60 * 1000))
+          isNotNull(infrastructureProjects.completionDate)
         )
       );
 
@@ -371,7 +377,7 @@ export class InvestmentAnalyticsService {
       .limit(1);
 
     // Если данных нет или они устарели (больше 24 часов), пересчитываем
-    if (!analytics || new Date().getTime() - new Date(analytics.calculatedAt).getTime() > 24 * 60 * 60 * 1000) {
+    if (!analytics || (analytics.calculatedAt && new Date().getTime() - new Date(analytics.calculatedAt).getTime() > 24 * 60 * 60 * 1000)) {
       return await this.calculateFullAnalytics(propertyId);
     }
 
