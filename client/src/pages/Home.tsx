@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProperties, useRegions } from "@/hooks/useProperties";
-import { TrendingUp, BarChart3, Building2 } from "lucide-react";
+import { TrendingUp, BarChart3, Building2, Clock } from "lucide-react";
 import type { SearchFilters, Property } from "@/types";
 
 export default function Home() {
@@ -93,7 +93,7 @@ export default function Home() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             {/* Analytics Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Средняя доходность</CardTitle>
@@ -129,6 +129,19 @@ export default function Home() {
                   <div className="text-2xl font-bold text-green-600">↗ Рост</div>
                   <p className="text-xs text-muted-foreground">
                     Рынок показывает стабильный рост
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Новые объекты</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">12</div>
+                  <p className="text-xs text-muted-foreground">
+                    За последние 24 часа
                   </p>
                 </CardContent>
               </Card>

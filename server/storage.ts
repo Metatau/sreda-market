@@ -41,6 +41,9 @@ export interface IStorage {
   // Chat
   saveChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getChatHistory(sessionId: string, limit?: number): Promise<ChatMessage[]>;
+  
+  // Analytics
+  getNewPropertiesCount(since: Date): Promise<number>;
 }
 
 export interface PropertyFilters {

@@ -380,6 +380,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics Dashboard - new properties in last 24 hours
+  app.get("/api/analytics/new-properties", async (req, res) => {
+    try {
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+      
+      const newPropertiesCount = await storage.getNewPropertiesCount(twentyFourHoursAgo);
+      
+      res.json({ 
+        count: newPropertiesCount,
+        period: "24h",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error fetching new properties count:", error);
+      res.status(500).json({ error: "Failed to fetch new properties count" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
