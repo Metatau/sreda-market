@@ -10,7 +10,7 @@ import {
   varchar,
   index,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -71,7 +71,7 @@ export const properties = pgTable("properties", {
   activeIdx: index("idx_properties_active").on(table.isActive),
 }));
 
-// Property analytics table
+// Property analytics table - расширенная версия
 export const propertyAnalytics = pgTable("property_analytics", {
   id: serial("id").primaryKey(),
   propertyId: integer("property_id").references(() => properties.id),
@@ -83,6 +83,98 @@ export const propertyAnalytics = pgTable("property_analytics", {
   marketTrend: varchar("market_trend", { length: 20 }),
   calculatedAt: timestamp("calculated_at").defaultNow(),
 });
+
+// Таблица исторических данных цен
+export const priceHistory = pgTable("price_history", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id),
+  price: integer("price").notNull(),
+  pricePerSqm: integer("price_per_sqm"),
+  dateRecorded: timestamp("date_recorded").notNull(),
+  source: varchar("source", { length: 50 }).default("ads-api.ru"),
+  marketConditions: jsonb("market_conditions"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  propertyDateIdx: index("idx_price_history_property_date").on(table.propertyId, table.dateRecorded),
+}));
+
+// Таблица региональных расходов
+export const regionalCosts = pgTable("regional_costs", {
+  id: serial("id").primaryKey(),
+  regionId: integer("region_id").references(() => regions.id),
+  propertyClassId: integer("property_class_id").references(() => propertyClasses.id),
+  taxRate: decimal("tax_rate", { precision: 5, scale: 4 }), // Ставка налога на имущество
+  maintenanceCostPerSqm: integer("maintenance_cost_per_sqm"), // Расходы на содержание за кв.м
+  utilityCostPerSqm: integer("utility_cost_per_sqm"), // Коммунальные за кв.м
+  managementFeePercent: decimal("management_fee_percent", { precision: 4, scale: 2 }), // Комиссия УК в %
+  insuranceCostPerSqm: integer("insurance_cost_per_sqm"), // Страховка за кв.м
+  repairReservePercent: decimal("repair_reserve_percent", { precision: 4, scale: 2 }), // Резерв на ремонт в %
+  year: integer("year").default(2024),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  regionClassIdx: index("idx_regional_costs_region_class").on(table.regionId, table.propertyClassId),
+}));
+
+// Таблица инвестиционной аналитики
+export const investmentAnalytics = pgTable("investment_analytics", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").references(() => properties.id),
+  
+  // Динамика цены
+  priceChange1y: decimal("price_change_1y", { precision: 5, scale: 2 }), // Изменение цены за год в %
+  priceChange3m: decimal("price_change_3m", { precision: 5, scale: 2 }), // За 3 месяца в %
+  priceVolatility: decimal("price_volatility", { precision: 5, scale: 2 }), // Волатильность цены
+  
+  // Сценарий аренды
+  rentalYield: decimal("rental_yield", { precision: 5, scale: 2 }), // Рентабельность аренды в %
+  rentalIncomeMonthly: integer("rental_income_monthly"), // Ежемесячный доход
+  rentalRoiAnnual: decimal("rental_roi_annual", { precision: 5, scale: 2 }), // ROI аренды годовой
+  rentalPaybackYears: decimal("rental_payback_years", { precision: 4, scale: 2 }), // Срок окупаемости
+  
+  // Сценарий флиппинга
+  flipPotentialProfit: integer("flip_potential_profit"), // Потенциальная прибыль
+  flipRoi: decimal("flip_roi", { precision: 5, scale: 2 }), // ROI флиппинга
+  flipTimeframeMonths: integer("flip_timeframe_months"), // Срок реализации
+  renovationCostEstimate: integer("renovation_cost_estimate"), // Оценка затрат на ремонт
+  
+  // Сценарий "тихая гавань"
+  safeHavenScore: integer("safe_haven_score"), // 1-10
+  capitalPreservationIndex: decimal("capital_preservation_index", { precision: 5, scale: 2 }),
+  liquidityScore: integer("liquidity_score"), // 1-10
+  
+  // Прогноз на 3 года
+  priceForecast3y: decimal("price_forecast_3y", { precision: 5, scale: 2 }), // Прогноз роста цены
+  infrastructureImpactScore: decimal("infrastructure_impact_score", { precision: 3, scale: 2 }), // Влияние инфраструктуры
+  developmentRiskScore: decimal("development_risk_score", { precision: 3, scale: 2 }), // Риск новой застройки
+  
+  // Комплексные метрики
+  investmentRating: varchar("investment_rating", { length: 10 }), // A+, A, B+, B, C+, C
+  riskLevel: varchar("risk_level", { length: 20 }), // low, moderate, high
+  recommendedStrategy: varchar("recommended_strategy", { length: 50 }), // rental, flip, hold
+  
+  calculatedAt: timestamp("calculated_at").defaultNow(),
+  expiresAt: timestamp("expires_at").defaultNow(),
+}, (table) => ({
+  propertyIdx: index("idx_investment_analytics_property").on(table.propertyId),
+  calculatedIdx: index("idx_investment_analytics_calculated").on(table.calculatedAt),
+}));
+
+// Таблица инфраструктурных проектов
+export const infrastructureProjects = pgTable("infrastructure_projects", {
+  id: serial("id").primaryKey(),
+  regionId: integer("region_id").references(() => regions.id),
+  projectName: varchar("project_name", { length: 255 }).notNull(),
+  projectType: varchar("project_type", { length: 100 }), // метро, дорога, школа, ТЦ и т.д.
+  coordinates: text("coordinates"), // POINT coordinates
+  impactRadius: integer("impact_radius"), // Радиус влияния в метрах
+  completionDate: timestamp("completion_date"),
+  investmentAmount: decimal("investment_amount", { precision: 15, scale: 2 }),
+  impactCoefficient: decimal("impact_coefficient", { precision: 3, scale: 2 }), // Коэффициент влияния на цены
+  status: varchar("status", { length: 50 }).default("planned"),
+}, (table) => ({
+  regionIdx: index("idx_infrastructure_projects_region").on(table.regionId),
+  statusIdx: index("idx_infrastructure_projects_status").on(table.status),
+}));
 
 // Chat messages table for AI interactions
 export const chatMessages = pgTable("chat_messages", {
@@ -97,13 +189,16 @@ export const chatMessages = pgTable("chat_messages", {
 // Relations
 export const regionsRelations = relations(regions, ({ many }) => ({
   properties: many(properties),
+  regionalCosts: many(regionalCosts),
+  infrastructureProjects: many(infrastructureProjects),
 }));
 
 export const propertyClassesRelations = relations(propertyClasses, ({ many }) => ({
   properties: many(properties),
+  regionalCosts: many(regionalCosts),
 }));
 
-export const propertiesRelations = relations(properties, ({ one }) => ({
+export const propertiesRelations = relations(properties, ({ one, many }) => ({
   region: one(regions, {
     fields: [properties.regionId],
     references: [regions.id],
@@ -116,6 +211,11 @@ export const propertiesRelations = relations(properties, ({ one }) => ({
     fields: [properties.id],
     references: [propertyAnalytics.propertyId],
   }),
+  investmentAnalytics: one(investmentAnalytics, {
+    fields: [properties.id],
+    references: [investmentAnalytics.propertyId],
+  }),
+  priceHistory: many(priceHistory),
 }));
 
 export const propertyAnalyticsRelations = relations(propertyAnalytics, ({ one }) => ({
@@ -125,6 +225,38 @@ export const propertyAnalyticsRelations = relations(propertyAnalytics, ({ one })
   }),
   region: one(regions, {
     fields: [propertyAnalytics.regionId],
+    references: [regions.id],
+  }),
+}));
+
+export const priceHistoryRelations = relations(priceHistory, ({ one }) => ({
+  property: one(properties, {
+    fields: [priceHistory.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const regionalCostsRelations = relations(regionalCosts, ({ one }) => ({
+  region: one(regions, {
+    fields: [regionalCosts.regionId],
+    references: [regions.id],
+  }),
+  propertyClass: one(propertyClasses, {
+    fields: [regionalCosts.propertyClassId],
+    references: [propertyClasses.id],
+  }),
+}));
+
+export const investmentAnalyticsRelations = relations(investmentAnalytics, ({ one }) => ({
+  property: one(properties, {
+    fields: [investmentAnalytics.propertyId],
+    references: [properties.id],
+  }),
+}));
+
+export const infrastructureProjectsRelations = relations(infrastructureProjects, ({ one }) => ({
+  region: one(regions, {
+    fields: [infrastructureProjects.regionId],
     references: [regions.id],
   }),
 }));
@@ -142,6 +274,18 @@ export const selectPropertySchema = createSelectSchema(properties);
 export const insertPropertyAnalyticsSchema = createInsertSchema(propertyAnalytics);
 export const selectPropertyAnalyticsSchema = createSelectSchema(propertyAnalytics);
 
+export const insertPriceHistorySchema = createInsertSchema(priceHistory);
+export const selectPriceHistorySchema = createSelectSchema(priceHistory);
+
+export const insertRegionalCostsSchema = createInsertSchema(regionalCosts);
+export const selectRegionalCostsSchema = createSelectSchema(regionalCosts);
+
+export const insertInvestmentAnalyticsSchema = createInsertSchema(investmentAnalytics);
+export const selectInvestmentAnalyticsSchema = createSelectSchema(investmentAnalytics);
+
+export const insertInfrastructureProjectsSchema = createInsertSchema(infrastructureProjects);
+export const selectInfrastructureProjectsSchema = createSelectSchema(infrastructureProjects);
+
 export const insertChatMessageSchema = createInsertSchema(chatMessages);
 export const selectChatMessageSchema = createSelectSchema(chatMessages);
 
@@ -157,6 +301,18 @@ export type InsertProperty = typeof properties.$inferInsert;
 
 export type PropertyAnalytics = typeof propertyAnalytics.$inferSelect;
 export type InsertPropertyAnalytics = typeof propertyAnalytics.$inferInsert;
+
+export type PriceHistory = typeof priceHistory.$inferSelect;
+export type InsertPriceHistory = typeof priceHistory.$inferInsert;
+
+export type RegionalCosts = typeof regionalCosts.$inferSelect;
+export type InsertRegionalCosts = typeof regionalCosts.$inferInsert;
+
+export type InvestmentAnalytics = typeof investmentAnalytics.$inferSelect;
+export type InsertInvestmentAnalytics = typeof investmentAnalytics.$inferInsert;
+
+export type InfrastructureProjects = typeof infrastructureProjects.$inferSelect;
+export type InsertInfrastructureProjects = typeof infrastructureProjects.$inferInsert;
 
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = typeof chatMessages.$inferInsert;
