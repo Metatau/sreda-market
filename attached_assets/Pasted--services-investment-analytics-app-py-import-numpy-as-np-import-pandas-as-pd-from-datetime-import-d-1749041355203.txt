@@ -1,0 +1,387 @@
+# services/investment_analytics/app.py
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+from sqlalchemy import create_engine, text
+from sklearn.linear_model import LinearRegression
+import os
+
+class InvestmentAnalyzer:
+    def __init__(self):
+        self.db_engine = create_engine(os.getenv('DATABASE_URL'))
+        
+        # Региональные коэффициенты на основе исследований [9][11][12]
+        self.regional_tax_rates = {
+            'Москва': 0.001,  # 0.1% для жилья до 20 млн
+            'Санкт-Петербург': 0.001,
+            'Московская область': 0.001,
+            'Калининград': 0.001,
+            'Екатеринбург': 0.001,
+            'Новосибирск': 0.001,
+            # Остальные регионы по умолчанию
+        }
+        
+        # Средние арендные ставки по регионам [26][29]
+        self.rental_yields = {
+            'Москва': 0.074,  # 7.4% по данным Дом.РФ
+            'Санкт-Петербург': 0.064,  # 6.4%
+            'Хабаровск': 0.089,  # Самая высокая доходность
+            'Калининград': 0.085,
+            'Ижевск': 0.082,
+            # Средняя доходность 6.6%
+        }
+
+    def calculate_price_dynamics(self, property_id):
+        """Расчет динамики изменения цены за год [17][22]"""
+        query = text("""
+            SELECT price, price_per_sqm, date_recorded
+            FROM price_history 
+            WHERE property_id = :property_id 
+            ORDER BY date_recorded DESC
+            LIMIT 365
+        """)
+        
+        df = pd.read_sql(query, self.db_engine, params={'property_id': property_id})
+        
+        if len(df) < 2:
+            return {'price_change_1y': 0, 'volatility': 0}
+        
+        # Линейная регрессия для тренда
+        df['days'] = (df['date_recorded'] - df['date_recorded'].min()).dt.days
+        X = df[['days']]
+        y = df['price_per_sqm'].fillna(df['price'] / 50)  # Предполагаем 50 кв.м если нет данных
+        
+        model = LinearRegression()
+        model.fit(X, y)
+        
+        price_change_1y = ((y.iloc[0] - y.iloc[-1]) / y.iloc[-1]) * 100
+        volatility = y.std() / y.mean() * 100
+        
+        return {
+            'price_change_1y': round(price_change_1y, 2),
+            'volatility': round(volatility, 2)
+        }
+
+    def calculate_rental_scenario(self, property_data, regional_costs):
+        """Расчет рентабельности сценария аренды [4][5][8]"""
+        property_cost = property_data['price']
+        area = property_data.get('area', 50)  # По умолчанию 50 кв.м
+        region_name = property_data['region']['name']
+        
+        # Расчет арендного дохода
+        base_yield = self.rental_yields.get(region_name, 0.066)  # Средняя 6.6%
+        monthly_rental = property_cost * base_yield / 12
+        annual_rental = monthly_rental * 12
+        
+        # Расчет расходов
+        annual_tax = property_cost * self.regional_tax_rates.get(region_name, 0.001)
+        maintenance_cost = regional_costs.get('maintenance_cost_per_sqm', 1000) * area
+        utility_cost = regional_costs.get('utility_cost_per_sqm', 2000) * area * 12
+        management_fee = annual_rental * regional_costs.get('management_fee_percent', 8) / 100
+        insurance_cost = regional_costs.get('insurance_cost_per_sqm', 100) * area
+        repair_reserve = annual_rental * regional_costs.get('repair_reserve_percent', 5) / 100
+        
+        total_expenses = annual_tax + maintenance_cost + utility_cost + management_fee + insurance_cost + repair_reserve
+        net_annual_income = annual_rental - total_expenses
+        rental_roi = (net_annual_income / property_cost) * 100
+        payback_years = property_cost / net_annual_income if net_annual_income > 0 else 999
+        
+        return {
+            'rental_yield': round(rental_roi, 2),
+            'rental_income_monthly': int(monthly_rental),
+            'rental_roi_annual': round(rental_roi, 2),
+            'rental_payback_years': round(payback_years, 1),
+            'annual_expenses': int(total_expenses),
+            'net_annual_income': int(net_annual_income)
+        }
+
+    def calculate_flipping_scenario(self, property_data):
+        """Расчет рентабельности флиппинга [20]"""
+        property_cost = property_data['price']
+        area = property_data.get('area', 50)
+        property_class = property_data.get('property_class', {}).get('name', 'Стандарт')
+        
+        # Коэффициенты ремонта по классам недвижимости
+        renovation_costs_per_sqm = {
+            'Эконом': 15000,      # Косметический ремонт
+            'Стандарт': 25000,    # Евроремонт
+            'Комфорт': 35000,     # Дизайнерский ремонт
+            'Бизнес': 50000,      # Премиальный ремонт
+            'Элит': 80000         # Люксовый ремонт
+        }
+        
+        renovation_cost = renovation_costs_per_sqm.get(property_class, 25000) * area
+        
+        # Потенциальный рост стоимости после ремонта
+        value_increase_percent = {
+            'Эконом': 15,    # 15% рост стоимости
+            'Стандарт': 20,  # 20% рост
+            'Комфорт': 25,   # 25% рост
+            'Бизнес': 30,    # 30% рост
+            'Элит': 35       # 35% рост
+        }
+        
+        value_increase = property_cost * value_increase_percent.get(property_class, 20) / 100
+        
+        # Расходы на сделку (риелтор, налоги, реклама)
+        transaction_costs = property_cost * 0.06  # 6% от стоимости
+        
+        # Расчет прибыли
+        total_investment = property_cost + renovation_cost + transaction_costs
+        expected_sale_price = property_cost + value_increase
+        gross_profit = expected_sale_price - total_investment
+        flip_roi = (gross_profit / total_investment) * 100
+        
+        # Среднее время реализации 6-12 месяцев
+        timeframe_months = 8
+        
+        return {
+            'flip_potential_profit': int(gross_profit),
+            'flip_roi': round(flip_roi, 2),
+            'flip_timeframe_months': timeframe_months,
+            'renovation_cost_estimate': int(renovation_cost),
+            'expected_sale_price': int(expected_sale_price),
+            'total_investment': int(total_investment)
+        }
+
+    def calculate_safe_haven_scenario(self, property_data, price_dynamics):
+        """Расчет сценария "тихая гавань" [3][13]"""
+        volatility = price_dynamics.get('volatility', 0)
+        location_factors = self.analyze_location_stability(property_data)
+        
+        # Индекс сохранности капитала (обратная волатильности)
+        capital_preservation = max(0, 100 - volatility * 2)
+        
+        # Оценка ликвидности на основе локации
+        liquidity_factors = {
+            'center_distance': location_factors.get('center_distance_score', 5),
+            'transport_access': location_factors.get('transport_score', 5),
+            'infrastructure': location_factors.get('infrastructure_score', 5)
+        }
+        
+        liquidity_score = sum(liquidity_factors.values()) / len(liquidity_factors)
+        safe_haven_score = (capital_preservation * 0.4 + liquidity_score * 10 * 0.6) / 10
+        
+        return {
+            'safe_haven_score': int(min(10, max(1, safe_haven_score))),
+            'capital_preservation_index': round(capital_preservation, 2),
+            'liquidity_score': int(min(10, max(1, liquidity_score)))
+        }
+
+    def forecast_price_3years(self, property_data):
+        """Прогнозирование цены на 3 года [17][28]"""
+        region_name = property_data['region']['name']
+        
+        # Базовые тренды роста цен по регионам на 2024-2025
+        regional_growth_rates = {
+            'Москва': 0.08,      # 8% годовой рост (стабилизация)
+            'Санкт-Петербург': 0.07,  # 7% годовой рост
+            'Московская область': 0.10,  # 10% рост (миграция из Москвы)
+            'Калининград': 0.12,      # 12% высокий рост
+            'Екатеринбург': 0.09,     # 9% рост
+            'Новосибирск': 0.08,      # 8% рост
+            'Краснодар': 0.11,        # 11% рост
+            'Сочи': 0.13,             # 13% курортная недвижимость
+        }
+        
+        base_growth = regional_growth_rates.get(region_name, 0.08)  # По умолчанию 8%
+        
+        # Анализ инфраструктурных проектов
+        infrastructure_impact = self.analyze_infrastructure_impact(property_data)
+        development_risk = self.analyze_development_risk(property_data)
+        
+        # Итоговый прогноз с учетом всех факторов
+        adjusted_growth = base_growth * (1 + infrastructure_impact - development_risk)
+        price_forecast_3y = ((1 + adjusted_growth) ** 3 - 1) * 100
+        
+        return {
+            'price_forecast_3y': round(price_forecast_3y, 2),
+            'infrastructure_impact_score': round(infrastructure_impact, 2),
+            'development_risk_score': round(development_risk, 2),
+            'annual_growth_rate': round(adjusted_growth * 100, 2)
+        }
+
+    def analyze_infrastructure_impact(self, property_data):
+        """Анализ влияния инфраструктурных проектов [21]"""
+        if not property_data.get('coordinates'):
+            return 0
+        
+        query = text("""
+            SELECT project_name, project_type, completion_date, impact_coefficient,
+                   ST_Distance(coordinates, ST_GeomFromText(:point, 4326)) as distance
+            FROM infrastructure_projects 
+            WHERE region_id = :region_id 
+            AND completion_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '3 years'
+            AND ST_DWithin(coordinates, ST_GeomFromText(:point, 4326), 5000)
+            ORDER BY distance
+        """)
+        
+        point = f"POINT({property_data['coordinates'][0]} {property_data['coordinates'][1]})"
+        region_id = property_data['region']['id']
+        
+        projects = pd.read_sql(query, self.db_engine, params={
+            'point': point, 
+            'region_id': region_id
+        })
+        
+        if projects.empty:
+            return 0
+        
+        # Расчет совокупного влияния проектов
+        total_impact = 0
+        for _, project in projects.iterrows():
+            distance_km = project['distance'] / 1000
+            # Влияние уменьшается с расстоянием
+            distance_factor = max(0, 1 - distance_km / 5)  # В радиусе 5 км
+            impact = project['impact_coefficient'] * distance_factor
+            total_impact += impact
+        
+        return min(0.3, total_impact)  # Максимум 30% влияния
+
+    def analyze_development_risk(self, property_data):
+        """Анализ риска новой застройки"""
+        # Поиск планируемых ЖК в радиусе 2 км
+        if not property_data.get('coordinates'):
+            return 0
+        
+        # Упрощенная модель: оценка плотности застройки
+        query = text("""
+            SELECT COUNT(*) as nearby_properties
+            FROM properties p
+            WHERE p.region_id = :region_id
+            AND p.id != :property_id
+            AND ST_DWithin(p.coordinates, ST_GeomFromText(:point, 4326), 2000)
+            AND p.created_at > CURRENT_DATE - INTERVAL '2 years'
+        """)
+        
+        point = f"POINT({property_data['coordinates'][0]} {property_data['coordinates'][1]})"
+        
+        result = pd.read_sql(query, self.db_engine, params={
+            'point': point,
+            'region_id': property_data['region']['id'],
+            'property_id': property_data['id']
+        })
+        
+        nearby_count = result.iloc[0]['nearby_properties']
+        
+        # Риск увеличивается с количеством новой застройки
+        risk_score = min(0.2, nearby_count * 0.01)  # Максимум 20% риска
+        
+        return risk_score
+
+    def analyze_location_stability(self, property_data):
+        """Анализ стабильности локации [13][16]"""
+        coordinates = property_data.get('coordinates')
+        if not coordinates:
+            return {'center_distance_score': 5, 'transport_score': 5, 'infrastructure_score': 5}
+        
+        # Упрощенная оценка на основе адреса и района
+        district = property_data.get('district', '').lower()
+        metro_station = property_data.get('metro_station')
+        
+        # Оценка удаленности от центра (по наличию метро)
+        center_distance_score = 8 if metro_station else 4
+        
+        # Оценка транспортной доступности
+        transport_score = 9 if metro_station else 5
+        
+        # Оценка развитости инфраструктуры (на основе района)
+        prestigious_districts = ['центр', 'арбат', 'тверская', 'невский', 'петроградская']
+        infrastructure_score = 9 if any(dist in district for dist in prestigious_districts) else 6
+        
+        return {
+            'center_distance_score': center_distance_score,
+            'transport_score': transport_score,
+            'infrastructure_score': infrastructure_score
+        }
+
+    def calculate_investment_rating(self, analytics_data):
+        """Расчет общего инвестиционного рейтинга"""
+        # Весовые коэффициенты для разных метрик
+        weights = {
+            'rental_roi': 0.25,
+            'flip_roi': 0.20,
+            'price_forecast_3y': 0.20,
+            'safe_haven_score': 0.15,
+            'liquidity_score': 0.10,
+            'infrastructure_impact': 0.10
+        }
+        
+        # Нормализация метрик к шкале 0-100
+        normalized_scores = {
+            'rental_roi': min(100, max(0, analytics_data.get('rental_roi_annual', 0) * 10)),
+            'flip_roi': min(100, max(0, analytics_data.get('flip_roi', 0) * 2)),
+            'price_forecast_3y': min(100, max(0, analytics_data.get('price_forecast_3y', 0) * 2)),
+            'safe_haven_score': analytics_data.get('safe_haven_score', 5) * 10,
+            'liquidity_score': analytics_data.get('liquidity_score', 5) * 10,
+            'infrastructure_impact': analytics_data.get('infrastructure_impact_score', 0) * 100
+        }
+        
+        # Взвешенная оценка
+        total_score = sum(score * weights[metric] for metric, score in normalized_scores.items())
+        
+        # Конвертация в рейтинг
+        if total_score >= 85:
+            return 'A+', 'low'
+        elif total_score >= 75:
+            return 'A', 'low'
+        elif total_score >= 65:
+            return 'B+', 'moderate'
+        elif total_score >= 55:
+            return 'B', 'moderate'
+        elif total_score >= 45:
+            return 'C+', 'high'
+        else:
+            return 'C', 'high'
+
+    def recommend_strategy(self, analytics_data):
+        """Рекомендация инвестиционной стратегии"""
+        rental_roi = analytics_data.get('rental_roi_annual', 0)
+        flip_roi = analytics_data.get('flip_roi', 0)
+        price_forecast = analytics_data.get('price_forecast_3y', 0)
+        
+        if flip_roi > 20 and flip_roi > rental_roi * 2:
+            return 'flip'
+        elif rental_roi > 8:
+            return 'rental'
+        elif price_forecast > 25:
+            return 'hold'
+        else:
+            return 'hold'
+
+    def calculate_full_analytics(self, property_id):
+        """Полный расчет инвестиционной аналитики"""
+        # Получение данных объекта
+        property_data = self.get_property_data(property_id)
+        regional_costs = self.get_regional_costs(property_data['region']['id'])
+        
+        # Расчет всех сценариев
+        price_dynamics = self.calculate_price_dynamics(property_id)
+        rental_scenario = self.calculate_rental_scenario(property_data, regional_costs)
+        flipping_scenario = self.calculate_flipping_scenario(property_data)
+        safe_haven_scenario = self.calculate_safe_haven_scenario(property_data, price_dynamics)
+        price_forecast = self.forecast_price_3years(property_data)
+        
+        # Объединение всех метрик
+        analytics_data = {
+            **price_dynamics,
+            **rental_scenario,
+            **flipping_scenario,
+            **safe_haven_scenario,
+            **price_forecast
+        }
+        
+        # Расчет рейтинга и стратегии
+        rating, risk_level = self.calculate_investment_rating(analytics_data)
+        recommended_strategy = self.recommend_strategy(analytics_data)
+        
+        analytics_data.update({
+            'investment_rating': rating,
+            'risk_level': risk_level,
+            'recommended_strategy': recommended_strategy
+        })
+        
+        # Сохранение в базу данных
+        self.save_analytics(property_id, analytics_data)
+        
+        return analytics_data

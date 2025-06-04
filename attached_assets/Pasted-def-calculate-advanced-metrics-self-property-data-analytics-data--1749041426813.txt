@@ -1,0 +1,145 @@
+def calculate_advanced_metrics(self, property_data, analytics_data):
+    """Расчет дополнительных метрик и KPI"""
+    
+    # Метрики ликвидности
+    liquidity_metrics = {
+        'days_on_market_estimate': self.estimate_days_on_market(property_data),
+        'market_depth_score': self.calculate_market_depth(property_data),
+        'price_to_rent_ratio': property_data['price'] / (analytics_data['rental_income_monthly'] * 12),
+        'affordability_index': self.calculate_affordability_index(property_data)
+    }
+    
+    # ESG метрики (экология, социальное влияние, управление)
+    esg_metrics = {
+        'energy_efficiency_class': self.estimate_energy_efficiency(property_data),
+        'environmental_score': self.calculate_environmental_impact(property_data),
+        'social_infrastructure_score': self.assess_social_infrastructure(property_data),
+        'governance_score': self.assess_building_management(property_data)
+    }
+    
+    # Метрики технологичности
+    tech_metrics = {
+        'smart_home_potential': self.assess_smart_home_potential(property_data),
+        'digital_infrastructure_score': self.assess_digital_infrastructure(property_data),
+        'future_proof_score': self.calculate_future_proof_score(property_data)
+    }
+    
+    # Демографические метрики
+    demographic_metrics = {
+        'target_audience_match': self.analyze_target_audience(property_data),
+        'demographic_trend_score': self.analyze_demographic_trends(property_data),
+        'lifestyle_compatibility': self.assess_lifestyle_compatibility(property_data)
+    }
+    
+    return {
+        **liquidity_metrics,
+        **esg_metrics,
+        **tech_metrics,
+        **demographic_metrics
+    }
+
+def calculate_property_momentum(self, property_data):
+    """Расчет "моментума" объекта недвижимости"""
+    
+    # Анализ поисковых запросов и интереса
+    search_volume = self.get_search_volume_trend(property_data['address'])
+    
+    # Анализ активности рынка в районе
+    market_activity = self.analyze_market_activity(property_data)
+    
+    # Социальные сигналы (упоминания в соцсетях, отзывы)
+    social_signals = self.analyze_social_sentiment(property_data)
+    
+    # Composite momentum score
+    momentum_score = (search_volume * 0.4 + market_activity * 0.4 + social_signals * 0.2)
+    
+    return {
+        'momentum_score': round(momentum_score, 1),
+        'trend_direction': 'up' if momentum_score > 6 else 'down' if momentum_score < 4 else 'stable',
+        'search_volume_trend': search_volume,
+        'market_activity_level': market_activity,
+        'social_sentiment': social_signals
+    }
+
+def calculate_stress_test_scenarios(self, property_data, analytics_data):
+    """Стресс-тестирование инвестиций [1][3]"""
+    
+    base_rental_yield = analytics_data['rental_yield']
+    base_price = property_data['price']
+    
+    # Сценарии стресс-тестирования
+    scenarios = {
+        'crisis_scenario': {
+            'price_drop': -30,  # Падение цен на 30%
+            'rental_drop': -20,  # Падение арендных ставок на 20%
+            'vacancy_rate': 15,  # 15% времени без арендаторов
+            'description': 'Экономический кризис'
+        },
+        'interest_rate_hike': {
+            'price_drop': -15,
+            'rental_drop': -5,
+            'vacancy_rate': 8,
+            'description': 'Рост ключевой ставки до 25%'
+        },
+        'oversupply_scenario': {
+            'price_drop': -20,
+            'rental_drop': -25,
+            'vacancy_rate': 20,
+            'description': 'Избыток предложения в районе'
+        },
+        'inflation_scenario': {
+            'price_drop': 10,  # Рост цен на 10%
+            'rental_drop': 15,  # Рост аренды на 15%
+            'vacancy_rate': 5,
+            'description': 'Высокая инфляция'
+        }
+    }
+    
+    stress_results = {}
+    for scenario_name, scenario in scenarios.items():
+        adjusted_price = base_price * (1 + scenario['price_drop'] / 100)
+        adjusted_rental = base_rental_yield * (1 + scenario['rental_drop'] / 100)
+        vacancy_impact = 1 - scenario['vacancy_rate'] / 100
+        
+        stress_roi = adjusted_rental * vacancy_impact
+        
+        stress_results[scenario_name] = {
+            'roi': round(stress_roi, 2),
+            'price_impact': adjusted_price,
+            'description': scenario['description'],
+            'severity': 'high' if stress_roi < 2 else 'medium' if stress_roi < 4 else 'low'
+        }
+    
+    return stress_results
+
+def calculate_market_timing_indicators(self, property_data):
+    """Индикаторы рыночного таймирга [24][25]"""
+    
+    region_name = property_data['region']['name']
+    
+    # Анализ циклов рынка недвижимости
+    market_cycle_position = self.determine_market_cycle_position(region_name)
+    
+    # Сезонные факторы
+    seasonal_factors = self.analyze_seasonal_patterns(region_name)
+    
+    # Макроэкономические индикаторы
+    macro_indicators = self.analyze_macro_environment()
+    
+    # Рекомендация по времени покупки/продажи
+    timing_score = self.calculate_timing_score(
+        market_cycle_position, 
+        seasonal_factors, 
+        macro_indicators
+    )
+    
+    return {
+        'market_cycle_phase': market_cycle_position,
+        'seasonal_adjustment': seasonal_factors,
+        'macro_environment': macro_indicators,
+        'timing_score': timing_score,
+        'buy_recommendation': 'strong_buy' if timing_score > 8 else 
+                             'buy' if timing_score > 6 else
+                             'hold' if timing_score > 4 else 'sell',
+        'optimal_timeframe': self.get_optimal_timeframe(timing_score)
+    }

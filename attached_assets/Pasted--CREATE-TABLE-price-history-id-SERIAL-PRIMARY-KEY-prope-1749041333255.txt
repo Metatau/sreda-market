@@ -1,0 +1,81 @@
+-- Таблица исторических данных цен
+CREATE TABLE price_history (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER REFERENCES properties(id),
+    price INTEGER NOT NULL,
+    price_per_sqm INTEGER,
+    date_recorded DATE NOT NULL,
+    source VARCHAR(50) DEFAULT 'ads-api.ru',
+    market_conditions JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица региональных расходов
+CREATE TABLE regional_costs (
+    id SERIAL PRIMARY KEY,
+    region_id INTEGER REFERENCES regions(id),
+    property_class_id INTEGER REFERENCES property_classes(id),
+    tax_rate DECIMAL(5,4), -- Ставка налога на имущество
+    maintenance_cost_per_sqm INTEGER, -- Расходы на содержание за кв.м
+    utility_cost_per_sqm INTEGER, -- Коммунальные за кв.м
+    management_fee_percent DECIMAL(4,2), -- Комиссия УК в %
+    insurance_cost_per_sqm INTEGER, -- Страховка за кв.м
+    repair_reserve_percent DECIMAL(4,2), -- Резерв на ремонт в %
+    year INTEGER DEFAULT EXTRACT(YEAR FROM CURRENT_DATE),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Таблица инвестиционной аналитики
+CREATE TABLE investment_analytics (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER REFERENCES properties(id),
+    
+    -- Динамика цены
+    price_change_1y DECIMAL(5,2), -- Изменение цены за год в %
+    price_change_3m DECIMAL(5,2), -- За 3 месяца в %
+    price_volatility DECIMAL(5,2), -- Волатильность цены
+    
+    -- Сценарий аренды
+    rental_yield DECIMAL(5,2), -- Рентабельность аренды в %
+    rental_income_monthly INTEGER, -- Ежемесячный доход
+    rental_roi_annual DECIMAL(5,2), -- ROI аренды годовой
+    rental_payback_years DECIMAL(4,2), -- Срок окупаемости
+    
+    -- Сценарий флиппинга
+    flip_potential_profit INTEGER, -- Потенциальная прибыль
+    flip_roi DECIMAL(5,2), -- ROI флиппинга
+    flip_timeframe_months INTEGER, -- Срок реализации
+    renovation_cost_estimate INTEGER, -- Оценка затрат на ремонт
+    
+    -- Сценарий "тихая гавань"
+    safe_haven_score INTEGER CHECK (safe_haven_score BETWEEN 1 AND 10),
+    capital_preservation_index DECIMAL(5,2),
+    liquidity_score INTEGER CHECK (liquidity_score BETWEEN 1 AND 10),
+    
+    -- Прогноз на 3 года
+    price_forecast_3y DECIMAL(5,2), -- Прогноз роста цены
+    infrastructure_impact_score DECIMAL(3,2), -- Влияние инфраструктуры
+    development_risk_score DECIMAL(3,2), -- Риск новой застройки
+    
+    -- Комплексные метрики
+    investment_rating VARCHAR(10), -- A+, A, B+, B, C+, C
+    risk_level VARCHAR(20), -- low, moderate, high
+    recommended_strategy VARCHAR(50), -- rental, flip, hold
+    
+    calculated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '24 hours')
+);
+
+-- Таблица инфраструктурных проектов
+CREATE TABLE infrastructure_projects (
+    id SERIAL PRIMARY KEY,
+    region_id INTEGER REFERENCES regions(id),
+    project_name VARCHAR(255) NOT NULL,
+    project_type VARCHAR(100), -- метро, дорога, школа, ТЦ и т.д.
+    coordinates GEOMETRY(POINT, 4326),
+    impact_radius INTEGER, -- Радиус влияния в метрах
+    completion_date DATE,
+    investment_amount BIGINT,
+    impact_coefficient DECIMAL(3,2), -- Коэффициент влияния на цены
+    status VARCHAR(50) DEFAULT 'planned'
+);

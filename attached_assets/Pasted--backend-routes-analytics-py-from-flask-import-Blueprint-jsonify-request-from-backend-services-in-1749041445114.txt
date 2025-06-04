@@ -1,0 +1,64 @@
+# backend/routes/analytics.py
+from flask import Blueprint, jsonify, request
+from backend.services.investment_analytics import InvestmentAnalyzer
+
+analytics_bp = Blueprint('analytics', __name__)
+analyzer = InvestmentAnalyzer()
+
+@analytics_bp.route('/api/v1/analytics/property/<int:property_id>', methods=['GET'])
+def get_property_analytics(property_id):
+    """Получение полной инвестиционной аналитики объекта"""
+    try:
+        analytics = analyzer.calculate_full_analytics(property_id)
+        return jsonify(analytics)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@analytics_bp.route('/api/v1/analytics/property/<int:property_id>/stress-test', methods=['GET'])
+def get_stress_test(property_id):
+    """Стресс-тестирование инвестиций"""
+    try:
+        property_data = analyzer.get_property_data(property_id)
+        analytics_data = analyzer.get_cached_analytics(property_id)
+        stress_results = analyzer.calculate_stress_test_scenarios(property_data, analytics_data)
+        return jsonify(stress_results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@analytics_bp.route('/api/v1/analytics/property/<int:property_id>/momentum', methods=['GET'])
+def get_property_momentum(property_id):
+    """Анализ моментума объекта"""
+    try:
+        property_data = analyzer.get_property_data(property_id)
+        momentum = analyzer.calculate_property_momentum(property_data)
+        return jsonify(momentum)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@analytics_bp.route('/api/v1/analytics/market-timing/<int:region_id>', methods=['GET'])
+def get_market_timing(region_id):
+    """Анализ рыночного таймирга для региона"""
+    try:
+        timing_indicators = analyzer.calculate_market_timing_indicators({'region': {'id': region_id}})
+        return jsonify(timing_indicators)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@analytics_bp.route('/api/v1/analytics/batch-calculate', methods=['POST'])
+def batch_calculate_analytics():
+    """Массовый пересчет аналитики"""
+    try:
+        data = request.json
+        property_ids = data.get('property_ids', [])
+        
+        results = []
+        for property_id in property_ids:
+            try:
+                analytics = analyzer.calculate_full_analytics(property_id)
+                results.append({'property_id': property_id, 'status': 'success', 'analytics': analytics})
+            except Exception as e:
+                results.append({'property_id': property_id, 'status': 'error', 'error': str(e)})
+        
+        return jsonify({'results': results})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

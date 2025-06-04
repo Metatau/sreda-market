@@ -1,0 +1,304 @@
+// frontend/src/components/Property/InvestmentAnalyticsModal.tsx
+import React, { useState } from 'react';
+import { Dialog } from '@headlessui/react';
+import { Property, InvestmentAnalytics } from '@/types';
+import { Scatter, Line, Bar } from 'react-chartjs-2';
+
+interface InvestmentAnalyticsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  property: Property;
+  analytics: InvestmentAnalytics;
+}
+
+export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> = ({
+  isOpen,
+  onClose,
+  property,
+  analytics
+}) => {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const ScenarioComparison = () => {
+    const scenarios = [
+      {
+        name: 'Аренда',
+        roi: analytics.rental_roi_annual,
+        timeframe: `${analytics.rental_payback_years} лет`,
+        income: `${analytics.net_annual_income?.toLocaleString()} ₽/год`,
+        description: 'Стабильный пассивный доход'
+      },
+      {
+        name: 'Флиппинг',
+        roi: analytics.flip_roi,
+        timeframe: `${analytics.flip_timeframe_months} мес`,
+        income: `${analytics.flip_potential_profit?.toLocaleString()} ₽`,
+        description: 'Быстрая прибыль после ремонта'
+      },
+      {
+        name: 'Тихая гавань',
+        roi: analytics.capital_preservation_index,
+        timeframe: '3+ лет',
+        income: 'Сохранение капитала',
+        description: 'Защита от инфляции'
+      }
+    ];
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Сравнение инвестиционных сценариев</h3>
+        <div className="grid gap-4">
+          {scenarios.map((scenario) => (
+            <div key={scenario.name} className="border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-medium">{scenario.name}</h4>
+                <span className={`text-lg font-bold ${
+                  scenario.roi > 10 ? 'text-green-600' :
+                  scenario.roi > 5 ? 'text-blue-600' : 'text-gray-600'
+                }`}>
+                  {scenario.roi}%
+                </span>
+              </div>
+              <div className="text-sm text-gray-600 space-y-1">
+                <div>Срок реализации: {scenario.timeframe}</div>
+                <div>Доход: {scenario.income}</div>
+                <div className="italic">{scenario.description}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const PriceHistory = () => {
+    // Данные для графика динамики цен
+    const chartData = {
+      datasets: [{
+        label: 'Цена за м²',
+        data: [
+          { x: '2024-01', y: property.price_per_sqm * 0.9 },
+          { x: '2024-06', y: property.price_per_sqm * 0.95 },
+          { x: '2024-12', y: property.price_per_sqm },
+          { x: '2025-12', y: property.price_per_sqm * (1 + analytics.annual_growth_rate / 100) },
+          { x: '2026-12', y: property.price_per_sqm * Math.pow(1 + analytics.annual_growth_rate / 100, 2) },
+          { x: '2027-12', y: property.price_per_sqm * Math.pow(1 + analytics.annual_growth_rate / 100, 3) }
+        ],
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4
+      }]
+    };
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Динамика и прогноз цен</h3>
+        <div className="h-64">
+          <Line data={chartData} options={{
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: false,
+                ticks: {
+                  callback: (value) => `${value.toLocaleString()} ₽`
+                }
+              }
+            }
+          }} />
+        </div>
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="p-3 bg-gray-50 rounded">
+            <div className="text-sm text-gray-600">Волатильность</div>
+            <div className="text-lg font-semibold">{analytics.volatility}%</div>
+          </div>
+          <div className="p-3 bg-blue-50 rounded">
+            <div className="text-sm text-gray-600">Прогноз 3 года</div>
+            <div className="text-lg font-semibold text-blue-600">
+              +{analytics.price_forecast_3y}%
+            </div>
+          </div>
+          <div className="p-3 bg-green-50 rounded">
+            <div className="text-sm text-gray-600">Годовой рост</div>
+            <div className="text-lg font-semibold text-green-600">
+              {analytics.annual_growth_rate}%
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const LocationAnalysis = () => {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Анализ локации и инфраструктуры</h3>
+        
+        {/* Инфраструктурные факторы */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 border rounded-lg">
+            <h4 className="font-medium mb-2">Влияние инфраструктуры</h4>
+            <div className="text-2xl font-bold text-blue-600 mb-1">
+              +{(analytics.infrastructure_impact_score * 100).toFixed(1)}%
+            </div>
+            <div className="text-sm text-gray-600">
+              Ожидаемый рост стоимости от развития инфраструктуры
+            </div>
+          </div>
+          
+          <div className="p-4 border rounded-lg">
+            <h4 className="font-medium mb-2">Риск застройки</h4>
+            <div className="text-2xl font-bold text-orange-600 mb-1">
+              -{(analytics.development_risk_score * 100).toFixed(1)}%
+            </div>
+            <div className="text-sm text-gray-600">
+              Потенциальное снижение из-за новой застройки
+            </div>
+          </div>
+        </div>
+
+        {/* Оценка ликвидности */}
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium mb-2">Оценка ликвидности</h4>
+          <div className="flex items-center space-x-2 mb-2">
+            <div className="text-lg font-semibold">{analytics.liquidity_score}/10</div>
+            <div className="flex-1 bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-blue-500 h-2 rounded-full transition-all"
+                style={{ width: `${analytics.liquidity_score * 10}%` }}
+              />
+            </div>
+          </div>
+          <div className="text-sm text-gray-600">
+            Скорость продажи объекта на вторичном рынке
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const CostBreakdown = () => {
+    const rentalCosts = [
+      { name: 'Налог на имущество', value: analytics.annual_tax || 0 },
+      { name: 'Содержание и ремонт', value: analytics.maintenance_costs || 0 },
+      { name: 'Коммунальные платежи', value: analytics.utility_costs || 0 },
+      { name: 'Управление', value: analytics.management_fees || 0 },
+      { name: 'Страхование', value: analytics.insurance_costs || 0 }
+    ];
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Детализация расходов</h3>
+        
+        <div className="space-y-3">
+          {rentalCosts.map((cost, index) => (
+            <div key={index} className="flex justify-between items-center py-2 border-b">
+              <span className="text-gray-700">{cost.name}</span>
+              <span className="font-medium">{cost.value.toLocaleString()} ₽/год</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-4 bg-blue-50 rounded-lg">
+          <div className="flex justify-between items-center">
+            <span className="font-medium">Чистый доход от аренды:</span>
+            <span className="text-lg font-bold text-blue-600">
+              {analytics.net_annual_income?.toLocaleString()} ₽/год
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const tabs = [
+    { id: 'overview', name: 'Обзор', component: <ScenarioComparison /> },
+    { id: 'dynamics', name: 'Динамика цен', component: <PriceHistory /> },
+    { id: 'location', name: 'Локация', component: <LocationAnalysis /> },
+    { id: 'costs', name: 'Расходы', component: <CostBreakdown /> }
+  ];
+
+  return (
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className="mx-auto max-w-4xl w-full bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden">
+          {/* Заголовок */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <Dialog.Title className="text-xl font-semibold text-gray-900">
+                  Инвестиционная аналитика
+                </Dialog.Title>
+                <p className="text-sm text-gray-600 mt-1">{property.address}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Основные метрики */}
+            <div className="grid grid-cols-4 gap-4 mt-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {analytics.rental_yield}%
+                </div>
+                <div className="text-xs text-gray-600">Доходность аренды</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {analytics.flip_roi}%
+                </div>
+                <div className="text-xs text-gray-600">ROI флиппинга</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">
+                  +{analytics.price_forecast_3y}%
+                </div>
+                <div className="text-xs text-gray-600">Прогноз 3 года</div>
+              </div>
+              <div className="text-center">
+                <div className={`text-2xl font-bold px-2 py-1 rounded ${
+                  analytics.investment_rating.startsWith('A') ? 'bg-green-100 text-green-800' :
+                  analytics.investment_rating.startsWith('B') ? 'bg-blue-100 text-blue-800' :
+                  'bg-orange-100 text-orange-800'
+                }`}>
+                  {analytics.investment_rating}
+                </div>
+                <div className="text-xs text-gray-600">Рейтинг</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Табы */}
+          <div className="border-b border-gray-200">
+            <nav className="flex px-6">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {tab.name}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Контент */}
+          <div className="px-6 py-6 overflow-y-auto max-h-96">
+            {tabs.find(tab => tab.id === activeTab)?.component}
+          </div>
+        </Dialog.Panel>
+      </div>
+    </Dialog>
+  );
+};
