@@ -67,14 +67,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
           </Badge>
         </div>
         
-        {/* Investment Rating */}
-        {property.analytics?.investmentRating && (
-          <div className="absolute top-3 right-12">
-            <Badge className={`${getInvestmentRatingColor(property.analytics.investmentRating)} font-bold text-xs px-2 py-1`}>
-              {property.analytics.investmentRating}
-            </Badge>
-          </div>
-        )}
+
         
         <Button
           variant="ghost"
@@ -139,9 +132,18 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             )}
           </div>
           
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-            Подробнее
-          </Button>
+          <div className="flex items-center space-x-2">
+            {/* Investment Rating */}
+            {property.analytics?.investmentRating && (
+              <Badge className={`${getInvestmentRatingColor(property.analytics.investmentRating)} font-bold text-xs px-2 py-1`}>
+                {property.analytics.investmentRating}
+              </Badge>
+            )}
+            
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+              Подробнее
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
