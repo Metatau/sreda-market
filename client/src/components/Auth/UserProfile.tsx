@@ -61,9 +61,11 @@ export const UserProfile: React.FC = () => {
           </>
         )}
         
-        <DropdownMenuItem>
-          <i className="fas fa-user mr-2 h-4 w-4"></i>
-          <span>Профиль</span>
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="flex items-center">
+            <i className="fas fa-user mr-2 h-4 w-4"></i>
+            <span>Профиль</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
