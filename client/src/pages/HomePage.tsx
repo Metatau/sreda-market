@@ -158,7 +158,6 @@ export function HomePage() {
                 <PropertyMap
                   filters={filters}
                   onPropertySelect={handlePropertySelect}
-                  height="500px"
                 />
                 
                 {/* Properties grid below map */}
@@ -201,7 +200,7 @@ export function HomePage() {
       </div>
 
       {/* AI Chat Widget */}
-      <AIChat onPropertySearch={handleAISearch} />
+      <AIChat onMessage={handleAISearch} />
 
       {/* Property Detail Modal would go here */}
       {selectedProperty && (
