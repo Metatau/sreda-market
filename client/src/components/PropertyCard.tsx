@@ -104,6 +104,11 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
       <CardContent className="p-5">
         <h3 className="text-gray-900 mb-2 line-clamp-2 font-normal">{property.title}</h3>
 
+        {/* Description - 2 lines */}
+        <div className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
+          {property.description || `${propertyClassName} класс, ${property.rooms ? `${property.rooms} комнаты` : 'свободная планировка'}, ${property.area ? `${property.area} м²` : ''}. ${property.district ? `Район ${property.district}` : 'Отличное расположение'}, современный ремонт.`}
+        </div>
+
         <div className="flex items-center text-sm text-gray-600 mb-3">
           <i className="fas fa-map-marker-alt mr-1"></i>
           <span className="truncate">{property.address}</span>
