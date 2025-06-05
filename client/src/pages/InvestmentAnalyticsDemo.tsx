@@ -104,7 +104,7 @@ export default function InvestmentAnalyticsDemo() {
           </div>
 
           <div className="mb-4">
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="font-bold text-gray-900 text-[16px]">
               {property.price.toLocaleString('ru-RU')} ₽
             </div>
             {property.pricePerSqm && (
