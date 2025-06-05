@@ -7,7 +7,9 @@ import { useProperties } from "@/hooks/useProperties";
 import { useInvestmentAnalytics, useCalculateInvestmentAnalytics } from "@/hooks/useInvestmentAnalytics";
 import { PropertyPreviewCard } from "@/components/PropertyPreviewCard";
 import { InvestmentAnalyticsModal } from "@/components/InvestmentAnalyticsModal";
+import { PropertyFilters } from "@/components/PropertyFilters";
 import { Loader2, Calculator, TrendingUp, Home, BarChart3 } from "lucide-react";
+import type { SearchFilters } from "@/types";
 
 interface Property {
   id: number;
@@ -38,8 +40,9 @@ export default function InvestmentAnalyticsDemo() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [selectedAnalytics, setSelectedAnalytics] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filters, setFilters] = useState<SearchFilters>({});
 
-  const { data: propertiesData, isLoading: isLoadingProperties } = useProperties();
+  const { data: propertiesData, isLoading: isLoadingProperties } = useProperties(filters);
   const calculateAnalytics = useCalculateInvestmentAnalytics();
 
   const properties = propertiesData?.properties || [];
@@ -276,13 +279,30 @@ export default function InvestmentAnalyticsDemo() {
           </Card>
         </div>
 
-        {/* Список объектов с аналитикой */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Объекты недвижимости</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties.slice(0, 12).map((property) => (
-              <AnalyticsCard key={property.id} property={property} />
-            ))}
+        {/* Основной контент с фильтрами и объектами */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Боковая панель с фильтрами */}
+          <div className="lg:col-span-1">
+            <PropertyFilters 
+              filters={filters} 
+              onFiltersChange={setFilters}
+            />
+          </div>
+
+          {/* Список объектов с аналитикой */}
+          <div className="lg:col-span-3">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Объекты недвижимости</h2>
+              <div className="text-sm text-gray-600">
+                Найдено {properties.length} объектов
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {properties.slice(0, 12).map((property) => (
+                <AnalyticsCard key={property.id} property={property} />
+              ))}
+            </div>
           </div>
         </div>
 

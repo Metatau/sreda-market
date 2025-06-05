@@ -593,12 +593,14 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" aria-describedby="investment-analytics-description">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
               Инвестиционная аналитика
             </DialogTitle>
-            <p className="text-sm text-gray-600">{property.address}</p>
+            <div id="investment-analytics-description" className="text-sm text-gray-600">
+              Детальный анализ инвестиционной привлекательности объекта: {property.address}
+            </div>
           </DialogHeader>
 
           {/* Основные метрики в шапке */}
