@@ -47,15 +47,15 @@ export function Navigation() {
     <nav className="bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 pl-4">
-          {/* Логотип */}
-          <div className="flex items-center">
+          {/* Логотип - скрыт на мобильных в портретной ориентации */}
+          <div className="hidden landscape:flex md:flex items-center">
             <div className="text-xl font-quantum font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 tracking-wide uppercase">
               SREDA Market
             </div>
           </div>
 
           {/* Навигационные ссылки */}
-          <div className="flex space-x-4" style={{marginLeft: '4px'}}>
+          <div className="flex space-x-4 landscape:ml-1 md:ml-1 portrait:ml-0">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
                 <Button
