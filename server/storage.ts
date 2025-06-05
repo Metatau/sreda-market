@@ -80,6 +80,10 @@ export interface MapDataPoint {
   propertyClass?: string;
   rooms?: number;
   area?: string;
+  investmentScore?: number;
+  roi?: string;
+  liquidityScore?: number;
+  investmentRating?: string;
 }
 
 export interface RegionAnalytics {
@@ -267,7 +271,7 @@ export class DatabaseStorage implements IStorage {
         roi: propertyAnalytics.roi,
         liquidityScore: propertyAnalytics.liquidityScore,
         investmentRating: propertyAnalytics.investmentRating,
-        rentalRoi: investmentAnalytics.rentalRoi,
+        rentalRoi: investmentAnalytics.rentalRoiAnnual,
         flipRoi: investmentAnalytics.flipRoi,
         safeHavenScore: investmentAnalytics.safeHavenScore,
         investmentScore: investmentAnalytics.investmentRating,
@@ -294,7 +298,8 @@ export class DatabaseStorage implements IStorage {
 
       // Rental ROI contribution (0-3 points)  
       if (result.rentalRoi) {
-        investmentScore += Math.min(result.rentalRoi / 5, 3);
+        const rentalRoiValue = parseFloat(result.rentalRoi.toString());
+        investmentScore += Math.min(rentalRoiValue / 5, 3);
         scoreCount++;
       }
 
@@ -306,7 +311,8 @@ export class DatabaseStorage implements IStorage {
 
       // Safe Haven Score contribution (0-2 points)
       if (result.safeHavenScore) {
-        investmentScore += (result.safeHavenScore / 5);
+        const safeHavenValue = parseFloat(result.safeHavenScore.toString());
+        investmentScore += (safeHavenValue / 5);
         scoreCount++;
       }
 
