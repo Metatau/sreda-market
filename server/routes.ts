@@ -833,6 +833,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === DATA CLEANUP ROUTES ===
+  
+  // Запуск очистки невалидных объектов
+  app.post("/api/admin/cleanup", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { dataCleanupService } = await import('./services/dataCleanupService');
+      const result = await dataCleanupService.cleanupInvalidProperties();
+      res.json({ success: true, data: result });
+    } catch (error) {
+      console.error("Error during cleanup:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: { message: "Failed to cleanup properties" }
+      });
+    }
+  });
+
+  // Получение статистики качества данных
+  app.get("/api/admin/data-quality", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { dataCleanupService } = await import('./services/dataCleanupService');
+      const stats = await dataCleanupService.getDataQualityStats();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      console.error("Error getting data quality stats:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: { message: "Failed to get data quality stats" }
+      });
+    }
+  });
+
   // Global error handler
   app.use(globalErrorHandler);
 
