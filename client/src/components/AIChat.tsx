@@ -88,18 +88,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
     }
   };
 
-  if (!isOpen) {
-    return (
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          onClick={onToggle}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          <i className="fas fa-robot text-xl"></i>
-        </Button>
-      </div>
-    );
-  }
+
 
   return (
     <>
