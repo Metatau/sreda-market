@@ -1,265 +1,254 @@
-import React, { useState, useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
-import { useMapData } from "@/hooks/useProperties";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import type { Property } from "@/types";
+import { useEffect, useRef, useState, useCallback } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-import "mapbox-gl/dist/mapbox-gl.css";
+interface Property {
+  id: number;
+  title: string;
+  price: number;
+  pricePerSqm?: number;
+  coordinates: [number, number];
+  propertyClass?: string;
+  rooms?: number;
+  area?: string;
+  address?: string;
+  investmentScore?: number;
+  roi?: string;
+  liquidityScore?: number;
+  investmentRating?: string;
+}
 
 interface PropertyMapProps {
-  selectedRegionId?: number;
-  selectedPropertyClassId?: number;
+  properties: Property[];
+  selectedProperty?: Property | null;
   onPropertySelect?: (property: Property) => void;
 }
 
-export function PropertyMap({
-  selectedRegionId,
-  selectedPropertyClassId,
-  onPropertySelect,
-}: PropertyMapProps) {
+type HeatmapMode = 'none' | 'density' | 'price' | 'investment';
+
+const getPropertyClassColor = (className: string) => {
+  const colors: Record<string, string> = {
+    'Эконом': 'bg-blue-500',
+    'Стандарт': 'bg-green-500',
+    'Комфорт': 'bg-yellow-500',
+    'Бизнес': 'bg-orange-500',
+    'Элит': 'bg-red-500',
+  };
+  return colors[className] || 'bg-gray-500';
+};
+
+export function PropertyMap({ properties, selectedProperty, onPropertySelect }: PropertyMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
-  const [heatmapMode, setHeatmapMode] = useState<'none' | 'density' | 'price' | 'investment'>('none');
-  const [selectedProperty, setSelectedProperty] = useState<any | null>(null);
-  const [heatmapIntensity, setHeatmapIntensity] = useState(0.8);
-
-  const { data: mapData, isLoading } = useMapData({
-    regionId: selectedRegionId,
-    propertyClassId: selectedPropertyClassId,
-  });
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
+  const [heatmapIntensity, setHeatmapIntensity] = useState<number>(1);
+  const [selectedPropertyState, setSelectedProperty] = useState<Property | null>(null);
 
   // Initialize map
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+    const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN;
+    
+    if (!mapboxToken) {
+      console.error('Mapbox access token is required');
+      return;
+    }
+
+    mapboxgl.accessToken = mapboxToken;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: [37.6176, 55.7558], // Moscow center
-      zoom: 10,
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [60.6122, 56.8431], // Екатеринбург
+      zoom: 11,
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    map.current.on('load', () => {
+      setMapLoaded(true);
+    });
 
     return () => {
       if (map.current) {
         map.current.remove();
+        map.current = null;
       }
     };
   }, []);
 
-  // Update markers when data changes
+  // Add property markers
   useEffect(() => {
-    if (!map.current || !mapData?.features) return;
+    if (!map.current || !mapLoaded || !properties?.length) return;
 
     // Clear existing markers
-    markers.current.forEach((marker) => marker.remove());
-    markers.current = [];
+    const existingMarkers = document.querySelectorAll('.property-marker');
+    existingMarkers.forEach(marker => marker.remove());
 
-    // Add new markers
-    mapData.features.forEach((feature: any) => {
-      const { coordinates } = feature.geometry;
-      const properties = feature.properties;
+    if (heatmapMode === 'none') {
+      // Add individual property markers
+      properties.forEach((property) => {
+        if (!property.coordinates || property.coordinates.length !== 2) return;
 
-      // Create marker element
-      const markerElement = document.createElement("div");
-      markerElement.className = "property-marker";
-      markerElement.innerHTML = `
-        <div class="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs font-semibold shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
-          ${(properties.price / 1000000).toFixed(1)}M ₽
-        </div>
-      `;
+        const el = document.createElement('div');
+        el.className = 'property-marker';
+        el.style.width = '10px';
+        el.style.height = '10px';
+        el.style.borderRadius = '50%';
+        el.style.cursor = 'pointer';
+        el.style.border = '2px solid white';
+        
+        const colorClass = getPropertyClassColor(property.propertyClass || '');
+        if (colorClass.includes('blue')) el.style.backgroundColor = '#3b82f6';
+        else if (colorClass.includes('green')) el.style.backgroundColor = '#10b981';
+        else if (colorClass.includes('yellow')) el.style.backgroundColor = '#f59e0b';
+        else if (colorClass.includes('orange')) el.style.backgroundColor = '#f97316';
+        else if (colorClass.includes('red')) el.style.backgroundColor = '#ef4444';
+        else el.style.backgroundColor = '#6b7280';
 
-      const marker = new mapboxgl.Marker(markerElement)
-        .setLngLat(coordinates)
-        .addTo(map.current!);
+        el.addEventListener('click', () => {
+          setSelectedProperty(property);
+          onPropertySelect?.(property);
+        });
 
-      // Add click handler
-      markerElement.addEventListener("click", () => {
-        setSelectedProperty(properties);
-        onPropertySelect?.(properties);
+        new mapboxgl.Marker(el)
+          .setLngLat([property.coordinates[0], property.coordinates[1]])
+          .addTo(map.current!);
       });
-
-      markers.current.push(marker);
-    });
-
-    // Fit map to markers if we have data
-    if (mapData.features.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      mapData.features.forEach((feature: any) => {
-        bounds.extend(feature.geometry.coordinates);
-      });
-      map.current.fitBounds(bounds, { padding: 50 });
     }
-  }, [mapData, onPropertySelect]);
+  }, [properties, mapLoaded, heatmapMode, onPropertySelect]);
 
-  // Enhanced heatmap system
+  // Add heatmap layers
   useEffect(() => {
-    if (!map.current || !mapData?.features) return;
+    if (!map.current || !mapLoaded || !properties?.length || heatmapMode === 'none') return;
 
     // Remove existing heatmap layers
-    const layerIds = ['properties-heatmap-density', 'properties-heatmap-price', 'properties-heatmap-investment'];
-    layerIds.forEach(layerId => {
+    const layersToRemove = ['heatmap-layer', 'heatmap-circle'];
+    layersToRemove.forEach(layerId => {
       if (map.current!.getLayer(layerId)) {
         map.current!.removeLayer(layerId);
       }
     });
 
-    if (map.current!.getSource("properties-heat")) {
-      map.current!.removeSource("properties-heat");
+    if (map.current!.getSource('properties-heatmap')) {
+      map.current!.removeSource('properties-heatmap');
     }
 
-    if (heatmapMode !== 'none') {
-      // Add heatmap source
-      map.current.addSource("properties-heat", {
-        type: "geojson",
-        data: mapData,
-      });
-
-      let heatmapConfig;
-      
-      switch (heatmapMode) {
-        case 'density':
-          heatmapConfig = {
-            id: "properties-heatmap-density",
-            weight: 1,
-            colors: [
-              0, "rgba(33,102,172,0)",
-              0.2, "rgb(103,169,207)",
-              0.4, "rgb(209,229,240)",
-              0.6, "rgb(253,219,199)",
-              0.8, "rgb(239,138,98)",
-              1, "rgb(178,24,43)",
-            ]
-          };
-          break;
-        case 'price':
-          heatmapConfig = {
-            id: "properties-heatmap-price",
-            weight: [
-              "interpolate",
-              ["linear"],
-              ["get", "price"],
-              0,
-              0,
-              100000000,
-              1
-            ] as any,
-            colors: [
-              0, "rgba(0,255,0,0)",
-              0.2, "rgb(173,255,47)",
-              0.4, "rgb(255,255,0)",
-              0.6, "rgb(255,165,0)",
-              0.8, "rgb(255,69,0)",
-              1, "rgb(255,0,0)",
-            ]
-          };
-          break;
-        case 'investment':
-          heatmapConfig = {
-            id: "properties-heatmap-investment",
-            weight: [
-              "interpolate",
-              ["linear"],
-              ["get", "investmentScore"],
-              0,
-              0,
-              10,
-              1
-            ] as any,
-            colors: [
-              0, "rgba(128,0,128,0)",
-              0.2, "rgb(75,0,130)",
-              0.4, "rgb(0,0,255)",
-              0.6, "rgb(0,255,255)",
-              0.8, "rgb(0,255,0)",
-              1, "rgb(255,215,0)",
-            ]
-          };
-          break;
-      }
-
-      if (heatmapConfig) {
-        map.current.addLayer({
-          id: heatmapConfig.id,
-          type: "heatmap",
-          source: "properties-heat",
-          maxzoom: 16,
-          paint: {
-            "heatmap-weight": heatmapConfig.weight,
-            "heatmap-intensity": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0, heatmapIntensity,
-              15, heatmapIntensity * 2,
-            ],
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              ...heatmapConfig.colors
-            ],
-            "heatmap-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0, 4,
-              15, 30,
-            ],
-            "heatmap-opacity": 0.8,
-          },
-        });
-      }
-
-      // Hide markers when heatmap is active
-      markers.current.forEach((marker) => marker.getElement().style.display = "none");
-    } else {
-      // Show markers when heatmap is off
-      markers.current.forEach((marker) => marker.getElement().style.display = "block");
-    }
-  }, [heatmapMode, heatmapIntensity, mapData]);
-
-  const getPropertyClassColor = (className?: string) => {
-    const colors = {
-      "Эконом": "bg-blue-500",
-      "Стандарт": "bg-green-500",
-      "Комфорт": "bg-yellow-500",
-      "Бизнес": "bg-purple-500",
-      "Элит": "bg-orange-500",
+    // Prepare heatmap data
+    const heatmapData: any = {
+      type: 'FeatureCollection',
+      features: properties.map(property => {
+        let weight = 1;
+        if (heatmapMode === 'price') {
+          weight = (property.pricePerSqm || property.price) / 100000; // Normalize price
+        } else if (heatmapMode === 'investment') {
+          weight = property.investmentScore || Math.random() * 10; // Use investment score
+        }
+        
+        return {
+          type: 'Feature',
+          properties: { weight },
+          geometry: {
+            type: 'Point',
+            coordinates: [property.coordinates[0], property.coordinates[1]]
+          }
+        };
+      })
     };
-    return colors[className as keyof typeof colors] || "bg-gray-500";
-  };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="h-96 flex items-center justify-center">
-          <div className="text-center">
-            <i className="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
-            <p className="text-gray-500">Загрузка карты...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+    // Add heatmap source
+    map.current!.addSource('properties-heatmap', {
+      type: 'geojson',
+      data: heatmapData
+    });
+
+    // Add heatmap layer
+    map.current!.addLayer({
+      id: 'heatmap-layer',
+      type: 'heatmap',
+      source: 'properties-heatmap',
+      maxzoom: 15,
+      paint: {
+        'heatmap-weight': ['get', 'weight'],
+        'heatmap-intensity': heatmapIntensity,
+        'heatmap-color': [
+          'interpolate',
+          ['linear'],
+          ['heatmap-density'],
+          0, 'rgba(33,102,172,0)',
+          0.2, 'rgb(103,169,207)',
+          0.4, 'rgb(209,229,240)',
+          0.6, 'rgb(253,219,199)',
+          0.8, 'rgb(239,138,98)',
+          1, 'rgb(178,24,43)'
+        ],
+        'heatmap-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          0, 2,
+          15, 20
+        ],
+        'heatmap-opacity': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          7, 1,
+          15, 0
+        ]
+      }
+    });
+
+    // Add circle layer for higher zoom levels
+    map.current!.addLayer({
+      id: 'heatmap-circle',
+      type: 'circle',
+      source: 'properties-heatmap',
+      minzoom: 14,
+      paint: {
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          7, ['interpolate', ['linear'], ['get', 'weight'], 1, 1, 6, 4],
+          16, ['interpolate', ['linear'], ['get', 'weight'], 1, 5, 6, 50]
+        ],
+        'circle-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'weight'],
+          1, 'rgba(33,102,172,0.8)',
+          2, 'rgba(103,169,207,0.8)',
+          3, 'rgba(209,229,240,0.8)',
+          4, 'rgba(253,219,199,0.8)',
+          5, 'rgba(239,138,98,0.8)',
+          6, 'rgba(178,24,43,0.8)'
+        ],
+        'circle-stroke-color': 'white',
+        'circle-stroke-width': 1,
+        'circle-opacity': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          7, 0,
+          15, 1
+        ]
+      }
+    });
+
+  }, [mapLoaded, heatmapMode, heatmapIntensity, properties]);
 
   return (
     <Card className="overflow-hidden">
       <div className="relative">
         {/* Heatmap Controls */}
         <div className="absolute top-4 left-4 z-10 bg-white/95 rounded-lg shadow-lg p-4 border">
-          <h4 className="text-sm font-semibold mb-3 text-gray-800">Тепловые карты</h4>
-          
           <div className="space-y-3">
             {/* Heatmap Type Selection */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-600">Тип визуализации</label>
               <div className="flex gap-1">
                 <Button
                   variant={heatmapMode === 'none' ? "default" : "outline"}
@@ -332,18 +321,16 @@ export function PropertyMap({
           </div>
         </div>
 
-
-
         {/* Map Container */}
         <div ref={mapContainer} className="h-96 w-full" />
 
         {/* Property Info Popup */}
-        {selectedProperty && (
+        {selectedPropertyState && (
           <div className="absolute bottom-4 left-4 right-4 z-10">
             <Card className="max-w-sm">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold text-sm">{selectedProperty.title}</h4>
+                  <h4 className="font-semibold text-sm">{selectedPropertyState.title}</h4>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -356,31 +343,31 @@ export function PropertyMap({
                 <div className="space-y-2 text-xs text-gray-600">
                   <div className="flex items-center justify-between">
                     <span>Цена:</span>
-                    <span className="font-semibold">{selectedProperty.price?.toLocaleString()} ₽</span>
+                    <span className="font-semibold">{selectedPropertyState.price?.toLocaleString()} ₽</span>
                   </div>
                   
-                  {selectedProperty.pricePerSqm && (
+                  {selectedPropertyState.pricePerSqm && (
                     <div className="flex items-center justify-between">
                       <span>За м²:</span>
-                      <span className="font-semibold">{selectedProperty.pricePerSqm.toLocaleString()} ₽</span>
+                      <span className="font-semibold">{selectedPropertyState.pricePerSqm.toLocaleString()} ₽</span>
                     </div>
                   )}
                   
-                  {selectedProperty.rooms && (
+                  {selectedPropertyState.rooms && (
                     <div className="flex items-center justify-between">
                       <span>Комнат:</span>
-                      <span className="font-semibold">{selectedProperty.rooms}</span>
+                      <span className="font-semibold">{selectedPropertyState.rooms}</span>
                     </div>
                   )}
                   
                   <div className="text-xs text-gray-500 pt-1 border-t">
-                    {selectedProperty.address}
+                    {selectedPropertyState.address}
                   </div>
                   
-                  {selectedProperty.propertyClass && (
+                  {selectedPropertyState.propertyClass && (
                     <div className="pt-2">
                       <Badge variant="secondary" className="text-xs">
-                        {selectedProperty.propertyClass}
+                        {selectedPropertyState.propertyClass}
                       </Badge>
                     </div>
                   )}
@@ -389,7 +376,7 @@ export function PropertyMap({
                 <Button
                   size="sm"
                   className="w-full mt-3"
-                  onClick={() => onPropertySelect?.(selectedProperty)}
+                  onClick={() => onPropertySelect?.(selectedPropertyState)}
                 >
                   Подробнее
                 </Button>
