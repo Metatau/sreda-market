@@ -33,6 +33,7 @@ export function useProperties(filters?: SearchFilters, page: number = 1, perPage
       max_price: filters?.maxPrice,
       rooms: filters?.rooms,
       property_type: filters?.propertyType,
+      market_type: filters?.marketType,
     }),
   });
 }
