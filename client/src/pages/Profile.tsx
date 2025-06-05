@@ -412,10 +412,6 @@ export function Profile() {
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          API доступ для интеграций
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500" />
                           Неограниченные сравнения
                         </li>
                       </ul>
