@@ -574,7 +574,7 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  Открыть объявление на ads-api.ru
+                  Открыть объявление
                 </a>
               ) : (
                 <a 

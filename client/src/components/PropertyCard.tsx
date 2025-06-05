@@ -21,7 +21,12 @@ const propertyClassColors = {
 };
 
 const getPropertyImage = (property: Property) => {
-  // Different images based on property class and type
+  // Use real photo from ads-api.ru if available, otherwise fallback to placeholder
+  if (property.images && property.images.length > 0) {
+    return property.images[0];
+  }
+  
+  // Fallback images based on property class
   const images = {
     "Эконом": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
     "Стандарт": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",

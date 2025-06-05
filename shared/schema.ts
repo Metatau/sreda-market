@@ -68,6 +68,7 @@ export const properties = pgTable("properties", {
   url: varchar("url", { length: 1000 }),
   phone: varchar("phone", { length: 50 }),
   imageUrl: varchar("image_url", { length: 1000 }),
+  images: jsonb("images").$type<string[]>().default([]),
   autoClassified: boolean("auto_classified").default(false),
   manualOverride: boolean("manual_override").default(false),
   isActive: boolean("is_active").default(true),
