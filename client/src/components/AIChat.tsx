@@ -21,7 +21,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
       id: 1,
       sessionId: "default",
       role: "assistant",
-      content: "Привет! Я AI-помощник SREDA Market. Помогу найти идеальную недвижимость для инвестиций. О каком регионе и бюджете думаете?",
+      content: "Привет! Я AI-агент SREDA. Помогу найти идеальную недвижимость для инвестиций. Какой у вас запрос?",
       createdAt: new Date().toISOString(),
     }
   ]);
@@ -104,14 +104,16 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
   return (
     <>
       {/* Chat Toggle Button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          onClick={onToggle}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          <i className="fas fa-robot text-xl"></i>
-        </Button>
-      </div>
+      {!isOpen && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            onClick={onToggle}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            <i className="fas fa-robot text-xl"></i>
+          </Button>
+        </div>
+      )}
       {/* Full Screen AI Panel */}
       {isOpen && (
         <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm">
@@ -198,10 +200,10 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                       <i className="fas fa-robot text-white"></i>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Чат с AI SREDA</h3>
+                      <h3 className="font-semibold text-gray-900">Чат с AI агентом</h3>
                       <p className="text-sm text-gray-500">
-                        Привет! Я AI-помощник SREDA Market. Могу помочь с анализом недвижимости, 
-                        поиском объектов и инвестиционными расчетами. О чем хотите узнать?
+                        Привет! Я AI-агент SREDA. Могу помочь с анализом недвижимости, 
+                        поиском объектов и инвестиционными расчетами. Чем вам помочь?
                       </p>
                     </div>
                   </div>
