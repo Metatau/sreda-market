@@ -1,23 +1,11 @@
 
 import { storage } from "../storage";
 import { DatabaseError } from "../utils/errors";
-
-export interface PropertyFilters {
-  regionId?: number;
-  propertyClassId?: number;
-  minPrice?: number;
-  maxPrice?: number;
-  rooms?: number;
-  propertyType?: string;
-}
-
-export interface PaginationOptions {
-  page: number;
-  perPage: number;
-}
+import { parseCoordinates } from "../utils/validation";
+import type { PropertyFilters, Pagination } from "../storage";
 
 export class PropertyService {
-  async getProperties(filters: PropertyFilters, pagination: PaginationOptions) {
+  async getProperties(filters: PropertyFilters, pagination: Pagination) {
     try {
       return await storage.getProperties(filters, pagination);
     } catch (error) {
@@ -41,24 +29,15 @@ export class PropertyService {
     }
   }
 
-  async getMapData(filters: { regionId?: number; propertyClassId?: number }) {
+  async getMapData(filters: PropertyFilters) {
     try {
       const mapData = await storage.getMapData(filters);
       
-      // Convert to GeoJSON format
+      // Convert to GeoJSON format with improved coordinate parsing
       return {
         type: "FeatureCollection" as const,
         features: mapData.map(point => {
-          // Parse coordinates from PostGIS POINT format
-          const coordMatch = point.coordinates.match(/POINT\(([^)]+)\)/);
-          let coordinates = [37.6176, 55.7558]; // Default to Moscow coordinates
-          
-          if (coordMatch && coordMatch[1]) {
-            const [lng, lat] = coordMatch[1].split(' ').map(Number);
-            if (!isNaN(lng) && !isNaN(lat)) {
-              coordinates = [lng, lat];
-            }
-          }
+          const coordinates = parseCoordinates(point.coordinates);
           
           return {
             type: "Feature" as const,
@@ -74,6 +53,10 @@ export class PropertyService {
               propertyClass: point.propertyClass,
               rooms: point.rooms,
               area: point.area,
+              investmentScore: point.investmentScore,
+              roi: point.roi,
+              liquidityScore: point.liquidityScore,
+              investmentRating: point.investmentRating,
             },
           };
         }),
