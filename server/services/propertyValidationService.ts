@@ -11,23 +11,63 @@ interface MarketPriceData {
 
 export class PropertyValidationService {
   
+  // Список разрешенных городов для загрузки объектов
+  private allowedCities = [
+    'Москва', 'Санкт-Петербург', 'Новосибирск', 'Екатеринбург', 'Нижний Новгород',
+    'Казань', 'Челябинск', 'Самара', 'Омск', 'Ростов-на-Дону', 'Уфа', 'Красноярск',
+    'Воронеж', 'Пермь', 'Волгоград', 'Краснодар', 'Саратов', 'Тюмень', 'Тольятти',
+    'Ижевск', 'Барнаул', 'Ульяновск', 'Иркутск', 'Хабаровск', 'Ярославль',
+    'Владивосток', 'Махачкала', 'Томск', 'Оренбург', 'Кемерово', 'Новокузнецк',
+    'Рязань', 'Набережные Челны', 'Астрахань', 'Пенза', 'Липецк', 'Тула',
+    'Киров', 'Чебоксары', 'Калининград', 'Курск', 'Улан-Удэ', 'Ставрополь',
+    'Сочи', 'Тверь', 'Магнитогорск', 'Иваново', 'Брянск', 'Белгород', 'Сургут'
+  ];
+
+  /**
+   * Проверяет, находится ли объект в разрешенном городе
+   */
+  private async isFromAllowedCity(property: PropertyWithRelations): Promise<boolean> {
+    // Проверяем регион из базы данных
+    if (property.region) {
+      return this.allowedCities.includes(property.region.name);
+    }
+
+    // Если региона нет, проверяем по адресу
+    if (property.address) {
+      const address = property.address.toLowerCase();
+      return this.allowedCities.some(city => 
+        address.includes(city.toLowerCase()) || 
+        address.includes(`г. ${city.toLowerCase()}`) ||
+        address.includes(`город ${city.toLowerCase()}`)
+      );
+    }
+
+    return false;
+  }
+
   /**
    * Валидирует объект недвижимости по всем критериям
    */
   async validateProperty(property: PropertyWithRelations): Promise<boolean> {
-    // 1. Проверка наличия достаточного количества фотографий
+    // 1. Проверка разрешенного города
+    if (!(await this.isFromAllowedCity(property))) {
+      console.log(`Property ${property.id} rejected: not from allowed city`);
+      return false;
+    }
+
+    // 2. Проверка наличия достаточного количества фотографий
     if (!this.hasValidImages(property)) {
       console.log(`Property ${property.id} rejected: insufficient images`);
       return false;
     }
 
-    // 2. Проверка цены относительно рыночной
+    // 3. Проверка цены относительно рыночной
     if (!await this.isValidPrice(property)) {
       console.log(`Property ${property.id} rejected: price deviation from market`);
       return false;
     }
 
-    // 3. Проверка обязательных полей
+    // 4. Проверка обязательных полей
     if (!this.hasRequiredFields(property)) {
       console.log(`Property ${property.id} rejected: missing required fields`);
       return false;
@@ -40,21 +80,26 @@ export class PropertyValidationService {
    * Проверяет наличие достаточного количества фотографий (минимум 2)
    */
   private hasValidImages(property: PropertyWithRelations): boolean {
-    const images = property.images;
+    const imageUrl = property.imageUrl;
     
-    if (!images) return false;
+    if (!imageUrl) return false;
     
     let imageList: string[] = [];
     
-    if (typeof images === 'string') {
+    if (typeof imageUrl === 'string') {
       try {
-        imageList = JSON.parse(images);
+        const parsed = JSON.parse(imageUrl);
+        if (Array.isArray(parsed)) {
+          imageList = parsed;
+        } else if (parsed.imgurl) {
+          imageList = [parsed.imgurl];
+        } else if (typeof parsed === 'string') {
+          imageList = [parsed];
+        }
       } catch {
         // Если не JSON, считаем что это одна ссылка
-        imageList = images.split(',').map(url => url.trim()).filter(url => url.length > 0);
+        imageList = imageUrl.split(',').map(url => url.trim()).filter(url => url.length > 0);
       }
-    } else if (Array.isArray(images)) {
-      imageList = images;
     }
 
     // Фильтруем валидные URL изображений
@@ -67,7 +112,9 @@ export class PropertyValidationService {
       
       return imageExtensions.some(ext => lowerUrl.includes(ext)) || 
              lowerUrl.includes('image') || 
-             lowerUrl.includes('photo');
+             lowerUrl.includes('photo') ||
+             lowerUrl.includes('cdn-cian') ||
+             lowerUrl.includes('imgurl');
     });
 
     return validImages.length >= 2;
