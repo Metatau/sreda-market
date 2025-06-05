@@ -195,6 +195,7 @@ export const users = pgTable("users", {
   username: varchar("username", { length: 100 }).notNull().unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   role: userRoleEnum("role").default('client').notNull(),
+  telegramId: varchar("telegram_id", { length: 50 }).unique(),
   telegramHandle: varchar("telegram_handle", { length: 100 }),
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),

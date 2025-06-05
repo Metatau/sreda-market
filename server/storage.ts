@@ -53,6 +53,7 @@ export interface IStorage {
   // User management
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByTelegramId(telegramId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
   updateUserBonusBalance(id: number, balance: string): Promise<void>;
@@ -427,6 +428,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByTelegramId(telegramId: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.telegramId, telegramId));
     return user;
   }
 

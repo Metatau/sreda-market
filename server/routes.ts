@@ -9,6 +9,7 @@ import { ReferralService } from "./services/referralService";
 import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware/auth";
 import { requireAuth as requireRoleAuth, requireAdmin, checkAIQuota } from "./middleware/authMiddleware";
 import { UserService } from "./services/userService";
+import { TelegramAuthService } from "./services/telegramAuthService";
 import { RegionController } from "./controllers/RegionController";
 import { PropertyClassController } from "./controllers/PropertyClassController";
 import { PropertyController } from "./controllers/PropertyController";
@@ -195,6 +196,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error registering user:', error);
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Telegram Authentication endpoints
+  app.post("/api/auth/telegram", async (req, res) => {
+    try {
+      const telegramAuthData = req.body;
+      
+      const user = await TelegramAuthService.authenticateUser(telegramAuthData);
+      
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          telegramHandle: user.telegramHandle,
+          profileImageUrl: user.profileImageUrl
+        }
+      });
+    } catch (error: any) {
+      console.error('Telegram authentication error:', error);
+      res.status(400).json({ 
+        success: false, 
+        error: error.message || 'Telegram authentication failed' 
+      });
+    }
+  });
+
+  app.get("/api/auth/telegram/config", (req, res) => {
+    try {
+      const botId = process.env.TELEGRAM_BOT_TOKEN?.split(':')[0];
+      const botUsername = process.env.TELEGRAM_BOT_USERNAME;
+      
+      if (!botId || !botUsername) {
+        return res.status(500).json({ 
+          error: 'Telegram bot configuration missing. Please configure TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME' 
+        });
+      }
+      
+      res.json({
+        botId,
+        botUsername,
+        domain: req.get('host')
+      });
+    } catch (error) {
+      console.error('Error getting Telegram config:', error);
+      res.status(500).json({ error: 'Failed to get Telegram configuration' });
     }
   });
 
