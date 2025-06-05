@@ -537,11 +537,11 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
           </Card>
         </div>
 
-        {/* Контактная информация и ссылки */}
+        {/* Ссылка на объявление */}
         <Card className="p-4">
           <h4 className="font-medium mb-4 flex items-center">
-            <Phone className="w-4 h-4 mr-2" />
-            Контакты и ссылки
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Ссылка на объявление
           </h4>
           <div className="space-y-3">
             {/* Источник объявления */}
