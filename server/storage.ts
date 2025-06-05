@@ -72,6 +72,7 @@ export interface PropertyFilters {
   minArea?: number;
   maxArea?: number;
   propertyType?: string;
+  marketType?: 'secondary' | 'new_construction';
 }
 
 export interface Pagination {
@@ -152,6 +153,9 @@ export class DatabaseStorage implements IStorage {
       }
       if (filters.propertyType) {
         conditions.push(eq(properties.propertyType, filters.propertyType));
+      }
+      if (filters.marketType) {
+        conditions.push(eq(properties.marketType, filters.marketType));
       }
     }
 

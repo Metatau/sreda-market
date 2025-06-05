@@ -90,6 +90,7 @@ export interface SearchFilters {
   maxPrice?: number;
   rooms?: number;
   propertyType?: string;
+  marketType?: 'secondary' | 'new_construction';
   query?: string;
 }
 
