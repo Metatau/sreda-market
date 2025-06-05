@@ -143,11 +143,12 @@ export class AdsApiService {
     const params: Record<string, any> = {
       is_actual: '1', // Только актуальные объявления
       limit: Math.min(filters?.limit || 100, 1000), // API ограничение
+      type: 'flat', // Только квартиры
+      category: 'sale', // Только продажа
     };
 
     // Добавляем фильтры согласно документации ads-api.ru
     if (filters?.region) params.region = filters.region;
-    if (filters?.propertyType) params.category = filters.propertyType;
     if (filters?.minPrice) params.price_min = filters.minPrice;
     if (filters?.maxPrice) params.price_max = filters.maxPrice;
 
@@ -223,6 +224,27 @@ export class AdsApiService {
   }
 
   private async convertAdsProperty(adsProperty: AdsApiProperty): Promise<InsertProperty> {
+    // Дополнительная проверка типа недвижимости - только квартиры
+    const title = (adsProperty.title || '').toLowerCase().trim();
+    
+    // Исключаем дома, гаражи, участки, коммерческую недвижимость
+    const isExcluded = title.includes('дом ') || 
+                      title.includes('участок ') || 
+                      title.includes('гараж ') ||
+                      title.includes('помещение ') ||
+                      title.includes('офис ') ||
+                      title.includes('склад ') ||
+                      title.includes('магазин ');
+
+    // Проверяем, что это именно квартира
+    const isApartment = title.includes('-к кв.') || 
+                       title.includes('квартира') ||
+                       title.includes('студия');
+
+    if (isExcluded || !isApartment) {
+      throw new Error(`Property title "${title}" is not an apartment (only apartments allowed)`);
+    }
+
     // Дополнительная проверка региона на уровне конвертации с картой соответствий
     const allowedRegions = await storage.getRegions();
     const propertyRegion = (adsProperty.region || adsProperty.city || '').toLowerCase().trim();
@@ -341,6 +363,29 @@ export class AdsApiService {
           if (i === 0) {
             console.log('Sample property structure:', Object.keys(adsProperty));
             console.log('Property data:', JSON.stringify(adsProperty, null, 2).substring(0, 500));
+          }
+
+          // СТРОГАЯ ФИЛЬТРАЦИЯ: проверяем тип недвижимости - только квартиры
+          const title = (adsProperty.title || '').toLowerCase().trim();
+          const propertyType = (adsProperty.propertyType || adsProperty.category || '').toLowerCase().trim();
+          
+          // Исключаем дома, гаражи, участки, коммерческую недвижимость
+          const isExcluded = title.includes('дом ') || 
+                            title.includes('участок ') || 
+                            title.includes('гараж ') ||
+                            title.includes('помещение ') ||
+                            title.includes('офис ') ||
+                            title.includes('склад ') ||
+                            title.includes('магазин ');
+
+          // Проверяем, что это именно квартира
+          const isApartment = title.includes('-к кв.') || 
+                             title.includes('квартира') ||
+                             title.includes('студия');
+
+          if (isExcluded || !isApartment) {
+            console.log(`Skipping property ${adsProperty.id}: title "${title}" is not an apartment`);
+            continue;
           }
 
           // СТРОГАЯ ФИЛЬТРАЦИЯ: проверяем регион объекта с улучшенным сопоставлением
