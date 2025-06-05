@@ -183,11 +183,37 @@ export class AdsApiService {
   private async mapRegion(regionName: string, district: string): Promise<number | null> {
     const regions = await storage.getRegions();
     
-    // Ищем регион по названию
-    const matchingRegion = regions.find(r => 
-      r.name.toLowerCase().includes(regionName.toLowerCase()) ||
-      regionName.toLowerCase().includes(r.name.toLowerCase())
+    // Очищаем и нормализуем названия
+    const cleanRegionName = regionName.toLowerCase().trim();
+    const cleanDistrict = district?.toLowerCase().trim() || '';
+    
+    // Сначала точное совпадение
+    let matchingRegion = regions.find(r => 
+      r.name.toLowerCase() === cleanRegionName ||
+      cleanRegionName === r.name.toLowerCase()
     );
+    
+    // Если точного совпадения нет, ищем частичное
+    if (!matchingRegion) {
+      matchingRegion = regions.find(r => 
+        r.name.toLowerCase().includes(cleanRegionName) ||
+        cleanRegionName.includes(r.name.toLowerCase())
+      );
+    }
+    
+    // Проверяем также район, если есть
+    if (!matchingRegion && cleanDistrict) {
+      matchingRegion = regions.find(r => 
+        r.name.toLowerCase().includes(cleanDistrict) ||
+        cleanDistrict.includes(r.name.toLowerCase())
+      );
+    }
+
+    if (matchingRegion) {
+      console.log(`Mapped region "${regionName}" to database region "${matchingRegion.name}" (ID: ${matchingRegion.id})`);
+    } else {
+      console.log(`No matching region found for "${regionName}" in allowed regions list`);
+    }
 
     return matchingRegion?.id || null;
   }
@@ -197,6 +223,19 @@ export class AdsApiService {
   }
 
   private async convertAdsProperty(adsProperty: AdsApiProperty): Promise<InsertProperty> {
+    // Дополнительная проверка региона на уровне конвертации
+    const allowedRegions = await storage.getRegions();
+    const propertyRegion = (adsProperty.region || adsProperty.city || '').toLowerCase().trim();
+    const allowedRegionNames = allowedRegions.map(r => r.name.toLowerCase());
+    
+    const isValidRegion = allowedRegionNames.some(allowedRegion => 
+      propertyRegion.includes(allowedRegion) || allowedRegion.includes(propertyRegion)
+    );
+    
+    if (!isValidRegion) {
+      throw new Error(`Property region "${propertyRegion}" is not in the allowed regions list`);
+    }
+
     // Проверяем обязательные поля
     if (!adsProperty.id || !adsProperty.title) {
       throw new Error('Missing required fields: id or title');
@@ -258,6 +297,12 @@ export class AdsApiService {
     const errors: string[] = [];
 
     try {
+      // Получаем строгий список регионов из базы данных приложения
+      const allowedRegions = await storage.getRegions();
+      const allowedRegionNames = allowedRegions.map(r => r.name.toLowerCase());
+      
+      console.log('Allowed regions from database:', allowedRegionNames);
+
       const filters = regions ? { region: regions.join(',') } : {};
       const response = await this.fetchProperties(filters, credentials);
 
@@ -275,6 +320,18 @@ export class AdsApiService {
             console.log('Property data:', JSON.stringify(adsProperty, null, 2).substring(0, 500));
           }
 
+          // СТРОГАЯ ФИЛЬТРАЦИЯ: проверяем регион объекта
+          const propertyRegion = (adsProperty.region || adsProperty.city || '').toLowerCase().trim();
+          const isAllowedRegion = allowedRegionNames.some(allowedRegion => 
+            propertyRegion.includes(allowedRegion) || allowedRegion.includes(propertyRegion)
+          );
+
+          if (!isAllowedRegion) {
+            console.log(`Skipping property ${adsProperty.id}: region "${propertyRegion}" not in allowed list`);
+            continue;
+          }
+
+          console.log(`Region "${propertyRegion}" is allowed, processing property`);
           const propertyData = await this.convertAdsProperty(adsProperty);
           
           // Проверяем, существует ли объект
