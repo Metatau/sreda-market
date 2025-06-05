@@ -459,20 +459,39 @@ export class AdsApiService {
           }
 
           // СТРОГАЯ ФИЛЬТРАЦИЯ: проверяем регион объекта с улучшенным сопоставлением
-          const propertyRegion = (adsProperty.region || adsProperty.city || '').toLowerCase().trim();
+          const cityField = (adsProperty.city || '').toLowerCase().trim();
+          const regionField = (adsProperty.region || '').toLowerCase().trim();
+          
+          // Извлекаем регион из поля city если оно содержит "область"
+          let propertyRegion = regionField;
+          if (cityField.includes('область')) {
+            const parts = cityField.split(',');
+            if (parts.length > 0) {
+              propertyRegion = parts[0].trim();
+            }
+          }
+          
+          // Если регион все еще пустой, используем city
+          if (!propertyRegion) {
+            propertyRegion = cityField;
+          }
           
           // Создаем карту соответствий для точного сопоставления
           const regionMapping: Record<string, string> = {
             'москва': 'москва',
+            'московская область': 'москва', // Московская область относится к Москве
             'санкт-петербург': 'санкт-петербург',
+            'ленинградская область': 'санкт-петербург',
             'новосибирск': 'новосибирск',
             'новосибирская область': 'новосибирск',
             'екатеринбург': 'екатеринбург',
             'свердловская область': 'екатеринбург',
             'казань': 'казань',
             'татарстан': 'казань',
+            'республика татарстан': 'казань',
             'уфа': 'уфа',
             'башкортостан': 'уфа',
+            'республика башкортостан': 'уфа',
             'красноярск': 'красноярск',
             'красноярский край': 'красноярск',
             'пермь': 'пермь',
@@ -487,6 +506,14 @@ export class AdsApiService {
 
           const mappedRegion = regionMapping[propertyRegion];
           const isAllowedRegion = mappedRegion && allowedCityNames.includes(mappedRegion);
+
+          console.log(`Debug region mapping for property ${adsProperty.id}:`);
+          console.log(`  Original city field: "${adsProperty.city}"`);
+          console.log(`  Original region field: "${adsProperty.region}"`);
+          console.log(`  Processed region: "${propertyRegion}"`);
+          console.log(`  Mapped region: "${mappedRegion}"`);
+          console.log(`  Is allowed: ${isAllowedRegion}`);
+          console.log(`  Allowed cities: ${allowedCityNames.join(', ')}`);
 
           if (!isAllowedRegion) {
             console.log(`Skipping property ${adsProperty.id}: region "${propertyRegion}" not in allowed list`);
