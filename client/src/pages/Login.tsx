@@ -168,7 +168,6 @@ export default function Login() {
           <CardContent className="pt-6">
             <div className="text-center mb-4">
               <h3 className="font-semibold text-blue-900 mb-2">Быстрый вход через Telegram</h3>
-              <p className="text-sm text-blue-700">Безопасно и удобно</p>
             </div>
             <TelegramLoginWidget 
               onAuth={handleTelegramAuth}
@@ -187,13 +186,7 @@ export default function Login() {
         {/* Табы для клиентов */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Клиентский доступ
-            </CardTitle>
-            <CardDescription>
-              Войдите в систему или зарегистрируйтесь как клиент
-            </CardDescription>
+            <CardDescription className="text-center">Войдите в систему или зарегистрируйтесь</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
@@ -268,19 +261,7 @@ export default function Login() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="telegram">Telegram (необязательно)</Label>
-                    <div className="relative">
-                      <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="telegram"
-                        placeholder="@username"
-                        className="pl-10"
-                        value={registerForm.telegramHandle}
-                        onChange={(e) => setRegisterForm({ ...registerForm, telegramHandle: e.target.value })}
-                      />
-                    </div>
-                  </div>
+                  
 
                   <div className="space-y-2">
                     <Label htmlFor="referralCode">Промокод (необязательно)</Label>
@@ -302,18 +283,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        {/* Информация о тарифах */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <h3 className="font-semibold text-blue-900 mb-2">Тарифные планы:</h3>
-            <div className="text-sm text-blue-700 space-y-1">
-              <div>• <strong>Промо:</strong> 1 AI-запрос в день</div>
-              <div>• <strong>Стандарт:</strong> 10 AI-запросов в день</div>
-              <div>• <strong>Профи:</strong> 30 AI-запросов в день</div>
-              <div>• <strong>Администратор:</strong> Безлимитный доступ</div>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
     </div>
   );
