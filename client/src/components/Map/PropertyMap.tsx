@@ -260,11 +260,11 @@ export function PropertyMap({
             {/* Heatmap Type Selection */}
             <div className="space-y-2">
               <label className="text-xs font-medium text-gray-600">Тип визуализации</label>
-              <div className="grid grid-cols-2 gap-1">
+              <div className="flex gap-1">
                 <Button
                   variant={heatmapMode === 'none' ? "default" : "outline"}
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 flex-1"
                   onClick={() => setHeatmapMode('none')}
                 >
                   Объекты
@@ -272,7 +272,7 @@ export function PropertyMap({
                 <Button
                   variant={heatmapMode === 'density' ? "default" : "outline"}
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 flex-1"
                   onClick={() => setHeatmapMode('density')}
                 >
                   Плотность
@@ -280,7 +280,7 @@ export function PropertyMap({
                 <Button
                   variant={heatmapMode === 'price' ? "default" : "outline"}
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 flex-1"
                   onClick={() => setHeatmapMode('price')}
                 >
                   Цены
@@ -288,7 +288,7 @@ export function PropertyMap({
                 <Button
                   variant={heatmapMode === 'investment' ? "default" : "outline"}
                   size="sm"
-                  className="text-xs h-7"
+                  className="text-xs h-7 flex-1"
                   onClick={() => setHeatmapMode('investment')}
                 >
                   Инвестиции
