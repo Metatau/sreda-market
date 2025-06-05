@@ -344,7 +344,7 @@ export function Profile() {
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          50 запросов к AI в день
+                          10 запросов к AI в день
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
