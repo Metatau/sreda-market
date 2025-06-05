@@ -186,6 +186,35 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 100 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  referralCode: varchar("referral_code", { length: 50 }).notNull().unique(),
+  referredBy: integer("referred_by").references(() => users.id),
+  bonusBalance: decimal("bonus_balance", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const referralEarnings = pgTable("referral_earnings", {
+  id: serial("id").primaryKey(),
+  referrerId: integer("referrer_id").references(() => users.id).notNull(),
+  referredUserId: integer("referred_user_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  subscriptionType: varchar("subscription_type", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const bonusTransactions = pgTable("bonus_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  type: varchar("type", { length: 20 }).notNull(), // 'earned', 'spent'
+  description: text("description").notNull(),
+  referralEarningId: integer("referral_earning_id").references(() => referralEarnings.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const regionsRelations = relations(regions, ({ many }) => ({
   properties: many(properties),
@@ -261,6 +290,39 @@ export const infrastructureProjectsRelations = relations(infrastructureProjects,
   }),
 }));
 
+export const usersRelations = relations(users, ({ one, many }) => ({
+  referrer: one(users, {
+    fields: [users.referredBy],
+    references: [users.id],
+  }),
+  referrals: many(users),
+  referralEarnings: many(referralEarnings),
+  bonusTransactions: many(bonusTransactions),
+}));
+
+export const referralEarningsRelations = relations(referralEarnings, ({ one, many }) => ({
+  referrer: one(users, {
+    fields: [referralEarnings.referrerId],
+    references: [users.id],
+  }),
+  referredUser: one(users, {
+    fields: [referralEarnings.referredUserId],
+    references: [users.id],
+  }),
+  bonusTransactions: many(bonusTransactions),
+}));
+
+export const bonusTransactionsRelations = relations(bonusTransactions, ({ one }) => ({
+  user: one(users, {
+    fields: [bonusTransactions.userId],
+    references: [users.id],
+  }),
+  referralEarning: one(referralEarnings, {
+    fields: [bonusTransactions.referralEarningId],
+    references: [referralEarnings.id],
+  }),
+}));
+
 // Zod schemas
 export const insertRegionSchema = createInsertSchema(regions);
 export const selectRegionSchema = createSelectSchema(regions);
@@ -316,3 +378,12 @@ export type InsertInfrastructureProject = typeof infrastructureProjects.$inferIn
 
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = typeof chatMessages.$inferInsert;
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = typeof users.$inferInsert;
+
+export type ReferralEarning = typeof referralEarnings.$inferSelect;
+export type InsertReferralEarning = typeof referralEarnings.$inferInsert;
+
+export type BonusTransaction = typeof bonusTransactions.$inferSelect;
+export type InsertBonusTransaction = typeof bonusTransactions.$inferInsert;

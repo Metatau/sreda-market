@@ -5,6 +5,7 @@ import { generateAIResponse, generatePropertyRecommendations, analyzePropertyInv
 import { simpleInvestmentAnalyticsService } from "./services/simpleInvestmentAnalytics";
 import { analyticsService } from "./services/analyticsService";
 import { blankBankPaymentService } from "./services/paymentService";
+import { ReferralService } from "./services/referralService";
 import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware/auth";
 import { RegionController } from "./controllers/RegionController";
 import { PropertyClassController } from "./controllers/PropertyClassController";
