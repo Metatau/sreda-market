@@ -16,6 +16,7 @@ export function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("map");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { data: newPropertiesData } = useNewProperties();
 
   const handleRegionChange = (regionId: number | undefined) => {
