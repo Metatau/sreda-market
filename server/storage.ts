@@ -56,6 +56,10 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
   updateUserBonusBalance(id: number, balance: string): Promise<void>;
+  isAdministrator(email: string): Promise<boolean>;
+  checkAIQuotaLimit(userId: number): Promise<{ canUse: boolean; dailyLimit: number; used: number }>;
+  incrementAIUsage(userId: number): Promise<void>;
+  updateSubscription(userId: number, type: string, expiresAt: Date): Promise<void>;
 }
 
 export interface PropertyFilters {
@@ -448,6 +452,84 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ bonusBalance: balance })
       .where(eq(users.id, id));
+  }
+
+  async isAdministrator(email: string): Promise<boolean> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(and(eq(users.email, email), eq(users.role, 'administrator')))
+      .limit(1);
+    return !!user;
+  }
+
+  async checkAIQuotaLimit(userId: number): Promise<{ canUse: boolean; dailyLimit: number; used: number }> {
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Администратор имеет неограниченный доступ
+    if (user.role === 'administrator') {
+      return { canUse: true, dailyLimit: -1, used: 0 };
+    }
+
+    // Сброс счетчика если прошел день
+    const now = new Date();
+    const lastReset = user.lastAiQueryReset ? new Date(user.lastAiQueryReset) : new Date(0);
+    const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysSinceReset >= 1) {
+      await db
+        .update(users)
+        .set({ 
+          aiQueriesUsed: 0, 
+          lastAiQueryReset: now 
+        })
+        .where(eq(users.id, userId));
+      
+      return { canUse: true, dailyLimit: this.getDailyLimit(user.subscriptionType), used: 0 };
+    }
+
+    const dailyLimit = this.getDailyLimit(user.subscriptionType);
+    const used = user.aiQueriesUsed || 0;
+    
+    return {
+      canUse: used < dailyLimit,
+      dailyLimit,
+      used
+    };
+  }
+
+  private getDailyLimit(subscriptionType: string | null): number {
+    switch (subscriptionType) {
+      case 'promo': return 1;
+      case 'standard': return 10;
+      case 'pro': return 30;
+      default: return 0; // Без подписки нет доступа к AI
+    }
+  }
+
+  async incrementAIUsage(userId: number): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        aiQueriesUsed: sql`${users.aiQueriesUsed} + 1`
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateSubscription(userId: number, type: string, expiresAt: Date): Promise<void> {
+    await db
+      .update(users)
+      .set({ 
+        subscriptionType: type,
+        subscriptionExpiresAt: expiresAt,
+        aiQueriesUsed: 0, // Сброс при новой подписке
+        lastAiQueryReset: new Date()
+      })
+      .where(eq(users.id, userId));
   }
 }
 

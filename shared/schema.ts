@@ -9,10 +9,14 @@ import {
   jsonb,
   varchar,
   index,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// User roles enum
+export const userRoleEnum = pgEnum('user_role', ['administrator', 'client']);
 
 // Regions table
 export const regions = pgTable("regions", {
@@ -190,10 +194,20 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 100 }).notNull().unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
+  role: userRoleEnum("role").default('client').notNull(),
+  telegramHandle: varchar("telegram_handle", { length: 100 }),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  profileImageUrl: varchar("profile_image_url", { length: 500 }),
   referralCode: varchar("referral_code", { length: 50 }).notNull().unique(),
   referredBy: integer("referred_by"),
   bonusBalance: decimal("bonus_balance", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  subscriptionType: varchar("subscription_type", { length: 50 }),
+  subscriptionExpiresAt: timestamp("subscription_expires_at"),
+  aiQueriesUsed: integer("ai_queries_used").default(0).notNull(),
+  lastAiQueryReset: timestamp("last_ai_query_reset").defaultNow(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const referralEarnings = pgTable("referral_earnings", {

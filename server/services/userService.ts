@@ -1,0 +1,106 @@
+import { storage } from '../storage';
+import { nanoid } from 'nanoid';
+
+export class UserService {
+  // Создание администратора при первом запуске
+  static async initializeAdministrator() {
+    const adminEmail = 'saabox@yandex.ru';
+    
+    try {
+      const existingAdmin = await storage.getUserByEmail(adminEmail);
+      if (existingAdmin) {
+        console.log('Administrator already exists');
+        return existingAdmin;
+      }
+
+      // Создаем администратора
+      const admin = await storage.createUser({
+        username: 'admin',
+        email: adminEmail,
+        role: 'administrator',
+        telegramHandle: '@metatau',
+        firstName: 'Администратор',
+        lastName: 'Системы',
+        referralCode: nanoid(8),
+        bonusBalance: '0.00'
+      });
+
+      console.log('Administrator created successfully:', admin.email);
+      return admin;
+    } catch (error) {
+      console.error('Error initializing administrator:', error);
+      throw error;
+    }
+  }
+
+  // Проверка и обновление подписки пользователя
+  static async checkSubscriptionStatus(userId: number): Promise<{
+    isActive: boolean;
+    type: string | null;
+    expiresAt: Date | null;
+    daysLeft: number;
+  }> {
+    const user = await storage.getUser(userId);
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Администратор имеет безлимитный доступ
+    if (user.role === 'administrator') {
+      return {
+        isActive: true,
+        type: 'unlimited',
+        expiresAt: null,
+        daysLeft: -1
+      };
+    }
+
+    const now = new Date();
+    const expiresAt = user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt) : null;
+    
+    if (!expiresAt || now > expiresAt) {
+      return {
+        isActive: false,
+        type: null,
+        expiresAt: null,
+        daysLeft: 0
+      };
+    }
+
+    const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    return {
+      isActive: true,
+      type: user.subscriptionType,
+      expiresAt,
+      daysLeft
+    };
+  }
+
+  // Получение лимитов AI для пользователя
+  static async getAILimits(userId: number): Promise<{
+    dailyLimit: number;
+    used: number;
+    canUse: boolean;
+    resetTime: Date;
+  }> {
+    const quotaCheck = await storage.checkAIQuotaLimit(userId);
+    const user = await storage.getUser(userId);
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const resetTime = new Date(user.lastAiQueryReset || new Date());
+    resetTime.setDate(resetTime.getDate() + 1);
+    resetTime.setHours(0, 0, 0, 0);
+
+    return {
+      dailyLimit: quotaCheck.dailyLimit,
+      used: quotaCheck.used,
+      canUse: quotaCheck.canUse,
+      resetTime
+    };
+  }
+}
