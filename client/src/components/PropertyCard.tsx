@@ -68,9 +68,11 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
   const propertyClassName = property.propertyClass?.name || "Стандарт";
   const colorClass = propertyClassColors[propertyClassName as keyof typeof propertyClassColors] || propertyClassColors["Стандарт"];
 
-  const roi = property.analytics?.roi ? parseFloat(property.analytics.roi) : null;
-  const liquidityScore = property.analytics?.liquidityScore || null;
+  const roi = property.investmentAnalytics?.rentalRoiAnnual ? parseFloat(property.investmentAnalytics.rentalRoiAnnual) : 
+              (property.analytics?.roi ? parseFloat(property.analytics.roi) : null);
+  const liquidityScore = property.investmentAnalytics?.liquidityScore || property.analytics?.liquidityScore || null;
   const priceGrowthRate = property.analytics?.priceGrowthRate ? parseFloat(property.analytics.priceGrowthRate) : null;
+  const investmentRating = property.investmentAnalytics?.investmentRating;
 
   return (
     <Card className="property-card overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={handleClick}>
@@ -159,9 +161,9 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
           <div className="flex items-center justify-between">
             {/* Investment Rating */}
             <div className="flex-1 mr-24">
-              {property.investmentAnalytics?.investmentRating && (
-                <Badge className="inline-flex items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-red-600 text-white font-bold text-sm px-3 py-1 pt-[7px] pb-[7px]">
-                  {property.investmentAnalytics.investmentRating}
+              {investmentRating && (
+                <Badge className={`inline-flex items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent font-bold text-sm px-3 py-1 pt-[7px] pb-[7px] ${getInvestmentRatingColor(investmentRating)}`}>
+                  {investmentRating}
                 </Badge>
               )}
             </div>
