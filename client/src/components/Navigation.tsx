@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Home, BarChart3, Building, Heart, Scale } from 'lucide-react';
+import { Home, BarChart3, Building, Heart, Scale, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { LoginButton } from "@/components/Auth/LoginButton";
 import { UserProfile } from "@/components/Auth/UserProfile";
@@ -28,7 +28,27 @@ export function Navigation() {
       label: 'Инвестиционная аналитика',
       icon: <BarChart3 className="w-4 h-4" />,
       description: 'Анализ доходности и рисков'
-    }
+    },
+    ...(isAuthenticated ? [
+      {
+        path: '/favorites',
+        label: 'Избранное',
+        icon: <Heart className="w-4 h-4" />,
+        description: 'Избранные объекты недвижимости'
+      },
+      {
+        path: '/comparison',
+        label: 'Сравнение',
+        icon: <Scale className="w-4 h-4" />,
+        description: 'Сравнение объектов недвижимости'
+      },
+      {
+        path: '/profile',
+        label: 'Профиль',
+        icon: <User className="w-4 h-4" />,
+        description: 'Личный кабинет пользователя'
+      }
+    ] : [])
   ];
 
   return (
@@ -64,21 +84,7 @@ export function Navigation() {
               <i className="fas fa-spinner fa-spin text-gray-400"></i>
             </div>
           ) : isAuthenticated ? (
-            <>
-              <Link href="/favorites">
-                <Button variant="outline" size="sm">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Избранное
-                </Button>
-              </Link>
-              <Link href="/comparison">
-                <Button variant="outline" size="sm">
-                  <Scale className="w-4 h-4 mr-2" />
-                  Сравнение
-                </Button>
-              </Link>
-              <UserProfile />
-            </>
+            <UserProfile />
           ) : (
             <LoginButton />
           )}
