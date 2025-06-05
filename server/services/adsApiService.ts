@@ -143,8 +143,6 @@ export class AdsApiService {
     const params: Record<string, any> = {
       is_actual: '1', // Только актуальные объявления
       limit: Math.min(filters?.limit || 100, 1000), // API ограничение
-      type: 'flat', // Только квартиры
-      category: 'sale', // Только продажа
     };
 
     // Добавляем фильтры согласно документации ads-api.ru
