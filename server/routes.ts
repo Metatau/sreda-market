@@ -393,12 +393,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.saveChatMessage({
         sessionId: sessionId || `session_${Date.now()}`,
         role: "assistant",
-        content: typeof response === 'string' ? response : response.message || 'Response generated',
+        content: typeof response === 'string' ? response : (response as any)?.message || 'Response generated',
         createdAt: new Date(),
       });
 
       res.json({
-        message: typeof response === 'string' ? response : response.message || 'Response generated',
+        response: typeof response === 'string' ? response : (response as any)?.message || 'Response generated',
         sessionId: sessionId || `session_${Date.now()}`,
       });
     } catch (error) {
@@ -824,7 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error running manual sync:", error);
-      res.status(500).json({ success: false, error: error.message || "Failed to run synchronization" });
+      res.status(500).json({ success: false, error: (error as Error)?.message || "Failed to run synchronization" });
     }
   });
 

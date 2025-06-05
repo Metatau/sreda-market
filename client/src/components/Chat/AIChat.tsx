@@ -15,10 +15,12 @@ export function AIChat({ onRecommendation }: AIChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: "1",
+      id: 1,
+      sessionId: "default",
+      role: "assistant",
       type: "ai",
       content: "Привет! Я AI-помощник SREDA Market. Помогу найти идеальную недвижимость для инвестиций. О каком регионе и бюджете думаете?",
-      timestamp: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     },
   ]);
   const [inputValue, setInputValue] = useState("");
@@ -38,10 +40,12 @@ export function AIChat({ onRecommendation }: AIChatProps) {
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: Date.now(),
+      sessionId: "default",
+      role: "user",
       type: "user",
       content: inputValue,
-      timestamp: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -52,10 +56,12 @@ export function AIChat({ onRecommendation }: AIChatProps) {
       const response = await chatApi.sendMessage(inputValue);
       
       const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+        id: Date.now() + 1,
+        sessionId: "default",
+        role: "assistant",
         type: "ai",
         content: response.response,
-        timestamp: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       };
 
       setMessages(prev => [...prev, aiMessage]);

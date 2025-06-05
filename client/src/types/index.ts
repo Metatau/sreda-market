@@ -140,10 +140,11 @@ export interface MapDataPoint {
 }
 
 export interface ChatMessage {
-  id: number;
+  id: number | string;
   sessionId: string;
   role: "user" | "assistant";
   content: string;
+  type?: string;
   metadata?: any;
   createdAt: string;
 }
@@ -151,4 +152,5 @@ export interface ChatMessage {
 export interface ChatResponse {
   response: string;
   sessionId: string;
+  entities?: any;
 }
