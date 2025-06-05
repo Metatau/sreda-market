@@ -150,7 +150,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             {/* Investment Rating */}
             <div className="flex-1 mr-24">
               {property.investmentAnalytics?.investmentRating && (
-                <Badge className={`${getInvestmentRatingColor(property.investmentAnalytics.investmentRating)} font-bold text-sm px-3 py-1`}>
+                <Badge className="inline-flex items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 bg-red-600 text-white font-bold text-sm px-3 py-1 pt-[7px] pb-[7px]">
                   {property.investmentAnalytics.investmentRating}
                 </Badge>
               )}
