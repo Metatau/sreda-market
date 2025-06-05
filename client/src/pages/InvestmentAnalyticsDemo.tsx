@@ -303,22 +303,24 @@ export default function InvestmentAnalyticsDemo() {
           </Card>
         </div>
 
+        {/* Заголовок секции */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold">Объекты недвижимости</h2>
+        </div>
+
         {/* Основной контент с фильтрами и объектами */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Боковая панель с фильтрами */}
           <div className="lg:col-span-1">
-            <div className="lg:mt-[52px]"> {/* Отступ для выравнивания с заголовком карточек */}
-              <PropertyFilters 
-                filters={filters} 
-                onFiltersChange={setFilters}
-              />
-            </div>
+            <PropertyFilters 
+              filters={filters} 
+              onFiltersChange={setFilters}
+            />
           </div>
 
           {/* Список объектов с аналитикой */}
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Объекты недвижимости</h2>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-600">
                   Найдено {sortedProperties.length} объектов
