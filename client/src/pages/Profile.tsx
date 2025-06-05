@@ -292,7 +292,7 @@ export function Profile() {
                         <div className="text-sm text-gray-600">на 3 дня</div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-8">
+                    <CardContent className="space-y-10">
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
