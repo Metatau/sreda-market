@@ -90,50 +90,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <Navigation />
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <i className="fas fa-building text-white text-lg"></i>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Поиск недвижимости</h1>
-                <p className="text-xs text-gray-500">ИИ-сервис недвижимости</p>
-              </div>
-            </div>
 
-            {/* Search Bar */}
-            <div className="flex-1 max-w-2xl mx-8">
-              <form onSubmit={handleSearch} className="relative">
-                <i className="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <Input
-                  type="text"
-                  placeholder="Поиск по адресу, району или названию..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4"
-                />
-              </form>
-            </div>
-
-            {/* User Actions */}
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <i className="fas fa-heart text-gray-600"></i>
-              </Button>
-              <Button variant="ghost" size="sm">
-                <i className="fas fa-bell text-gray-600"></i>
-              </Button>
-              <Button variant="ghost" size="sm">
-                <i className="fas fa-user text-gray-600"></i>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
