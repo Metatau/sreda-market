@@ -113,18 +113,33 @@ export class AdsApiService {
     page?: number;
     limit?: number;
   }, credentials?: { email: string; password: string }): Promise<AdsApiResponse> {
-    return this.makeRequest<AdsApiResponse>('/properties', {
-      region: filters?.region,
-      property_type: filters?.propertyType,
-      min_price: filters?.minPrice,
-      max_price: filters?.maxPrice,
-      page: filters?.page || 1,
-      limit: filters?.limit || 100,
-    }, credentials);
+    const params: Record<string, any> = {
+      is_actual: '1', // Только актуальные объявления
+      limit: Math.min(filters?.limit || 100, 1000), // API ограничение
+    };
+
+    // Добавляем фильтры согласно документации ads-api.ru
+    if (filters?.region) params.region = filters.region;
+    if (filters?.propertyType) params.category = filters.propertyType;
+    if (filters?.minPrice) params.price_min = filters.minPrice;
+    if (filters?.maxPrice) params.price_max = filters.maxPrice;
+
+    return this.makeRequest<AdsApiResponse>('/api', params, credentials);
   }
 
   async getProperty(externalId: string): Promise<AdsApiProperty> {
-    return this.makeRequest<AdsApiProperty>(`/properties/${externalId}`);
+    const params = {
+      id: externalId,
+      is_actual: '1'
+    };
+    
+    const response = await this.makeRequest<AdsApiResponse>('/api', params);
+    
+    if (response.data && response.data.length > 0) {
+      return response.data[0];
+    }
+    
+    throw new Error(`Property with ID ${externalId} not found`);
   }
 
   private async mapPropertyClass(propertyType: string, pricePerSqm: number): Promise<number | null> {
@@ -262,21 +277,10 @@ export class AdsApiService {
   }
 
   async testApiEndpoints(): Promise<{ working: string[], failed: string[] }> {
+    // Тестируем официальные endpoints согласно документации ads-api.ru
     const testEndpoints = [
-      '/',
-      '/status', 
-      '/regions',
-      '/cities',
-      '/properties',
-      '/ads',
-      '/listings',
-      '/offers',
-      '/api',
-      '/v1',
-      '/v1/regions',
-      '/v1/properties',
-      '/get_regions',
-      '/get_cities'
+      '/api',           // Основной endpoint для получения объявлений
+      '/apigetcheckfeed' // Endpoint для проверки актуальности
     ];
     
     const working: string[] = [];
@@ -284,14 +288,21 @@ export class AdsApiService {
     
     for (const endpoint of testEndpoints) {
       try {
-        console.log(`Testing endpoint: ${endpoint}`);
-        const response = await this.makeRequest<any>(endpoint);
-        working.push(endpoint);
-        console.log(`✓ Endpoint ${endpoint} works - Response type:`, typeof response);
+        console.log(`Testing ADS API endpoint: ${endpoint}`);
         
-        // Логируем структуру ответа для понимания API
+        // Для /api тестируем с минимальными параметрами
+        const params = endpoint === '/api' ? { limit: 1 } : {};
+        
+        const response = await this.makeRequest<any>(endpoint, params);
+        working.push(endpoint);
+        console.log(`✓ Endpoint ${endpoint} works`);
+        
+        // Логируем структуру ответа
         if (response && typeof response === 'object') {
-          console.log(`Response keys for ${endpoint}:`, Object.keys(response));
+          console.log(`Response structure for ${endpoint}:`, Object.keys(response));
+          if (response.data && Array.isArray(response.data)) {
+            console.log(`Data array length: ${response.data.length}`);
+          }
         }
       } catch (error) {
         failed.push(endpoint);
