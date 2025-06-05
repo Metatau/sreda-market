@@ -308,9 +308,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment routes for Blank Bank
-  app.post("/api/payments/create", async (req, res) => {
+  app.post("/api/payments/create", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const { plan, promoCode, returnUrl } = req.body;
+      const { plan, promoCode, returnUrl, referralCode } = req.body;
+      const userId = parseInt(req.user.id);
       
       const planPrices = {
         promo: 0,
@@ -332,22 +333,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Рассчитываем финальную цену с учетом бонусов
+      const priceCalculation = await ReferralService.calculateFinalPrice(userId, amount);
+      
+      // Проверяем реферальный код если он указан
+      let referrerId = null;
+      if (referralCode) {
+        const referrer = await ReferralService.getUserByReferralCode(referralCode);
+        if (referrer && referrer.id !== userId) {
+          referrerId = referrer.id;
+        }
+      }
+
       const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const description = `Подписка SREDA Market - ${plan === 'standard' ? 'Стандарт' : 'Профи'}`;
 
+      // Если вся сумма покрывается бонусами, обрабатываем как бесплатную подписку
+      if (priceCalculation.finalPrice === 0) {
+        // Списываем бонусы
+        await ReferralService.spendBonuses(
+          userId, 
+          priceCalculation.bonusUsed, 
+          `Оплата подписки ${description} бонусами`
+        );
+
+        // Если есть реферер, начисляем ему бонусы
+        if (referrerId) {
+          await ReferralService.processReferralEarning(referrerId, userId, amount, plan);
+        }
+
+        return res.json({
+          success: true,
+          plan,
+          message: `Подписка активирована с использованием ${priceCalculation.bonusUsed}₽ бонусов`,
+          bonusUsed: priceCalculation.bonusUsed,
+          finalPrice: 0
+        });
+      }
+
       const payment = await blankBankPaymentService.createPayment({
-        amount,
+        amount: priceCalculation.finalPrice,
         orderId,
-        description,
+        description: `${description} ${priceCalculation.bonusUsed > 0 ? `(использовано бонусов: ${priceCalculation.bonusUsed}₽)` : ''}`,
         returnUrl: returnUrl || `${req.protocol}://${req.get('host')}/profile?tab=subscription`,
-        customerEmail: req.body.email
+        customerEmail: req.body.email,
+        metadata: {
+          userId,
+          originalAmount: amount,
+          bonusUsed: priceCalculation.bonusUsed,
+          referrerId,
+          subscriptionType: plan
+        }
       });
 
       res.json({
         success: true,
         paymentId: payment.paymentId,
         paymentUrl: payment.paymentUrl,
-        orderId
+        orderId,
+        originalPrice: amount,
+        finalPrice: priceCalculation.finalPrice,
+        bonusUsed: priceCalculation.bonusUsed,
+        savings: amount - priceCalculation.finalPrice
       });
     } catch (error) {
       console.error("Error creating payment:", error);
@@ -399,6 +446,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error refunding payment:", error);
       res.status(500).json({ error: "Failed to refund payment" });
+    }
+  });
+
+  // Referral System APIs
+  app.get("/api/referrals/code/:code/user", async (req, res) => {
+    try {
+      const { code } = req.params;
+      const user = await ReferralService.getUserByReferralCode(code);
+      
+      if (!user) {
+        return res.status(404).json({ error: "Referral code not found" });
+      }
+      
+      res.json({
+        username: user.username,
+        isValid: true
+      });
+    } catch (error) {
+      console.error("Error validating referral code:", error);
+      res.status(500).json({ error: "Failed to validate referral code" });
+    }
+  });
+
+  app.get("/api/referrals/stats", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const userId = parseInt(req.user.id);
+      const stats = await ReferralService.getReferralStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting referral stats:", error);
+      res.status(500).json({ error: "Failed to get referral stats" });
+    }
+  });
+
+  app.post("/api/payments/calculate-price", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { originalPrice } = req.body;
+      const userId = parseInt(req.user.id);
+      
+      const priceCalculation = await ReferralService.calculateFinalPrice(userId, originalPrice);
+      
+      res.json({
+        originalPrice,
+        finalPrice: priceCalculation.finalPrice,
+        bonusUsed: priceCalculation.bonusUsed,
+        bonusAvailable: priceCalculation.bonusAvailable,
+        savings: originalPrice - priceCalculation.finalPrice
+      });
+    } catch (error) {
+      console.error("Error calculating price:", error);
+      res.status(500).json({ error: "Failed to calculate price" });
     }
   });
 
