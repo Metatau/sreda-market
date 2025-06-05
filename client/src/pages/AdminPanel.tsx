@@ -435,9 +435,9 @@ export default function AdminPanel() {
             <div className="p-3 border rounded-lg">
               <div className="font-medium mb-2">ADS API интеграция</div>
               <div className="text-sm text-gray-600 mb-2">Автоматическая синхронизация данных</div>
-              <Badge variant="secondary">
-                <AlertCircle className="w-3 h-3 mr-1" />
-                Ожидание документации
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Подключена
               </Badge>
             </div>
           </div>

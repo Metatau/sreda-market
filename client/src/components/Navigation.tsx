@@ -40,12 +40,6 @@ export function Navigation() {
       label: 'Сравнение',
       icon: <Scale className="w-4 h-4" />,
       description: 'Сравнение объектов недвижимости'
-    },
-    {
-      path: '/profile',
-      label: 'Профиль',
-      icon: <User className="w-4 h-4" />,
-      description: 'Личный кабинет пользователя'
     }
   ];
 
