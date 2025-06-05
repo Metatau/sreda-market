@@ -200,7 +200,7 @@ export default function Home() {
             {/* Property Section Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="font-bold text-gray-900 text-[20px]">
                   Недвижимость в {selectedRegionName}
                 </h2>
                 <p className="text-sm text-gray-600">
@@ -282,7 +282,6 @@ export default function Home() {
         isOpen={isChatOpen} 
         onToggle={() => setIsChatOpen(!isChatOpen)} 
       />
-
       {/* Investment Analytics Modal */}
       {selectedProperty && (
         <InvestmentAnalyticsModal
