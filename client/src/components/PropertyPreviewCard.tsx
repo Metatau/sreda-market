@@ -210,7 +210,7 @@ export const PropertyPreviewCard: React.FC<PropertyPreviewCardProps> = ({
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">Уровень риска:</span>
           {analytics.riskLevel && (
-            <Badge variant="secondary" className={getRiskLevelColor(analytics.riskLevel)}>
+            <Badge className={`${getRiskLevelColor(analytics.riskLevel)} font-medium border`}>
               {getRiskLevelName(analytics.riskLevel)}
             </Badge>
           )}

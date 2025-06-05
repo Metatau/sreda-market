@@ -9,6 +9,17 @@ import { Scale, X, Plus, MapPin, Bed, Square, Calculator } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Property } from '@/types';
 
+const getPropertyClassColor = (className: string) => {
+  const colors = {
+    "Эконом": "bg-blue-100 text-blue-700 border-blue-200",
+    "Стандарт": "bg-emerald-100 text-emerald-700 border-emerald-200",
+    "Комфорт": "bg-amber-100 text-amber-700 border-amber-200",
+    "Бизнес": "bg-purple-100 text-purple-700 border-purple-200",
+    "Элит": "bg-orange-100 text-orange-700 border-orange-200",
+  };
+  return colors[className as keyof typeof colors] || colors["Стандарт"];
+};
+
 export function Comparison() {
   const { isAuthenticated } = useAuth();
   const [compareList, setCompareList] = useState<Property[]>([]);
@@ -136,7 +147,7 @@ export function Comparison() {
                     </div>
                     
                     {property.propertyClass && (
-                      <Badge variant="secondary">
+                      <Badge className={`${getPropertyClassColor(property.propertyClass.name)} font-medium border`}>
                         {property.propertyClass.name}
                       </Badge>
                     )}

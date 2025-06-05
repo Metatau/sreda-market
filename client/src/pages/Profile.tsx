@@ -105,7 +105,7 @@ export function Profile() {
                 <p className="text-gray-600">ID: {user.id}</p>
                 {user.roles && (
                   <div className="mt-2">
-                    <Badge variant="secondary">{user.roles}</Badge>
+                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 font-medium border">{user.roles}</Badge>
                   </div>
                 )}
               </div>
