@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle, Key, BarChart, Users, Settings } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { Navigation } from "@/components/Navigation";
 
 interface AdsApiStatus {
   available: boolean;
@@ -117,14 +118,17 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center space-x-3">
-        <Database className="w-8 h-8 text-primary" />
-        <h1 className="text-3xl font-bold">Административная панель</h1>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center space-x-3">
+          <Database className="w-8 h-8 text-primary" />
+          <h1 className="text-3xl font-bold">Административная панель</h1>
+        </div>
 
-      {/* Статус ADS API */}
-      <Card>
+        {/* Статус ADS API */}
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <CheckCircle className="w-5 h-5" />
@@ -439,6 +443,7 @@ export default function AdminPanel() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
