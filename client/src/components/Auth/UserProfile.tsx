@@ -65,18 +65,6 @@ export const UserProfile: React.FC = () => {
           <i className="fas fa-user mr-2 h-4 w-4"></i>
           <span>Профиль</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <i className="fas fa-heart mr-2 h-4 w-4"></i>
-          <span>Избранное</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <i className="fas fa-balance-scale mr-2 h-4 w-4"></i>
-          <span>Сравнение</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <i className="fas fa-cog mr-2 h-4 w-4"></i>
-          <span>Настройки</span>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
           <i className="fas fa-sign-out-alt mr-2 h-4 w-4"></i>
