@@ -1,23 +1,9 @@
 
 import { Request, Response } from "express";
-import { z } from "zod";
 import { BaseController } from "./BaseController";
 import { PropertyService } from "../services/PropertyService";
-import { handleAsyncError, NotFoundError, ValidationError } from "../utils/errors";
-
-const searchFiltersSchema = z.object({
-  regionId: z.number().optional(),
-  propertyClassId: z.number().optional(),
-  minPrice: z.number().optional(),
-  maxPrice: z.number().optional(),
-  rooms: z.number().optional(),
-  propertyType: z.string().optional(),
-});
-
-const searchBodySchema = z.object({
-  query: z.string().optional(),
-  ...searchFiltersSchema.shape,
-});
+import { handleAsyncError, NotFoundError } from "../utils/errors";
+import { validateId, validatePagination, validateFilters, searchBodySchema } from "../utils/validation";
 
 export class PropertyController extends BaseController {
   constructor(private propertyService: PropertyService) {
@@ -25,20 +11,12 @@ export class PropertyController extends BaseController {
   }
 
   getProperties = handleAsyncError(async (req: Request, res: Response) => {
-    const { page, perPage } = this.validatePagination(
+    const { page, perPage } = validatePagination(
       req.query.page as string,
       req.query.per_page as string
     );
 
-    const filters = searchFiltersSchema.parse({
-      regionId: req.query.region_id ? parseInt(req.query.region_id as string) : undefined,
-      propertyClassId: req.query.property_class_id ? parseInt(req.query.property_class_id as string) : undefined,
-      minPrice: req.query.min_price ? parseInt(req.query.min_price as string) : undefined,
-      maxPrice: req.query.max_price ? parseInt(req.query.max_price as string) : undefined,
-      rooms: req.query.rooms ? parseInt(req.query.rooms as string) : undefined,
-      propertyType: req.query.property_type as string,
-    });
-
+    const filters = validateFilters(req.query);
     const result = await this.propertyService.getProperties(filters, { page, perPage });
     
     this.sendSuccess(res, {
@@ -55,7 +33,7 @@ export class PropertyController extends BaseController {
   });
 
   getProperty = handleAsyncError(async (req: Request, res: Response) => {
-    const id = this.validateId(req.params.id);
+    const id = validateId(req.params.id);
     const property = await this.propertyService.getProperty(id);
     
     if (!property) {
@@ -66,10 +44,10 @@ export class PropertyController extends BaseController {
   });
 
   getMapData = handleAsyncError(async (req: Request, res: Response) => {
-    const filters = {
-      regionId: req.query.region_id ? parseInt(req.query.region_id as string) : undefined,
-      propertyClassId: req.query.property_class_id ? parseInt(req.query.property_class_id as string) : undefined,
-    };
+    const filters = validateFilters({
+      region_id: req.query.region_id,
+      property_class_id: req.query.property_class_id
+    });
 
     const mapData = await this.propertyService.getMapData(filters);
     this.sendSuccess(res, mapData);
