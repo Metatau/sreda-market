@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle, Key } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface AdsApiStatus {
@@ -22,6 +24,8 @@ interface SyncResult {
 
 export default function AdminPanel() {
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [showCredentials, setShowCredentials] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -31,8 +35,8 @@ export default function AdminPanel() {
   });
 
   const syncMutation = useMutation({
-    mutationFn: async (regions?: string[]) => {
-      const response = await apiRequest('POST', '/api/admin/ads-api/sync', { regions });
+    mutationFn: async (params: { regions?: string[]; credentials?: { email: string; password: string } }) => {
+      const response = await apiRequest('POST', '/api/admin/ads-api/sync', params);
       return response.json();
     },
     onSuccess: (data: { success: boolean } & SyncResult) => {
@@ -69,7 +73,16 @@ export default function AdminPanel() {
   };
 
   const handleSyncAll = () => {
-    syncMutation.mutate(undefined);
+    if (!credentials.email || !credentials.password) {
+      toast({
+        title: "Введите учетные данные",
+        description: "Необходимо указать логин и пароль для ads-api.ru",
+        variant: "destructive",
+      });
+      setShowCredentials(true);
+      return;
+    }
+    syncMutation.mutate({ credentials });
   };
 
   const handleSyncSelected = () => {
@@ -81,7 +94,16 @@ export default function AdminPanel() {
       });
       return;
     }
-    syncMutation.mutate(selectedRegions);
+    if (!credentials.email || !credentials.password) {
+      toast({
+        title: "Введите учетные данные",
+        description: "Необходимо указать логин и пароль для ads-api.ru",
+        variant: "destructive",
+      });
+      setShowCredentials(true);
+      return;
+    }
+    syncMutation.mutate({ regions: selectedRegions, credentials });
   };
 
   if (statusLoading) {
@@ -151,6 +173,46 @@ export default function AdminPanel() {
         </CardContent>
       </Card>
 
+      {/* Учетные данные ADS API */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Key className="w-5 h-5" />
+            <span>Учетные данные ads-api.ru</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email (логин)</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={credentials.email}
+                onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Пароль</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Пароль от ads-api.ru"
+                value={credentials.password}
+                onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="p-3 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800">
+              Для синхронизации данных необходимы учетные данные от сервиса ads-api.ru. 
+              Эти данные используются только для получения актуальной информации о недвижимости.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Синхронизация данных */}
       <Card>
         <CardHeader>
@@ -160,10 +222,10 @@ export default function AdminPanel() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {adsApiStatus?.configured && adsApiStatus?.available ? (
+          {credentials.email && credentials.password ? (
             <>
               {/* Регионы для синхронизации */}
-              {adsApiStatus.regions && adsApiStatus.regions.length > 0 && (
+              {adsApiStatus?.regions && adsApiStatus.regions.length > 0 && (
                 <div>
                   <h3 className="font-medium mb-3">Доступные регионы:</h3>
                   <div className="flex flex-wrap gap-2">
@@ -228,13 +290,10 @@ export default function AdminPanel() {
             <div className="p-4 bg-yellow-50 rounded-lg">
               <div className="flex items-center space-x-2 text-yellow-800">
                 <AlertCircle className="w-5 h-5" />
-                <span className="font-medium">ADS API недоступен</span>
+                <span className="font-medium">Введите учетные данные</span>
               </div>
               <p className="text-yellow-700 mt-2">
-                {!adsApiStatus?.configured 
-                  ? "API ключ не настроен. Обратитесь к администратору системы."
-                  : "Сервис временно недоступен. Попробуйте позже."
-                }
+                Для запуска синхронизации необходимо указать логин и пароль от ads-api.ru в форме выше.
               </p>
             </div>
           )}

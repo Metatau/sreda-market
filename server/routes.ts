@@ -57,9 +57,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/ads-api/sync", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const { regions } = req.body;
+      const { regions, credentials } = req.body;
       const { adsApiService } = await import('./services/adsApiService');
-      const result = await adsApiService.syncProperties(regions);
+      const result = await adsApiService.syncProperties(regions, credentials);
       res.json({ success: true, ...result });
     } catch (error) {
       console.error("Error syncing properties:", error);
