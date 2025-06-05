@@ -230,18 +230,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/telegram/config", (req, res) => {
     try {
-      const botId = process.env.TELEGRAM_BOT_TOKEN?.split(':')[0];
+      console.log('TELEGRAM_BOT_TOKEN:', process.env.TELEGRAM_BOT_TOKEN ? 'Set' : 'Not set');
+      console.log('TELEGRAM_BOT_USERNAME:', process.env.TELEGRAM_BOT_USERNAME ? 'Set' : 'Not set');
+      
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
       const botUsername = process.env.TELEGRAM_BOT_USERNAME;
       
-      if (!botId || !botUsername) {
+      if (!botToken || !botUsername) {
         return res.status(500).json({ 
-          error: 'Telegram bot configuration missing. Please configure TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME' 
+          error: 'Telegram bot configuration missing. Please configure TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME',
+          debug: {
+            hasToken: !!botToken,
+            hasUsername: !!botUsername
+          }
         });
       }
       
+      const botId = botToken.split(':')[0];
+      
       res.json({
         botId,
-        botUsername,
+        botUsername: botUsername.replace('@', ''), // Убираем @ если есть
         domain: req.get('host')
       });
     } catch (error) {
