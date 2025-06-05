@@ -55,7 +55,7 @@ export function Navigation() {
           </div>
 
           {/* Навигационные ссылки */}
-          <div className="flex space-x-4" style={{marginLeft: '8px'}}>
+          <div className="flex space-x-4" style={{marginLeft: '4px'}}>
             {navItems.map((item) => (
               <Link key={item.path} href={item.path}>
                 <Button
