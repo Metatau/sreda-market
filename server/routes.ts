@@ -221,6 +221,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Новые API маршруты для фронтенда
+  app.get("/api/investment-analytics/:id", async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ error: "Invalid property ID" });
+      }
+
+      const analytics = await simpleInvestmentAnalyticsService.getAnalytics(propertyId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching investment analytics:", error);
+      res.status(500).json({ error: "Failed to fetch investment analytics" });
+    }
+  });
+
+  app.post("/api/investment-analytics/:id/calculate", async (req, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      if (isNaN(propertyId)) {
+        return res.status(400).json({ error: "Invalid property ID" });
+      }
+
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ error: "Property not found" });
+      }
+
+      const analysis = await analyzePropertyInvestment({
+        price: property.price,
+        pricePerSqm: property.pricePerSqm || 0,
+        region: property.region?.name || "Unknown",
+        propertyClass: property.propertyClass?.name || "Not specified",
+        area: parseFloat(property.area?.toString() || "0")
+      });
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error calculating investment analytics:", error);
+      res.status(500).json({ error: "Failed to calculate investment analytics" });
+    }
+  });
+
   // Batch calculate investment analytics
   app.post("/api/analytics/batch-calculate", async (req, res) => {
     try {
