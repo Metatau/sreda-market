@@ -36,6 +36,8 @@ export class AdsApiService {
   private baseUrl: string;
   private apiKey: string;
   private userEmail: string;
+  private lastRequestTime: number = 0;
+  private readonly rateLimitMs = 5000; // 5 секунд между запросами
 
   constructor() {
     this.baseUrl = 'https://ads-api.ru/main';
@@ -49,6 +51,18 @@ export class AdsApiService {
   }
 
   private async makeRequest<T>(endpoint: string, params?: Record<string, any>, credentials?: { email: string; password: string }): Promise<T> {
+    // Соблюдаем лимит частоты запросов (1 запрос каждые 5 секунд)
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    
+    if (timeSinceLastRequest < this.rateLimitMs) {
+      const waitTime = this.rateLimitMs - timeSinceLastRequest;
+      console.log(`Rate limit: waiting ${waitTime}ms before next request`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+    
+    this.lastRequestTime = Date.now();
+
     const url = new URL(`${this.baseUrl}${endpoint}`);
     
     // Добавляем обязательные параметры для ads-api.ru согласно документации
@@ -89,6 +103,13 @@ export class AdsApiService {
 
     if (!response.ok) {
       const errorText = await response.text();
+      
+      // Обрабатываем специально ошибку лимита частоты
+      if (response.status === 429) {
+        console.warn('ADS API rate limit exceeded, will retry with delay');
+        throw new Error('Rate limit exceeded. Please try again later.');
+      }
+      
       console.error('ADS API Error Response:', errorText.substring(0, 500));
       throw new Error(`ADS API error: ${response.status} ${response.statusText}`);
     }

@@ -153,7 +153,7 @@ export default function AdminPanel() {
               {adsApiStatus?.available ? (
                 <Badge variant="default" className="bg-green-100 text-green-800">
                   <CheckCircle className="w-4 h-4 mr-1" />
-                  Доступен
+                  Подключен
                 </Badge>
               ) : (
                 <Badge variant="secondary">
@@ -168,6 +168,17 @@ export default function AdminPanel() {
               <Badge variant="outline">
                 {adsApiStatus?.regions?.length || 0}
               </Badge>
+            </div>
+          </div>
+
+          {/* Дополнительная информация о статусе API */}
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-900 mb-2">Информация о подключении</h4>
+            <div className="text-sm text-blue-700 space-y-1">
+              <p>• Используется официальное API ads-api.ru</p>
+              <p>• Endpoint: https://ads-api.ru/main/api</p>
+              <p>• Лимит: 1 запрос каждые 5 секунд</p>
+              <p>• Получение актуальных объявлений о недвижимости</p>
             </div>
           </div>
         </CardContent>
