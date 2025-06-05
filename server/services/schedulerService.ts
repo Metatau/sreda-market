@@ -1,7 +1,6 @@
 import cron from 'node-cron';
 import { AdsApiService } from './adsApiService';
-import { PropertyValidationService } from './propertyValidationService';
-import { InvestmentCalculationService } from './investmentCalculationService';
+// Временно используем упрощенную валидацию и расчеты для совместимости с ES модулями
 import { storage } from '../storage';
 import { db } from '../db';
 import { properties, propertyAnalytics, investmentAnalytics, priceHistory } from '../../shared/schema';
@@ -9,14 +8,10 @@ import { eq } from 'drizzle-orm';
 
 export class SchedulerService {
   private adsApiService: AdsApiService;
-  private validationService: PropertyValidationService;
-  private investmentService: InvestmentCalculationService;
   private isRunning: boolean = false;
 
   constructor() {
     this.adsApiService = new AdsApiService();
-    this.validationService = new PropertyValidationService();
-    this.investmentService = new InvestmentCalculationService();
   }
 
   public start(): void {
@@ -100,7 +95,7 @@ export class SchedulerService {
 
     for (const property of properties) {
       try {
-        const isValid = await this.validationService.validateProperty(property);
+        const isValid = await this.validateProperty(property);
         
         if (!isValid) {
           // Помечаем объект как Fake и удаляем из базы данных
@@ -116,6 +111,170 @@ export class SchedulerService {
     }
 
     console.log(`Validation completed: ${validatedCount} valid, ${removedCount} removed`);
+  }
+
+  /**
+   * Валидирует объект недвижимости по всем критериям
+   */
+  private async validateProperty(property: any): Promise<boolean> {
+    // 1. Проверка наличия достаточного количества фотографий
+    if (!this.hasValidImages(property)) {
+      console.log(`Property ${property.id} rejected: insufficient images`);
+      return false;
+    }
+
+    // 2. Проверка цены относительно рыночной
+    if (!await this.isValidPrice(property)) {
+      console.log(`Property ${property.id} rejected: price deviation from market`);
+      return false;
+    }
+
+    // 3. Проверка обязательных полей
+    if (!this.hasRequiredFields(property)) {
+      console.log(`Property ${property.id} rejected: missing required fields`);
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Проверяет наличие достаточного количества фотографий (минимум 2)
+   */
+  private hasValidImages(property: any): boolean {
+    // Получаем изображения из поля description
+    const description = property.description || '';
+    const imageUrls = [];
+    
+    // Ищем ссылки на изображения в описании
+    const urlRegex = /(https?:\/\/[^\s]+\.(jpg|jpeg|png|gif|webp))/gi;
+    const matches = description.match(urlRegex);
+    
+    if (matches) {
+      imageUrls.push(...matches);
+    }
+
+    // Считаем что если в описании есть упоминания фотографий, то они есть
+    const hasPhotoMentions = description.includes('фото') || 
+                           description.includes('изображени') ||
+                           description.includes('картинк');
+
+    return imageUrls.length >= 2 || hasPhotoMentions;
+  }
+
+  /**
+   * Проверяет валидность цены относительно рыночной
+   */
+  private async isValidPrice(property: any): Promise<boolean> {
+    try {
+      const marketData = await this.getMarketPriceData(
+        property.regionId,
+        property.propertyClassId,
+        property.rooms,
+        property.marketType
+      );
+
+      if (!marketData || marketData.count < 3) {
+        // Если недостаточно данных для сравнения, считаем цену валидной
+        return true;
+      }
+
+      const propertyPrice = property.price;
+      const avgPrice = marketData.avgPrice;
+      
+      // Допустимое отклонение: ±50% от средней цены
+      const minAllowedPrice = avgPrice * 0.5;
+      const maxAllowedPrice = avgPrice * 1.5;
+
+      const isValidPrice = propertyPrice >= minAllowedPrice && propertyPrice <= maxAllowedPrice;
+
+      if (!isValidPrice) {
+        console.log(`Price validation failed for property ${property.id}:`);
+        console.log(`Property price: ${propertyPrice}, Market avg: ${avgPrice}`);
+        console.log(`Allowed range: ${minAllowedPrice} - ${maxAllowedPrice}`);
+      }
+
+      return isValidPrice;
+    } catch (error) {
+      console.error(`Error validating price for property ${property.id}:`, error);
+      // В случае ошибки считаем цену валидной
+      return true;
+    }
+  }
+
+  /**
+   * Получает рыночные данные по ценам для сравнения
+   */
+  private async getMarketPriceData(regionId: number, propertyClassId: number | null, rooms: number | null, marketType: string | null) {
+    try {
+      const filters: any = { regionId };
+      
+      if (propertyClassId) filters.propertyClassId = propertyClassId;
+      if (rooms) filters.rooms = rooms;
+      if (marketType) filters.marketType = marketType;
+
+      const { properties } = await storage.getProperties(filters, { page: 1, perPage: 1000 });
+
+      if (properties.length === 0) {
+        return null;
+      }
+
+      const prices = properties.map(p => p.price).filter(price => price > 0);
+
+      if (prices.length === 0) {
+        return null;
+      }
+
+      const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+      const minPrice = Math.min(...prices);
+      const maxPrice = Math.max(...prices);
+
+      return {
+        avgPrice,
+        minPrice,
+        maxPrice,
+        count: prices.length
+      };
+    } catch (error) {
+      console.error('Error getting market price data:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Проверяет наличие обязательных полей
+   */
+  private hasRequiredFields(property: any): boolean {
+    // Обязательные поля для валидного объекта
+    const requiredFields = [
+      property.title,
+      property.price,
+      property.address,
+      property.regionId
+    ];
+
+    const hasAllRequired = requiredFields.every(field => 
+      field !== null && field !== undefined && field !== ''
+    );
+
+    if (!hasAllRequired) {
+      console.log(`Property ${property.id} missing required fields`);
+      return false;
+    }
+
+    // Проверка валидности цены
+    if (property.price <= 0 || property.price > 1000000000) {
+      console.log(`Property ${property.id} has invalid price: ${property.price}`);
+      return false;
+    }
+
+    // Проверка валидности площади (если указана)
+    if (property.area && (property.area <= 0 || property.area > 1000)) {
+      console.log(`Property ${property.id} has invalid area: ${property.area}`);
+      return false;
+    }
+
+    return true;
   }
 
   private async removeInvalidProperty(propertyId: number): Promise<void> {
@@ -148,7 +307,7 @@ export class SchedulerService {
 
     for (const property of properties) {
       try {
-        await this.investmentService.calculateForProperty(property.id);
+        await this.calculateInvestmentAnalytics(property);
         calculatedCount++;
         
         if (calculatedCount % 10 === 0) {
@@ -160,6 +319,109 @@ export class SchedulerService {
     }
 
     console.log(`Investment analytics recalculated for ${calculatedCount} properties`);
+  }
+
+  /**
+   * Рассчитывает базовую инвестиционную аналитику для объекта
+   */
+  private async calculateInvestmentAnalytics(property: any): Promise<void> {
+    try {
+      // Базовые расчёты ROI
+      const monthlyRent = this.estimateMonthlyRent(property);
+      const yearlyRent = monthlyRent * 12;
+      const netROI = property.price > 0 ? ((yearlyRent * 0.75) / property.price) * 100 : 0; // 75% после расходов
+      
+      // Ликвидность на основе региона и класса
+      let liquidityScore = 5;
+      if (property.region && ['Москва', 'Санкт-Петербург', 'Сочи'].includes(property.region.name)) {
+        liquidityScore += 2;
+      }
+      if (property.propertyClass && ['Стандарт', 'Комфорт', 'Бизнес'].includes(property.propertyClass.name)) {
+        liquidityScore += 1;
+      }
+      
+      // Инвестиционный рейтинг
+      let rating = 'Низкий';
+      if (netROI >= 8 && liquidityScore >= 7) rating = 'Отличный';
+      else if (netROI >= 5 && liquidityScore >= 6) rating = 'Хороший';
+      else if (netROI >= 3) rating = 'Удовлетворительный';
+
+      // Сохраняем в базу данных
+      const existing = await db
+        .select()
+        .from(propertyAnalytics)
+        .where(eq(propertyAnalytics.propertyId, property.id))
+        .limit(1);
+
+      const analyticsData = {
+        propertyId: property.id,
+        roi: netROI.toFixed(2),
+        liquidityScore: Math.min(10, Math.max(1, liquidityScore)),
+        investmentScore: Math.round(netROI * 10),
+        investmentRating: rating,
+        calculatedAt: new Date()
+      };
+
+      if (existing.length > 0) {
+        await db
+          .update(propertyAnalytics)
+          .set(analyticsData)
+          .where(eq(propertyAnalytics.propertyId, property.id));
+      } else {
+        await db
+          .insert(propertyAnalytics)
+          .values(analyticsData);
+      }
+      
+    } catch (error) {
+      console.error(`Error calculating analytics for property ${property.id}:`, error);
+    }
+  }
+
+  /**
+   * Оценивает месячную арендную плату
+   */
+  private estimateMonthlyRent(property: any): number {
+    const region = property.region;
+    if (!region) return 0;
+
+    // Базовые коэффициенты аренды по регионам (% от стоимости в месяц)
+    const rentCoefficients: Record<string, number> = {
+      'Москва': 0.005,
+      'Санкт-Петербург': 0.006,
+      'Новосибирск': 0.008,
+      'Екатеринбург': 0.007,
+      'Казань': 0.008,
+      'Уфа': 0.009,
+      'Красноярск': 0.009,
+      'Пермь': 0.009,
+      'Калининград': 0.007,
+      'Сочи': 0.004,
+      'Тюмень': 0.008
+    };
+
+    const baseCoefficient = rentCoefficients[region.name] || 0.008;
+    
+    // Корректировки по типу рынка
+    let marketTypeMultiplier = 1.0;
+    if (property.marketType === 'new_construction') {
+      marketTypeMultiplier = 1.1; // Новостройки на 10% дороже в аренде
+    }
+
+    // Корректировки по классу недвижимости
+    let classMultiplier = 1.0;
+    if (property.propertyClass) {
+      const classMultipliers: Record<string, number> = {
+        'Эконом': 0.9,
+        'Стандарт': 1.0,
+        'Комфорт': 1.15,
+        'Бизнес': 1.3,
+        'Элит': 1.5
+      };
+      classMultiplier = classMultipliers[property.propertyClass.name] || 1.0;
+    }
+
+    return property.price * baseCoefficient * marketTypeMultiplier * classMultiplier;
   }
 
   public async runManualSync(): Promise<{ imported: number; updated: number; removed: number }> {

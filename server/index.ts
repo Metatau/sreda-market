@@ -43,6 +43,14 @@ app.use((req, res, next) => {
 
   // Error handling is now done in routes.ts via globalErrorHandler
 
+  // Инициализируем планировщик автоматизации
+  try {
+    schedulerService.start();
+    console.log('Property synchronization scheduler started successfully');
+  } catch (error) {
+    console.error('Failed to start scheduler:', error);
+  }
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes

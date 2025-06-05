@@ -773,6 +773,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === SCHEDULER AND AUTOMATION ROUTES ===
+  
+  // Запуск планировщика автоматизации
+  app.post("/api/admin/scheduler/start", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      schedulerService.start();
+      res.json({ 
+        success: true, 
+        message: "Property synchronization scheduler started",
+        status: schedulerService.getStatus()
+      });
+    } catch (error) {
+      console.error("Error starting scheduler:", error);
+      res.status(500).json({ success: false, error: "Failed to start scheduler" });
+    }
+  });
+
+  // Получение статуса планировщика
+  app.get("/api/admin/scheduler/status", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const status = schedulerService.getStatus();
+      res.json({ 
+        success: true, 
+        data: status
+      });
+    } catch (error) {
+      console.error("Error getting scheduler status:", error);
+      res.status(500).json({ success: false, error: "Failed to get scheduler status" });
+    }
+  });
+
+  // Ручной запуск синхронизации
+  app.post("/api/admin/scheduler/sync", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const result = await schedulerService.runManualSync();
+      res.json({ 
+        success: true, 
+        message: "Manual synchronization completed",
+        data: result
+      });
+    } catch (error) {
+      console.error("Error running manual sync:", error);
+      res.status(500).json({ success: false, error: error.message || "Failed to run synchronization" });
+    }
+  });
+
+  // Остановка планировщика
+  app.post("/api/admin/scheduler/stop", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      schedulerService.stop();
+      res.json({ 
+        success: true, 
+        message: "Scheduler stopped successfully"
+      });
+    } catch (error) {
+      console.error("Error stopping scheduler:", error);
+      res.status(500).json({ success: false, error: "Failed to stop scheduler" });
+    }
+  });
+
   // Global error handler
   app.use(globalErrorHandler);
 
