@@ -303,9 +303,27 @@ export default function InvestmentAnalyticsDemo() {
           </Card>
         </div>
 
-        {/* Заголовок секции */}
-        <div className="mb-6">
+        {/* Заголовок секции с контролами */}
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Объекты недвижимости</h2>
+          <div className="flex items-center space-x-4">
+            <div className="text-sm text-gray-600">
+              Найдено {sortedProperties.length} объектов
+            </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Сортировка" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
+                <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
+                <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
+                <SelectItem value="area">По площади</SelectItem>
+                <SelectItem value="roi_desc">По доходности</SelectItem>
+                <SelectItem value="investment_score">По рейтингу инвестиций</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Основной контент с фильтрами и объектами */}
@@ -320,26 +338,6 @@ export default function InvestmentAnalyticsDemo() {
 
           {/* Список объектов с аналитикой */}
           <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-600">
-                  Найдено {sortedProperties.length} объектов
-                </div>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Сортировка" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
-                    <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
-                    <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
-                    <SelectItem value="area">По площади</SelectItem>
-                    <SelectItem value="roi_desc">По доходности</SelectItem>
-                    <SelectItem value="investment_score">По рейтингу инвестиций</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {sortedProperties.slice(0, 12).map((property) => (
