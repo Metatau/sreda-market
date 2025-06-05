@@ -7,6 +7,8 @@ import { analyticsService } from "./services/analyticsService";
 import { blankBankPaymentService } from "./services/paymentService";
 import { ReferralService } from "./services/referralService";
 import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware/auth";
+import { requireAuth as requireRoleAuth, requireAdmin, checkAIQuota } from "./middleware/authMiddleware";
+import { UserService } from "./services/userService";
 import { RegionController } from "./controllers/RegionController";
 import { PropertyClassController } from "./controllers/PropertyClassController";
 import { PropertyController } from "./controllers/PropertyController";
@@ -15,6 +17,13 @@ import { globalErrorHandler } from "./utils/errors";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Инициализация администратора при запуске
+  try {
+    await UserService.initializeAdministrator();
+  } catch (error) {
+    console.error('Failed to initialize administrator:', error);
+  }
+
   // Initialize controllers
   const propertyService = new PropertyService();
   const regionController = new RegionController();
@@ -126,8 +135,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat
-  app.post("/api/chat", async (req, res) => {
+  // User management endpoints
+  app.get("/api/users/profile", requireRoleAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const subscriptionStatus = await UserService.checkSubscriptionStatus(user.id);
+      const aiLimits = await UserService.getAILimits(user.id);
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        telegramHandle: user.telegramHandle,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        bonusBalance: user.bonusBalance,
+        subscription: subscriptionStatus,
+        aiLimits
+      });
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.post("/api/users/register", async (req, res) => {
+    try {
+      const { username, email, firstName, lastName, telegramHandle, referralCode } = req.body;
+
+      // Проверяем, не существует ли уже пользователь с таким email
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: 'User with this email already exists' });
+      }
+
+      const newUser = await storage.createUser({
+        username,
+        email,
+        firstName,
+        lastName,
+        telegramHandle,
+        role: 'client',
+        referralCode: referralCode || `REF${Date.now()}`,
+        bonusBalance: '0.00'
+      });
+
+      res.status(201).json({
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role
+      });
+    } catch (error) {
+      console.error('Error registering user:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get("/api/users/ai-limits", requireRoleAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const aiLimits = await UserService.getAILimits(req.user!.id);
+      res.json(aiLimits);
+    } catch (error) {
+      console.error('Error fetching AI limits:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Admin endpoints
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      // Здесь должен быть метод для получения всех пользователей
+      // Пока возвращаем заглушку
+      res.json({ message: 'Admin access granted', users: [] });
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // AI Chat with role-based access and quota checking
+  app.post("/api/chat", requireRoleAuth, checkAIQuota, async (req, res) => {
     try {
       const { message, sessionId } = req.body;
       
