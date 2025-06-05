@@ -21,7 +21,9 @@ import {
   X,
   Crown,
   Check,
-  CreditCard
+  CreditCard,
+  Users,
+  Copy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -422,6 +424,135 @@ export function Profile() {
                       </div>
                     </CardContent>
                   </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Реферальная программа */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Реферальная программа
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Приглашайте друзей и получайте бонусы на свой счет
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Информация о бонусном счете */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Бонусный счет</span>
+                    <span className="text-2xl font-bold text-blue-600">₽0</span>
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    Можно использовать до 50% от стоимости тарифа
+                  </p>
+                </div>
+
+                {/* Реферальная ссылка и промокод */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="referral-link" className="text-sm font-medium">
+                      Реферальная ссылка
+                    </Label>
+                    <div className="flex mt-1">
+                      <Input
+                        id="referral-link"
+                        value="https://sreda.market/ref/USER123"
+                        readOnly
+                        className="rounded-r-none"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-l-none border-l-0"
+                        onClick={() => {
+                          navigator.clipboard.writeText("https://sreda.market/ref/USER123");
+                          alert("Ссылка скопирована!");
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="referral-code" className="text-sm font-medium">
+                      Промокод
+                    </Label>
+                    <div className="flex mt-1">
+                      <Input
+                        id="referral-code"
+                        value="USER123REF"
+                        readOnly
+                        className="rounded-r-none"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-l-none border-l-0"
+                        onClick={() => {
+                          navigator.clipboard.writeText("USER123REF");
+                          alert("Промокод скопирован!");
+                        }}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Правила программы */}
+                <div>
+                  <h4 className="font-medium mb-3">Как это работает:</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-medium text-blue-600">1</span>
+                      </div>
+                      <p className="text-sm text-gray-700">
+                        Поделитесь реферальной ссылкой и промокодом с друзьями
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-medium text-blue-600">2</span>
+                      </div>
+                      <p className="text-sm text-gray-700">
+                        Когда друг оплачивает любой тариф, вы получаете <span className="font-medium text-blue-600">20% бонусов</span> на свой счет
+                      </p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs font-medium text-blue-600">3</span>
+                      </div>
+                      <p className="text-sm text-gray-700">
+                        Используйте бонусы для оплаты <span className="font-medium text-blue-600">до 50%</span> стоимости своего тарифа
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Статистика рефералов */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">0</div>
+                    <div className="text-xs text-gray-600">Приглашено</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">0</div>
+                    <div className="text-xs text-gray-600">Оплатили</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">₽0</div>
+                    <div className="text-xs text-gray-600">Заработано</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">₽0</div>
+                    <div className="text-xs text-gray-600">Потрачено</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
