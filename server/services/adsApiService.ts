@@ -133,7 +133,7 @@ export class AdsApiService {
   }
 
   async fetchProperties(filters?: {
-    region?: string;
+    city?: string;
     propertyType?: string;
     minPrice?: number;
     maxPrice?: number;
@@ -145,8 +145,8 @@ export class AdsApiService {
       limit: Math.min(filters?.limit || 100, 1000), // API ограничение
     };
 
-    // Добавляем только поддерживаемые фильтры согласно документации ads-api.ru
-    // Убираем region - параметр не поддерживается API
+    // Добавляем поддерживаемые фильтры согласно документации ads-api.ru
+    if (filters?.city) params.city = filters.city;
     if (filters?.minPrice) params.price_min = filters.minPrice;
     if (filters?.maxPrice) params.price_max = filters.maxPrice;
 
@@ -390,7 +390,7 @@ export class AdsApiService {
     };
   }
 
-  async syncProperties(regions?: string[], credentials?: { email: string; password: string }): Promise<{
+  async syncProperties(cities?: string[], credentials?: { email: string; password: string }): Promise<{
     imported: number;
     updated: number;
     errors: string[];
@@ -406,17 +406,24 @@ export class AdsApiService {
     try {
       // Получаем строгий список регионов из базы данных приложения
       const allowedRegions = await storage.getRegions();
-      const allowedRegionNames = allowedRegions.map(r => r.name.toLowerCase());
+      const allowedCityNames = allowedRegions.map(r => r.name.toLowerCase());
       
-      console.log('Allowed regions from database:', allowedRegionNames);
+      console.log('Allowed cities from database:', allowedCityNames);
 
-      // Убираем неподдерживаемый параметр region и используем только базовые фильтры
-      const filters = { limit: 20 }; // Ограничиваем количество для тестирования
-      const response = await this.fetchProperties(filters, credentials);
-
-      console.log(`Processing ${response.data.length} properties from ADS API`);
+      // Используем параметр city согласно документации ads-api.ru
+      const citiesToSync = cities || allowedCityNames.slice(0, 3); // Ограничиваем для тестирования
       
-      for (let i = 0; i < response.data.length; i++) {
+      for (const city of citiesToSync) {
+        console.log(`Syncing properties for city: ${city}`);
+        const filters = { 
+          city: city,
+          limit: 10 // Ограничиваем количество для тестирования
+        };
+        const response = await this.fetchProperties(filters, credentials);
+
+        console.log(`Processing ${response.data.length} properties from ADS API for city: ${city}`);
+        
+        for (let i = 0; i < response.data.length; i++) {
         const adsProperty = response.data[i];
         
         try {
