@@ -63,6 +63,7 @@ export const properties = pgTable("properties", {
   source: varchar("source", { length: 50 }).default("ads-api.ru"),
   url: varchar("url", { length: 1000 }),
   phone: varchar("phone", { length: 50 }),
+  imageUrl: varchar("image_url", { length: 1000 }),
   autoClassified: boolean("auto_classified").default(false),
   manualOverride: boolean("manual_override").default(false),
   isActive: boolean("is_active").default(true),

@@ -6,6 +6,7 @@ import { simpleInvestmentAnalyticsService } from "./services/simpleInvestmentAna
 import { analyticsService } from "./services/analyticsService";
 import { blankBankPaymentService } from "./services/paymentService";
 import { ReferralService } from "./services/referralService";
+import { adsApiService } from "./services/adsApiService";
 import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware/auth";
 import { requireAuth as requireRoleAuth, requireAdmin, checkAIQuota } from "./middleware/authMiddleware";
 import { UserService } from "./services/userService";

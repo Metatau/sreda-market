@@ -9,6 +9,8 @@ const configSchema = z.object({
   SESSION_SECRET: z.string().default('dev-session-secret'),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_BOT_USERNAME: z.string().optional(),
+  ADS_API_KEY: z.string().optional(),
+  ADS_API_URL: z.string().optional().default('https://api.ads-api.ru/v1'),
 });
 
 export const config = configSchema.parse(process.env);
