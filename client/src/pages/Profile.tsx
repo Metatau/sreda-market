@@ -113,7 +113,6 @@ export function Profile() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Профиль Header */}
         <Card className="mb-8">
@@ -290,7 +289,7 @@ export function Profile() {
                       </Badge>
                       <div className="mt-4">
                         <div className="text-3xl font-bold text-gray-900">Бесплатно</div>
-                        <div className="text-sm text-gray-600">на 30 дней</div>
+                        <div className="text-sm text-gray-600">на 3 дня</div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
