@@ -142,12 +142,9 @@ export default function Home() {
               filters={filters} 
               onFiltersChange={setFilters}
             />
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
+            
             {/* Analytics Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="mt-6 space-y-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Средняя доходность</CardTitle>
@@ -194,6 +191,11 @@ export default function Home() {
                 </CardContent>
               </Card>
             </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+
 
             {/* Property Section Header */}
             <div className="flex items-center justify-between mb-6">
