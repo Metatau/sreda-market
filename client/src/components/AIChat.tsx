@@ -112,7 +112,6 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
           <i className="fas fa-robot text-xl"></i>
         </Button>
       </div>
-
       {/* Full Screen AI Panel */}
       {isOpen && (
         <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm">
@@ -123,7 +122,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                 {/* Header */}
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">AI Помощник по недвижимости</h2>
+                    <h2 className="text-xl font-bold text-gray-900">AI SREDA</h2>
                     <Button
                       variant="ghost"
                       size="sm"
