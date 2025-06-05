@@ -40,6 +40,8 @@ interface Property {
   metroStation?: string;
   url?: string;
   phone?: string;
+  source?: string;
+  imageUrl?: string;
   region?: {
     id: number;
     name: string;
@@ -563,19 +565,28 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
               </div>
             )}
             
-            {property.url && (
-              <div className="flex items-center space-x-2">
-                <ExternalLink className="w-4 h-4 text-gray-500" />
+            <div className="flex items-center space-x-2">
+              <ExternalLink className="w-4 h-4 text-gray-500" />
+              {property.url ? (
                 <a 
                   href={property.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  Открыть объявление на {property.source || 'источнике'}
+                  Открыть объявление на ads-api.ru
                 </a>
-              </div>
-            )}
+              ) : (
+                <a 
+                  href="https://ads-api.ru/main"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Перейти на ads-api.ru
+                </a>
+              )}
+            </div>
           </div>
         </Card>
 

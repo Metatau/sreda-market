@@ -382,6 +382,8 @@ export class AdsApiService {
         : null,
       propertyType: String(adsProperty.propertyType || adsProperty.category || 'квартира'),
       marketType: this.determineMarketType(adsProperty),
+      url: adsProperty.url || null,
+      source: adsProperty.source || 'ads-api.ru',
       isActive: true,
       createdAt: adsProperty.createdAt ? new Date(adsProperty.createdAt) : new Date(),
       updatedAt: adsProperty.updatedAt ? new Date(adsProperty.updatedAt) : new Date(),
