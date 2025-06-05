@@ -99,6 +99,27 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
           </Select>
         </div>
 
+        {/* Property Type Filter */}
+        <div className="space-y-2">
+          <Label>Тип недвижимости</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant={filters.propertyType === 'secondary' ? "default" : "outline"}
+              onClick={() => handleFilterChange('propertyType', filters.propertyType === 'secondary' ? undefined : 'secondary')}
+              className="h-10"
+            >
+              Вторичка
+            </Button>
+            <Button
+              variant={filters.propertyType === 'new' ? "default" : "outline"}
+              onClick={() => handleFilterChange('propertyType', filters.propertyType === 'new' ? undefined : 'new')}
+              className="h-10"
+            >
+              Новостройки
+            </Button>
+          </div>
+        </div>
+
         {/* Property Class Filter */}
         <div className="space-y-2">
           <Label>Класс недвижимости</Label>
