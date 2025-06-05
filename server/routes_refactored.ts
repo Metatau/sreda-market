@@ -145,12 +145,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.saveChatMessage({
         sessionId: sessionId || `session_${Date.now()}`,
         role: "assistant",
-        content: typeof response === 'string' ? response : response.message || 'Response generated',
+        content: response.message || response,
         createdAt: new Date(),
       });
 
       res.json({
-        message: typeof response === 'string' ? response : response.message || 'Response generated',
+        message: response.message || response,
         sessionId: sessionId || `session_${Date.now()}`,
       });
     } catch (error) {
