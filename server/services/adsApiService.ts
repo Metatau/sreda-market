@@ -35,60 +35,74 @@ interface AdsApiResponse {
 export class AdsApiService {
   private baseUrl: string;
   private apiKey: string;
+  private userEmail: string;
 
   constructor() {
-    // Попробуем несколько возможных базовых URLs для API
-    this.baseUrl = process.env.ADS_API_URL || 'https://ads-api.ru/api/v1';
+    this.baseUrl = 'https://ads-api.ru/main';
     this.apiKey = process.env.ADS_API_KEY || '1699b3bd91f1529aaeb9797a951cde4b';
+    this.userEmail = process.env.ADS_API_LOGIN || '';
 
     console.log('ADS API Configuration:');
-    console.log('URL:', this.baseUrl);
+    console.log('Base URL:', this.baseUrl);
     console.log('Access Token:', this.apiKey ? this.apiKey.substring(0, 8) + '...' : 'Not configured');
+    console.log('Login:', this.userEmail || 'Not configured');
   }
 
   private async makeRequest<T>(endpoint: string, params?: Record<string, any>, credentials?: { email: string; password: string }): Promise<T> {
-    // Используем access_token если он настроен
-    const accessToken = this.apiKey || '1699b3bd91f1529aaeb9797a951cde4b';
-    
-    if (!accessToken) {
-      throw new Error('ADS API access token not configured');
-    }
-
     const url = new URL(`${this.baseUrl}${endpoint}`);
     
-    // Добавляем access_token как обязательный параметр
-    url.searchParams.append('access_token', accessToken);
+    // Добавляем обязательные параметры для ads-api.ru согласно документации
+    const userEmail = credentials?.email || this.userEmail;
+    const token = this.apiKey;
     
-    // Добавляем остальные параметры
+    if (!userEmail || !token) {
+      throw new Error('ADS API requires user email and token for authentication');
+    }
+    
+    // Обязательные параметры согласно документации ads-api.ru
+    url.searchParams.set('user', userEmail);
+    url.searchParams.set('token', token);
+    url.searchParams.set('format', 'json');
+    
+    // Добавляем дополнительные параметры
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          url.searchParams.append(key, value.toString());
+          url.searchParams.set(key, String(value));
         }
       });
     }
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    console.log('Making request to:', url.toString());
-    console.log('Headers:', { ...headers, Authorization: '[REDACTED]' });
+    // Скрываем конфиденциальные данные в логах
+    const sanitizedUrl = url.toString().replace(token, '[TOKEN]').replace(userEmail, '[EMAIL]');
+    console.log(`Making ADS API request to: ${sanitizedUrl}`);
 
     const response = await fetch(url.toString(), {
-      headers,
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'SREDA-Market/1.0'
+      }
     });
 
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    console.log(`ADS API response status: ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('Error response body:', errorText);
-      throw new Error(`ADS API error: ${response.status} ${response.statusText} - ${errorText}`);
+      console.error('ADS API Error Response:', errorText.substring(0, 500));
+      throw new Error(`ADS API error: ${response.status} ${response.statusText}`);
     }
 
-    return response.json();
+    const responseText = await response.text();
+    
+    try {
+      const jsonResponse = JSON.parse(responseText) as T;
+      console.log('ADS API response parsed successfully');
+      return jsonResponse;
+    } catch (error) {
+      console.error('Failed to parse ADS API JSON response:', responseText.substring(0, 200));
+      throw new Error(`Invalid JSON response from ADS API`);
+    }
   }
 
   async fetchProperties(filters?: {
