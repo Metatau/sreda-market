@@ -833,6 +833,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Загрузка 10 объектов из ads-api.ru
+  app.post("/api/load-properties", async (req, res) => {
+    try {
+      console.log('=== Запуск загрузки 10 объектов из ads-api.ru ===');
+      
+      const { AdsApiService } = await import('./services/adsApiService');
+      const adsApiService = new AdsApiService();
+      
+      // Загружаем объекты для Москвы с ограничением 10 штук
+      const syncResult = await adsApiService.syncProperties(['Москва']);
+      
+      console.log(`Загрузка завершена: ${syncResult.imported} импортировано, ${syncResult.updated} обновлено`);
+      
+      if (syncResult.errors.length > 0) {
+        console.log('Ошибки при загрузке:', syncResult.errors);
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Загрузка объектов завершена",
+        result: {
+          imported: syncResult.imported,
+          updated: syncResult.updated,
+          errors: syncResult.errors,
+          totalProcessed: syncResult.imported + syncResult.updated
+        }
+      });
+    } catch (error) {
+      console.error("Ошибка загрузки объектов:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Ошибка загрузки объектов", 
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // Демонстрация полного цикла обработки данных
   app.post("/api/test-sync", async (req, res) => {
     try {
