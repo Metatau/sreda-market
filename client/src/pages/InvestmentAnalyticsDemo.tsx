@@ -17,6 +17,13 @@ interface Property {
   pricePerSqm?: number;
   area?: string;
   rooms?: number;
+  floor?: number;
+  totalFloors?: number;
+  propertyType?: string;
+  district?: string;
+  metroStation?: string;
+  url?: string;
+  phone?: string;
   region?: {
     id: number;
     name: string;
