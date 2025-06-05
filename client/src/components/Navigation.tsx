@@ -19,7 +19,7 @@ export function Navigation() {
     },
     {
       path: '/map',
-      label: 'Карта объектов',
+      label: 'Карта',
       icon: <Building className="w-4 h-4" />,
       description: 'Интерактивная карта недвижимости'
     },
