@@ -406,6 +406,7 @@ export class AdsApiService {
       imageUrl: (Array.isArray(adsProperty.images) && adsProperty.images.length > 0) 
         ? adsProperty.images[0] 
         : null,
+      images: Array.isArray(adsProperty.images) ? adsProperty.images : [],
       propertyType: String(adsProperty.propertyType || adsProperty.category || 'квартира'),
       marketType: this.determineMarketType(adsProperty),
       url: adsProperty.url || null,
