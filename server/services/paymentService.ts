@@ -8,6 +8,7 @@ interface BlankBankPaymentRequest {
   failUrl?: string;
   customerEmail?: string;
   customerPhone?: string;
+  metadata?: any;
 }
 
 interface BlankBankPaymentResponse {
@@ -24,6 +25,7 @@ interface BlankBankStatusResponse {
   currency: string;
   createdAt: string;
   paidAt?: string;
+  metadata?: any;
 }
 
 export class BlankBankPaymentService {

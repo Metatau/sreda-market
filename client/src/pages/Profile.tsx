@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +37,21 @@ export function Profile() {
     professional: ''
   });
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
+  const [referralStats, setReferralStats] = useState({
+    totalReferrals: 0,
+    paidReferrals: 0,
+    totalEarned: 0,
+    totalSpent: 0,
+    bonusBalance: 0
+  });
+  const [referralCode, setReferralCode] = useState('');
+  const [bonusCalculation, setBonusCalculation] = useState({
+    originalPrice: 0,
+    finalPrice: 0,
+    bonusUsed: 0,
+    bonusAvailable: 0,
+    savings: 0
+  });
 
   if (!isAuthenticated || !user) {
     return (
@@ -167,7 +182,7 @@ export function Profile() {
         </Card>
 
         <Tabs defaultValue="activity" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Активность
@@ -183,6 +198,10 @@ export function Profile() {
             <TabsTrigger value="subscription" className="flex items-center gap-2">
               <Crown className="h-4 w-4" />
               Подписка
+            </TabsTrigger>
+            <TabsTrigger value="referrals" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Рефералы
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />

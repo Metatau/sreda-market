@@ -102,17 +102,21 @@ export class ReferralService {
 
   // Списание бонусов при оплате
   static async spendBonuses(userId: number, amount: number, description: string) {
-    // Обновляем баланс пользователя
-    await db
-      .update(users)
-      .set({
-        bonusBalance: db
-          .select({ balance: users.bonusBalance })
-          .from(users)
-          .where(eq(users.id, userId))
-          .then(([user]) => Math.max(0, parseFloat(user.balance) - amount).toString())
-      })
+    // Получаем текущий баланс пользователя
+    const [currentUser] = await db
+      .select({ balance: users.bonusBalance })
+      .from(users)
       .where(eq(users.id, userId));
+
+    if (currentUser) {
+      const newBalance = Math.max(0, parseFloat(currentUser.balance) - amount);
+      
+      // Обновляем баланс пользователя
+      await db
+        .update(users)
+        .set({ bonusBalance: newBalance.toString() })
+        .where(eq(users.id, userId));
+    }
 
     // Создаем транзакцию списания
     await db
