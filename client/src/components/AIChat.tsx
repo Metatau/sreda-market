@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { X, Flame, Home, TrendingUp, MapPin, BarChart3, Send } from "lucide-react";
 import { chatApi } from "@/services/api";
 import type { ChatMessage } from "@/types";
 
@@ -130,32 +131,35 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                 <div className="flex-1 p-6 space-y-6">
                   <div>
                     <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-                      <i className="fas fa-fire text-orange-500 mr-2"></i>
+                      <Flame className="text-orange-500 mr-2 w-4 h-4" />
                       Популярные вопросы
                     </h3>
                     <div className="space-y-2">
                       {[
-                        { icon: "fas fa-home", text: "Найти квартиру в центре города", category: "Поиск" },
-                        { icon: "fas fa-chart-line", text: "Анализ доходности от аренды", category: "Аналитика" },
-                        { icon: "fas fa-map-marker-alt", text: "Лучшие районы для покупки", category: "Рекомендации" },
-                        { icon: "fas fa-trending-up", text: "Динамика цен за последний год", category: "Тренды" }
-                      ].map((item, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setInputMessage(item.text)}
-                          className="w-full text-left p-3 rounded-lg hover:bg-white border border-gray-200 hover:shadow-sm transition-all duration-200 group"
-                        >
-                          <div className="flex items-start space-x-3">
-                            <i className={`${item.icon} text-blue-500 mt-1`}></i>
-                            <div className="flex-1">
-                              <div className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
-                                {item.text}
+                        { icon: Home, text: "Найти квартиру в центре города", category: "Поиск" },
+                        { icon: BarChart3, text: "Анализ доходности от аренды", category: "Аналитика" },
+                        { icon: MapPin, text: "Лучшие районы для покупки", category: "Рекомендации" },
+                        { icon: TrendingUp, text: "Динамика цен за последний год", category: "Тренды" }
+                      ].map((item, index) => {
+                        const IconComponent = item.icon;
+                        return (
+                          <button
+                            key={index}
+                            onClick={() => setInputMessage(item.text)}
+                            className="w-full text-left p-3 rounded-lg hover:bg-white border border-gray-200 hover:shadow-sm transition-all duration-200 group"
+                          >
+                            <div className="flex items-start space-x-3">
+                              <IconComponent className="text-blue-500 mt-1 w-4 h-4" />
+                              <div className="flex-1">
+                                <div className="text-sm font-medium text-gray-900 group-hover:text-blue-600">
+                                  {item.text}
+                                </div>
+                                <div className="text-xs text-gray-500">{item.category}</div>
                               </div>
-                              <div className="text-xs text-gray-500">{item.category}</div>
                             </div>
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -184,18 +188,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
               <div className="flex-1 flex flex-col">
                 {/* Chat Header */}
                 <div className="p-6 border-b border-gray-200 bg-white">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                      <span className="font-quantum text-white text-xs font-bold">AI</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Чат с AI агентом</h3>
-                      <p className="text-sm text-gray-500">
-                        Привет! Я AI-агент SREDA. Могу помочь с анализом недвижимости, 
-                        поиском объектов и инвестиционными расчетами. Чем вам помочь?
-                      </p>
-                    </div>
-                  </div>
+                  
                   
                   {/* Suggested Actions */}
                   <div className="mt-4 flex flex-wrap gap-2">
