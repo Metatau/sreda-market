@@ -332,20 +332,7 @@ export function PropertyMap({
           </div>
         </div>
 
-        {/* Map Legend */}
-        {heatmapMode === 'none' && (
-          <div className="absolute top-4 right-4 z-10 bg-white/90 rounded-lg shadow-md p-3">
-            <h4 className="text-sm font-medium mb-2">Классы недвижимости</h4>
-            <div className="space-y-1 text-xs">
-              {["Эконом", "Стандарт", "Комфорт", "Бизнес", "Элит"].map((className) => (
-                <div key={className} className="flex items-center space-x-2">
-                  <div className={`w-3 h-3 rounded-full ${getPropertyClassColor(className)}`}></div>
-                  <span>{className}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Map Container */}
         <div ref={mapContainer} className="h-96 w-full" />
