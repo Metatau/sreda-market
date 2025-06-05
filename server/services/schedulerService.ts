@@ -3,6 +3,9 @@ import { AdsApiService } from './adsApiService';
 import { PropertyValidationService } from './propertyValidationService';
 import { InvestmentCalculationService } from './investmentCalculationService';
 import { storage } from '../storage';
+import { db } from '../db';
+import { properties, propertyAnalytics, investmentAnalytics, priceHistory } from '../../shared/schema';
+import { eq } from 'drizzle-orm';
 
 export class SchedulerService {
   private adsApiService: AdsApiService;
@@ -117,19 +120,19 @@ export class SchedulerService {
 
   private async removeInvalidProperty(propertyId: number): Promise<void> {
     try {
-      // Удаляем связанные записи
-      await storage.db.delete(storage.schema.propertyAnalytics)
-        .where(storage.schema.propertyAnalytics.propertyId.eq(propertyId));
+      // Удаляем связанные записи через SQL
+      await db.delete(propertyAnalytics)
+        .where(eq(propertyAnalytics.propertyId, propertyId));
       
-      await storage.db.delete(storage.schema.investmentAnalytics)
-        .where(storage.schema.investmentAnalytics.propertyId.eq(propertyId));
+      await db.delete(investmentAnalytics)
+        .where(eq(investmentAnalytics.propertyId, propertyId));
       
-      await storage.db.delete(storage.schema.priceHistory)
-        .where(storage.schema.priceHistory.propertyId.eq(propertyId));
+      await db.delete(priceHistory)
+        .where(eq(priceHistory.propertyId, propertyId));
 
       // Удаляем основную запись
-      await storage.db.delete(storage.schema.properties)
-        .where(storage.schema.properties.id.eq(propertyId));
+      await db.delete(properties)
+        .where(eq(properties.id, propertyId));
 
       console.log(`Successfully removed property ${propertyId} and all related data`);
     } catch (error) {

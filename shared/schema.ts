@@ -87,10 +87,13 @@ export const propertyAnalytics = pgTable("property_analytics", {
   regionId: integer("region_id").references(() => regions.id),
   roi: decimal("roi", { precision: 5, scale: 2 }),
   liquidityScore: integer("liquidity_score"),
-  investmentRating: varchar("investment_rating", { length: 10 }),
+  investmentScore: integer("investment_score"),
+  investmentRating: varchar("investment_rating", { length: 20 }),
   priceGrowthRate: decimal("price_growth_rate", { precision: 5, scale: 2 }),
   marketTrend: varchar("market_trend", { length: 20 }),
   calculatedAt: timestamp("calculated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Таблица исторических данных цен
