@@ -75,15 +75,6 @@ export function Navigation() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
-              onClick={logout}
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-2"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Выйти</span>
-            </Button>
             <LoginButton />
           </div>
         </div>
