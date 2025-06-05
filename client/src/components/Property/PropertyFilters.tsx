@@ -173,42 +173,7 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
           </div>
         </div>
 
-        {/* AI Search */}
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 mb-2">
-              <i className="fas fa-robot text-blue-600"></i>
-              <Label className="font-medium">ИИ-поиск</Label>
-            </div>
-            <p className="text-sm text-gray-600 mb-3">
-              Опишите, что вы ищете
-            </p>
-            <Textarea
-              placeholder="Например: 'Ищу квартиру для инвестиций с хорошей доходностью в центре Москвы'"
-              value={aiQuery}
-              onChange={(e) => setAiQuery(e.target.value)}
-              className="mb-3 resize-none"
-              rows={3}
-            />
-            <Button
-              onClick={handleAISearch}
-              disabled={aiSearchMutation.isPending || !aiQuery.trim()}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              {aiSearchMutation.isPending ? (
-                <>
-                  <i className="fas fa-spinner fa-spin mr-2"></i>
-                  Поиск...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-search mr-2"></i>
-                  Найти с ИИ
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+
       </CardContent>
     </Card>
   );
