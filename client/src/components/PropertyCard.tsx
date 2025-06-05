@@ -97,7 +97,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
         </Button>
       </div>
       <CardContent className="p-5">
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{property.title}</h3>
+        <h3 className="text-gray-900 mb-2 line-clamp-2 font-normal">{property.title}</h3>
 
         <div className="flex items-center text-sm text-gray-600 mb-3">
           <i className="fas fa-map-marker-alt mr-1"></i>
