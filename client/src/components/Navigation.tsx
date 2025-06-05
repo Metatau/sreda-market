@@ -29,26 +29,24 @@ export function Navigation() {
       icon: <BarChart3 className="w-4 h-4" />,
       description: 'Анализ доходности и рисков'
     },
-    ...(isAuthenticated ? [
-      {
-        path: '/favorites',
-        label: 'Избранное',
-        icon: <Heart className="w-4 h-4" />,
-        description: 'Избранные объекты недвижимости'
-      },
-      {
-        path: '/comparison',
-        label: 'Сравнение',
-        icon: <Scale className="w-4 h-4" />,
-        description: 'Сравнение объектов недвижимости'
-      },
-      {
-        path: '/profile',
-        label: 'Профиль',
-        icon: <User className="w-4 h-4" />,
-        description: 'Личный кабинет пользователя'
-      }
-    ] : [])
+    {
+      path: '/favorites',
+      label: 'Избранное',
+      icon: <Heart className="w-4 h-4" />,
+      description: 'Избранные объекты недвижимости'
+    },
+    {
+      path: '/comparison',
+      label: 'Сравнение',
+      icon: <Scale className="w-4 h-4" />,
+      description: 'Сравнение объектов недвижимости'
+    },
+    {
+      path: '/profile',
+      label: 'Профиль',
+      icon: <User className="w-4 h-4" />,
+      description: 'Личный кабинет пользователя'
+    }
   ];
 
   return (
