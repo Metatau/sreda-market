@@ -1002,8 +1002,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/data-quality", requireAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { dataCleanupService } = await import('./services/dataCleanupService');
-      const stats = await dataCleanupService.getDataQualityStats();
-      res.json({ success: true, data: stats });
+      const { PropertyValidationService } = await import('./services/propertyValidationService');
+      
+      // Получаем базовую статистику качества данных
+      const basicStats = await dataCleanupService.getDataQualityStats();
+      
+      // Получаем расширенную статистику валидации
+      const validationService = new PropertyValidationService();
+      const validationStats = await validationService.getValidationStats();
+      
+      // Комбинируем статистику
+      const combinedStats = {
+        ...basicStats,
+        validation: {
+          total: validationStats.total,
+          valid: validationStats.valid,
+          invalidPrice: validationStats.invalidPrice,
+          invalidImages: validationStats.invalidImages,
+          invalidFields: validationStats.invalidFields,
+          invalidCity: validationStats.invalidCity,
+          rentalProperties: validationStats.rentalProperties,
+          validationRate: validationStats.total > 0 ? 
+            Math.round((validationStats.valid / validationStats.total) * 100) : 0
+        }
+      };
+      
+      res.json({ success: true, data: combinedStats });
     } catch (error) {
       console.error("Error getting data quality stats:", error);
       res.status(500).json({ 

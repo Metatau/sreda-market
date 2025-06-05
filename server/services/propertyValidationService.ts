@@ -55,24 +55,90 @@ export class PropertyValidationService {
       return false;
     }
 
-    // 2. Проверка наличия достаточного количества фотографий
+    // 2. Проверка что объект предназначен для продажи (не аренды)
+    if (!this.isForSale(property)) {
+      console.log(`Property ${property.id} rejected: rental property, only sale properties allowed`);
+      return false;
+    }
+
+    // 3. Проверка наличия достаточного количества фотографий
     if (!this.hasValidImages(property)) {
       console.log(`Property ${property.id} rejected: insufficient images`);
       return false;
     }
 
-    // 3. Проверка цены относительно рыночной
+    // 4. Проверка цены относительно рыночной
     if (!await this.isValidPrice(property)) {
       console.log(`Property ${property.id} rejected: price deviation >20% from market`);
       return false;
     }
 
-    // 4. Проверка обязательных полей
+    // 5. Проверка обязательных полей
     if (!this.hasRequiredFields(property)) {
       console.log(`Property ${property.id} rejected: missing required fields`);
       return false;
     }
 
+    return true;
+  }
+
+  /**
+   * Проверяет что объект предназначен для продажи (не аренды)
+   */
+  private isForSale(property: PropertyWithRelations): boolean {
+    // Ключевые слова указывающие на аренду
+    const rentalKeywords = [
+      'аренда', 'сдам', 'сдается', 'сдаю', 'снять', 'сниму', 'снимем',
+      'арендовать', 'арендую', 'в аренду', 'долгосрочная аренда',
+      'посуточно', 'на сутки', 'суточная аренда', 'краткосрочная аренда',
+      'съем', 'съём', 'rental', 'rent', 'месяц', 'мес.',
+      'в месяц', '/мес', 'помесячно', 'ежемесячно'
+    ];
+
+    // Ключевые слова указывающие на продажу
+    const saleKeywords = [
+      'продам', 'продается', 'продаю', 'продажа', 'купить',
+      'приобрести', 'владение', 'собственность', 'покупка',
+      'sale', 'sell', 'млн', 'миллионов', 'тыс.'
+    ];
+
+    const title = property.title?.toLowerCase() || '';
+    const description = property.description?.toLowerCase() || '';
+    const fullText = `${title} ${description}`;
+
+    // Проверяем наличие слов указывающих на аренду
+    const hasRentalKeywords = rentalKeywords.some(keyword => 
+      fullText.includes(keyword.toLowerCase())
+    );
+
+    // Если найдены признаки аренды, отклоняем
+    if (hasRentalKeywords) {
+      return false;
+    }
+
+    // Дополнительная проверка по цене - аренда обычно дешевле продажи
+    const price = property.price || 0;
+    
+    // Если цена слишком низкая для продажи (менее 500,000 руб.), возможно это аренда
+    if (price < 500000) {
+      // Проверяем есть ли явные признаки продажи
+      const hasSaleKeywords = saleKeywords.some(keyword => 
+        fullText.includes(keyword.toLowerCase())
+      );
+      
+      // Если цена низкая и нет явных признаков продажи, отклоняем
+      if (!hasSaleKeywords) {
+        return false;
+      }
+    }
+
+    // URL может содержать информацию о типе объявления
+    const url = property.url?.toLowerCase() || '';
+    if (url.includes('rent') || url.includes('arenda') || url.includes('sdam')) {
+      return false;
+    }
+
+    // По умолчанию считаем что это продажа
     return true;
   }
 
@@ -265,6 +331,8 @@ export class PropertyValidationService {
     invalidPrice: number;
     invalidImages: number;
     invalidFields: number;
+    invalidCity: number;
+    rentalProperties: number;
   }> {
     const { properties } = await storage.getProperties({}, { page: 1, perPage: 10000 });
     
@@ -272,8 +340,20 @@ export class PropertyValidationService {
     let invalidPrice = 0;
     let invalidImages = 0;
     let invalidFields = 0;
+    let invalidCity = 0;
+    let rentalProperties = 0;
 
     for (const property of properties) {
+      if (!(await this.isFromAllowedCity(property))) {
+        invalidCity++;
+        continue;
+      }
+
+      if (!this.isForSale(property)) {
+        rentalProperties++;
+        continue;
+      }
+
       if (!this.hasRequiredFields(property)) {
         invalidFields++;
         continue;
@@ -297,7 +377,9 @@ export class PropertyValidationService {
       valid,
       invalidPrice,
       invalidImages,
-      invalidFields
+      invalidFields,
+      invalidCity,
+      rentalProperties
     };
   }
 }
