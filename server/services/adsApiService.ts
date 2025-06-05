@@ -221,6 +221,67 @@ export class AdsApiService {
     return this.convertAdsProperty(adsProperty);
   }
 
+  determineMarketType(adsProperty: AdsApiProperty): 'secondary' | 'new_construction' {
+    const title = (adsProperty.title || '').toLowerCase();
+    const description = (adsProperty.description || '').toLowerCase();
+    const combined = title + ' ' + description;
+
+    // Ключевые слова для новостроек
+    const newConstructionKeywords = [
+      'новостройка', 'новострой', 'от застройщика', 'первичный рынок', 
+      'новый дом', 'сдача дома', 'готовность', 'ввод в эксплуатацию',
+      'первичная продажа', 'от девелопера', 'жк ', 'жилой комплекс',
+      'строящийся', 'новое строительство', 'сданный дом'
+    ];
+
+    // Ключевые слова для вторичного рынка
+    const secondaryKeywords = [
+      'вторичка', 'вторичный рынок', 'от собственника', 
+      'продам квартиру', 'хорошее состояние', 'косметический ремонт',
+      'евроремонт', 'требует ремонта', 'после ремонта', 'жилое состояние'
+    ];
+
+    // Проверяем год постройки - если есть и недавний, то скорее всего новостройка
+    const currentYear = new Date().getFullYear();
+    const buildYear = this.extractBuildYear(combined);
+    if (buildYear && buildYear >= currentYear - 3) {
+      return 'new_construction';
+    }
+
+    // Проверяем ключевые слова для новостроек
+    const hasNewConstructionKeywords = newConstructionKeywords.some(keyword => 
+      combined.includes(keyword)
+    );
+
+    // Проверяем ключевые слова для вторичного рынка
+    const hasSecondaryKeywords = secondaryKeywords.some(keyword => 
+      combined.includes(keyword)
+    );
+
+    if (hasNewConstructionKeywords && !hasSecondaryKeywords) {
+      return 'new_construction';
+    }
+
+    if (hasSecondaryKeywords && !hasNewConstructionKeywords) {
+      return 'secondary';
+    }
+
+    // По умолчанию считаем вторичным рынком
+    return 'secondary';
+  }
+
+  private extractBuildYear(text: string): number | null {
+    // Ищем упоминания года постройки в тексте
+    const yearMatches = text.match(/(?:построен|построенного|года постройки|год постройки).*?(\d{4})/);
+    if (yearMatches && yearMatches[1]) {
+      const year = parseInt(yearMatches[1], 10);
+      if (year >= 1950 && year <= new Date().getFullYear() + 2) {
+        return year;
+      }
+    }
+    return null;
+  }
+
   private async convertAdsProperty(adsProperty: AdsApiProperty): Promise<InsertProperty> {
     // Дополнительная проверка типа недвижимости - только квартиры
     const title = (adsProperty.title || '').toLowerCase().trim();
@@ -320,6 +381,7 @@ export class AdsApiService {
         ? adsProperty.images[0] 
         : null,
       propertyType: String(adsProperty.propertyType || adsProperty.category || 'квартира'),
+      marketType: this.determineMarketType(adsProperty),
       isActive: true,
       createdAt: adsProperty.createdAt ? new Date(adsProperty.createdAt) : new Date(),
       updatedAt: adsProperty.updatedAt ? new Date(adsProperty.updatedAt) : new Date(),

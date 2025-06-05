@@ -38,6 +38,7 @@ export interface Property {
   metroStation?: string;
   coordinates?: string;
   propertyType: string;
+  marketType?: 'secondary' | 'new_construction';
   source: string;
   url?: string;
   phone?: string;
