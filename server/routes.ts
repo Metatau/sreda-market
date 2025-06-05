@@ -6,8 +6,7 @@ import { simpleInvestmentAnalyticsService } from "./services/simpleInvestmentAna
 import { analyticsService } from "./services/analyticsService";
 import { blankBankPaymentService } from "./services/paymentService";
 import { ReferralService } from "./services/referralService";
-import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware/auth";
-import { requireAuth as requireRoleAuth, requireAdmin, checkAIQuota } from "./middleware/authMiddleware";
+import { requireAuth, requireAdmin, optionalAuth, checkAIQuota, type AuthenticatedRequest } from "./middleware/secureAuth";
 import { UserService } from "./services/userService";
 import { TelegramAuthService } from "./services/telegramAuthService";
 import { RegionController } from "./controllers/RegionController";
@@ -15,9 +14,17 @@ import { PropertyClassController } from "./controllers/PropertyClassController";
 import { PropertyController } from "./controllers/PropertyController";
 import { PropertyService } from "./services/PropertyService";
 import { globalErrorHandler } from "./utils/errors";
+import { securityHeaders, apiRateLimit, validateRequest, corsMiddleware, aiRateLimit } from "./middleware/security";
+import authRoutes from "./routes/auth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Apply security middleware
+  app.use(corsMiddleware);
+  app.use(securityHeaders);
+  app.use(validateRequest);
+  app.use('/api', apiRateLimit);
+
   // Инициализация администратора при запуске
   try {
     await UserService.initializeAdministrator();
@@ -30,6 +37,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const regionController = new RegionController();
   const propertyClassController = new PropertyClassController();
   const propertyController = new PropertyController(propertyService);
+
+  // Auth routes
+  app.use('/api/auth', authRoutes);
 
   // Health check
   app.get("/api/health", (req, res) => {
@@ -137,7 +147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User management endpoints
-  app.get("/api/users/profile", requireRoleAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/users/profile", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const user = await storage.getUser(parseInt(req.user!.id.toString()));
       if (!user) {
@@ -259,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/ai-limits", requireRoleAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/users/ai-limits", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const aiLimits = await UserService.getAILimits(parseInt(req.user!.id.toString()));
       res.json(aiLimits);
@@ -282,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat with role-based access and quota checking
-  app.post("/api/chat", requireRoleAuth, checkAIQuota, async (req, res) => {
+  app.post("/api/chat", requireAuth, checkAIQuota, aiRateLimit, async (req, res) => {
     try {
       const { message, sessionId } = req.body;
       

@@ -77,6 +77,9 @@ export class AuthService {
     // Hash password
     const hashedPassword = await this.hashPassword(validatedData.password);
 
+    // Generate referral code
+    const referralCode = `REF_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
     // Create user
     const newUser = await storage.createUser({
       username: validatedData.username,
@@ -85,6 +88,7 @@ export class AuthService {
       firstName: validatedData.firstName,
       lastName: validatedData.lastName,
       role: 'client',
+      referralCode,
       bonusBalance: '0.00',
       subscriptionType: null,
       subscriptionExpiresAt: null,
