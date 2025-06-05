@@ -29,6 +29,7 @@ export interface Property {
   price: number;
   pricePerSqm?: number;
   area?: string;
+  totalArea?: number;
   rooms?: number;
   floor?: number;
   totalFloors?: number;
@@ -45,6 +46,7 @@ export interface Property {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  investmentRating?: number;
   region?: Region;
   propertyClass?: PropertyClass;
   analytics?: PropertyAnalytics;
@@ -89,6 +91,9 @@ export interface SearchFilters {
   propertyType?: string;
   query?: string;
 }
+
+// Alias for backward compatibility
+export type PropertyFilters = SearchFilters;
 
 export interface Pagination {
   page: number;
