@@ -37,7 +37,7 @@ export class AdsApiService {
   private apiKey: string;
 
   constructor() {
-    this.baseUrl = process.env.ADS_API_URL || 'https://api.ads-api.ru/v1';
+    this.baseUrl = process.env.ADS_API_URL || 'https://ads-api.ru/api/v1';
     this.apiKey = process.env.ADS_API_KEY || '';
 
     if (!this.apiKey) {
