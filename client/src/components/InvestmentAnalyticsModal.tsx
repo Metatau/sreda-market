@@ -16,7 +16,13 @@ import {
   Target,
   BarChart3,
   PieChart,
-  Activity
+  Activity,
+  MapPin,
+  Building,
+  Layers,
+  Phone,
+  ExternalLink,
+  ImageIcon
 } from "lucide-react";
 
 interface Property {
@@ -27,6 +33,21 @@ interface Property {
   pricePerSqm?: number;
   area?: string;
   rooms?: number;
+  floor?: number;
+  totalFloors?: number;
+  propertyType?: string;
+  district?: string;
+  metroStation?: string;
+  url?: string;
+  phone?: string;
+  region?: {
+    id: number;
+    name: string;
+  };
+  propertyClass?: {
+    id: number;
+    name: string;
+  };
 }
 
 interface InvestmentAnalytics {
@@ -403,6 +424,172 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
     );
   };
 
+  const PropertyDetails = () => {
+    const getPropertyTypeName = (type: string) => {
+      const types = {
+        'apartment': 'Квартира',
+        'house': 'Дом',
+        'townhouse': 'Таунхаус',
+        'studio': 'Студия',
+        'loft': 'Лофт',
+        'penthouse': 'Пентхаус'
+      };
+      return types[type as keyof typeof types] || type;
+    };
+
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-semibold flex items-center">
+          <Building className="w-5 h-5 mr-2" />
+          Информация об объекте
+        </h3>
+        
+        {/* Основная информация */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="p-4">
+            <h4 className="font-medium mb-4 flex items-center">
+              <Home className="w-4 h-4 mr-2" />
+              Основные характеристики
+            </h4>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Стоимость:</span>
+                <span className="font-semibold text-lg text-green-600">
+                  {property.price.toLocaleString('ru-RU')} ₽
+                </span>
+              </div>
+              {property.pricePerSqm && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Цена за м²:</span>
+                  <span className="font-medium">
+                    {property.pricePerSqm.toLocaleString('ru-RU')} ₽/м²
+                  </span>
+                </div>
+              )}
+              {property.area && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Площадь:</span>
+                  <span className="font-medium">{property.area} м²</span>
+                </div>
+              )}
+              {property.rooms && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Комнат:</span>
+                  <span className="font-medium">{property.rooms}</span>
+                </div>
+              )}
+              {property.floor && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Этаж:</span>
+                  <span className="font-medium">
+                    {property.floor}{property.totalFloors ? ` из ${property.totalFloors}` : ''}
+                  </span>
+                </div>
+              )}
+              {property.propertyType && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Тип:</span>
+                  <span className="font-medium">
+                    {getPropertyTypeName(property.propertyType)}
+                  </span>
+                </div>
+              )}
+              {property.propertyClass && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Класс:</span>
+                  <Badge variant="outline" className="font-medium">
+                    {property.propertyClass.name}
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <h4 className="font-medium mb-4 flex items-center">
+              <MapPin className="w-4 h-4 mr-2" />
+              Расположение
+            </h4>
+            <div className="space-y-3">
+              <div>
+                <span className="text-gray-600 block text-sm">Адрес:</span>
+                <span className="font-medium">{property.address}</span>
+              </div>
+              {property.district && (
+                <div>
+                  <span className="text-gray-600 block text-sm">Район:</span>
+                  <span className="font-medium">{property.district}</span>
+                </div>
+              )}
+              {property.metroStation && (
+                <div>
+                  <span className="text-gray-600 block text-sm">Станция метро:</span>
+                  <span className="font-medium">{property.metroStation}</span>
+                </div>
+              )}
+              {property.region && (
+                <div>
+                  <span className="text-gray-600 block text-sm">Регион:</span>
+                  <span className="font-medium">{property.region.name}</span>
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+
+        {/* Контактная информация и ссылки */}
+        <Card className="p-4">
+          <h4 className="font-medium mb-4 flex items-center">
+            <Phone className="w-4 h-4 mr-2" />
+            Контакты и ссылки
+          </h4>
+          <div className="flex flex-wrap gap-4">
+            {property.phone && (
+              <div className="flex items-center space-x-2">
+                <Phone className="w-4 h-4 text-gray-500" />
+                <a 
+                  href={`tel:${property.phone}`}
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  {property.phone}
+                </a>
+              </div>
+            )}
+            {property.url && (
+              <div className="flex items-center space-x-2">
+                <ExternalLink className="w-4 h-4 text-gray-500" />
+                <a 
+                  href={property.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Открыть объявление
+                </a>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* Заглушка для фотографий */}
+        <Card className="p-4">
+          <h4 className="font-medium mb-4 flex items-center">
+            <ImageIcon className="w-4 h-4 mr-2" />
+            Фотографии объекта
+          </h4>
+          <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div className="text-center">
+              <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+              <p className="text-sm text-gray-500">
+                Фотографии будут загружены из источника объявления
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -459,11 +646,12 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
 
         {/* Табы с детальной информацией */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Обзор</TabsTrigger>
             <TabsTrigger value="dynamics">Динамика</TabsTrigger>
             <TabsTrigger value="location">Локация</TabsTrigger>
             <TabsTrigger value="costs">Расходы</TabsTrigger>
+            <TabsTrigger value="details">Объект</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-6">
@@ -480,6 +668,10 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
 
           <TabsContent value="costs" className="mt-6">
             <CostBreakdown />
+          </TabsContent>
+
+          <TabsContent value="details" className="mt-6">
+            <PropertyDetails />
           </TabsContent>
         </Tabs>
         </DialogContent>
