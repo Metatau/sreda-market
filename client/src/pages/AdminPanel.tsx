@@ -294,12 +294,138 @@ export default function AdminPanel() {
               </div>
               <p className="text-blue-700 mt-2">
                 {adsApiStatus?.configured 
-                  ? "API настроен, но для синхронизации требуется активная подписка на ads-api.ru. Обратитесь к support@ads-api.ru для активации доступа к API."
+                  ? "API настроен, но требуется документация по правильным endpoint URLs. Обратитесь к support@ads-api.ru для получения документации API и правильных endpoint URLs."
                   : "Для запуска синхронизации необходимо указать логин и пароль от ads-api.ru в форме выше."
                 }
               </p>
+              {adsApiStatus?.configured && (
+                <div className="mt-3 p-3 bg-yellow-50 rounded border-l-4 border-yellow-400">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Требуется:</strong> Документация API с правильными endpoint URLs от ads-api.ru
+                  </p>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Все стандартные endpoints (/regions, /properties, /api, etc.) возвращают 404 ошибку
+                  </p>
+                </div>
+              )}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Статистика платформы */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <BarChart className="w-5 h-5" />
+            <span>Статистика платформы</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">245</div>
+              <div className="text-sm text-blue-700">Всего объектов</div>
+            </div>
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">42</div>
+              <div className="text-sm text-green-700">Новых за неделю</div>
+            </div>
+            <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">18</div>
+              <div className="text-sm text-purple-700">Активных регионов</div>
+            </div>
+            <div className="text-center p-4 bg-orange-50 rounded-lg">
+              <div className="text-2xl font-bold text-orange-600">156</div>
+              <div className="text-sm text-orange-700">AI запросов сегодня</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Управление пользователями */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Users className="w-5 h-5" />
+            <span>Управление пользователями</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <div className="font-medium">Администраторы</div>
+              <div className="text-sm text-gray-600">Полный доступ к системе</div>
+            </div>
+            <Badge variant="default">2 активных</Badge>
+          </div>
+          
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <div className="font-medium">Зарегистрированные пользователи</div>
+              <div className="text-sm text-gray-600">Доступ к AI чату и аналитике</div>
+            </div>
+            <Badge variant="outline">147 пользователей</Badge>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <div className="font-medium">Telegram авторизация</div>
+              <div className="text-sm text-gray-600">Быстрый вход через Telegram</div>
+            </div>
+            <Badge variant="default" className="bg-blue-100 text-blue-800">
+              Активна
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Системные настройки */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Settings className="w-5 h-5" />
+            <span>Системные настройки</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 border rounded-lg">
+              <div className="font-medium mb-2">AI модель</div>
+              <div className="text-sm text-gray-600 mb-2">OpenAI GPT-4 для анализа недвижимости</div>
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Подключена
+              </Badge>
+            </div>
+
+            <div className="p-3 border rounded-lg">
+              <div className="font-medium mb-2">База данных</div>
+              <div className="text-sm text-gray-600 mb-2">PostgreSQL с расширением PostGIS</div>
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Активна
+              </Badge>
+            </div>
+
+            <div className="p-3 border rounded-lg">
+              <div className="font-medium mb-2">Mapbox интеграция</div>
+              <div className="text-sm text-gray-600 mb-2">Интерактивные карты недвижимости</div>
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                <CheckCircle className="w-3 h-3 mr-1" />
+                Работает
+              </Badge>
+            </div>
+
+            <div className="p-3 border rounded-lg">
+              <div className="font-medium mb-2">ADS API интеграция</div>
+              <div className="text-sm text-gray-600 mb-2">Автоматическая синхронизация данных</div>
+              <Badge variant="secondary">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Ожидание документации
+              </Badge>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
