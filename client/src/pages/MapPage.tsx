@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
-import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyMap } from "@/components/PropertyMap";
 import { PropertyCard } from "@/components/PropertyCard";
 import { Button } from "@/components/ui/button";
@@ -8,24 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProperties, useRegions } from "@/hooks/useProperties";
-import type { SearchFilters, Property } from "@/types";
+import type { Property } from "@/types";
 
 export default function MapPage() {
-  const [filters, setFilters] = useState<SearchFilters>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("moscow");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
   const { data: regions = [] } = useRegions();
-  const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 20);
+  const { data: propertiesData, isLoading } = useProperties({}, currentPage, 20);
 
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setFilters({ ...filters, search: searchQuery });
+    // Search functionality can be implemented here if needed
     setCurrentPage(1);
   };
 
@@ -88,15 +86,6 @@ export default function MapPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Filters */}
-        <div className="mb-6">
-          <PropertyFilters 
-            filters={filters} 
-            onFiltersChange={setFilters}
-            regions={regions}
-          />
-        </div>
-
         {/* Map View */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Map */}
@@ -104,9 +93,7 @@ export default function MapPage() {
             <Card className="h-[700px]">
               <CardContent className="p-0 h-full">
                 <PropertyMap
-                  properties={properties}
-                  onPropertyClick={handlePropertyClick}
-                  selectedProperty={selectedProperty}
+                  onPropertySelect={handlePropertyClick}
                 />
               </CardContent>
             </Card>
@@ -137,8 +124,7 @@ export default function MapPage() {
                   <PropertyCard
                     key={property.id}
                     property={property}
-                    onClick={() => handlePropertyClick(property)}
-                    isSelected={selectedProperty?.id === property.id}
+                    onSelect={() => handlePropertyClick(property)}
                   />
                 ))}
               </div>
