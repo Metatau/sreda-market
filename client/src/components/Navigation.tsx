@@ -25,7 +25,7 @@ export function Navigation() {
     },
     {
       path: '/analytics',
-      label: 'Инвестиционная аналитика',
+      label: 'Инвестиции',
       icon: <BarChart3 className="w-4 h-4" />,
       description: 'Анализ доходности и рисков'
     },
