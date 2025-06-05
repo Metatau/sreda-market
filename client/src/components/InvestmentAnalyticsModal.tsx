@@ -543,7 +543,14 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
             <Phone className="w-4 h-4 mr-2" />
             Контакты и ссылки
           </h4>
-          <div className="flex flex-wrap gap-4">
+          <div className="space-y-3">
+            {/* Источник объявления */}
+            <div className="flex items-center space-x-2">
+              <ExternalLink className="w-4 h-4 text-gray-500" />
+              <span className="text-gray-600">Источник:</span>
+              <span className="font-medium text-blue-600">{property.source || 'ads-api.ru'}</span>
+            </div>
+            
             {property.phone && (
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-gray-500" />
@@ -555,6 +562,7 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
                 </a>
               </div>
             )}
+            
             {property.url && (
               <div className="flex items-center space-x-2">
                 <ExternalLink className="w-4 h-4 text-gray-500" />
@@ -564,27 +572,96 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline font-medium"
                 >
-                  Открыть объявление
+                  Открыть объявление на {property.source || 'источнике'}
                 </a>
               </div>
             )}
           </div>
         </Card>
 
-        {/* Заглушка для фотографий */}
+        {/* Фотографии объекта */}
         <Card className="p-4">
           <h4 className="font-medium mb-4 flex items-center">
             <ImageIcon className="w-4 h-4 mr-2" />
             Фотографии объекта
           </h4>
-          <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-            <div className="text-center">
-              <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500">
-                Фотографии будут загружены из источника объявления
-              </p>
-            </div>
-          </div>
+          {(() => {
+            if (!property.imageUrl) {
+              return (
+                <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <div className="text-center">
+                    <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-500">
+                      Фотографии недоступны
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            let imageList: string[] = [];
+            try {
+              const parsed = JSON.parse(property.imageUrl);
+              if (Array.isArray(parsed)) {
+                imageList = parsed;
+              } else if (parsed.imgurl) {
+                imageList = [parsed.imgurl];
+              } else if (typeof parsed === 'string') {
+                imageList = [parsed];
+              }
+            } catch {
+              // Если не JSON, возможно это просто URL
+              imageList = [property.imageUrl];
+            }
+
+            const validImages = imageList.filter(url => {
+              if (!url || typeof url !== 'string') return false;
+              return url.includes('http') && (
+                url.includes('.jpg') || 
+                url.includes('.jpeg') || 
+                url.includes('.png') || 
+                url.includes('.webp') ||
+                url.includes('cdn-cian') ||
+                url.includes('image')
+              );
+            });
+
+            if (validImages.length === 0) {
+              return (
+                <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <div className="text-center">
+                    <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-500">
+                      Изображения не найдены
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {validImages.slice(0, 4).map((imageUrl, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={imageUrl}
+                      alt={`Фото объекта ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex items-center justify-center">
+                      <button className="opacity-0 group-hover:opacity-100 bg-white text-gray-800 px-3 py-1 rounded-md text-sm font-medium transition-opacity">
+                        Увеличить
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </Card>
       </div>
     );
