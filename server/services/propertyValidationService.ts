@@ -63,7 +63,7 @@ export class PropertyValidationService {
 
     // 3. Проверка цены относительно рыночной
     if (!await this.isValidPrice(property)) {
-      console.log(`Property ${property.id} rejected: price deviation from market`);
+      console.log(`Property ${property.id} rejected: price deviation >20% from market`);
       return false;
     }
 
@@ -140,9 +140,9 @@ export class PropertyValidationService {
       const propertyPrice = property.price;
       const avgPrice = marketData.avgPrice;
       
-      // Допустимое отклонение: ±50% от средней цены
-      const minAllowedPrice = avgPrice * 0.5;
-      const maxAllowedPrice = avgPrice * 1.5;
+      // Допустимое отклонение: ±20% от средней цены
+      const minAllowedPrice = avgPrice * 0.8;
+      const maxAllowedPrice = avgPrice * 1.2;
 
       const isValidPrice = propertyPrice >= minAllowedPrice && propertyPrice <= maxAllowedPrice;
 
