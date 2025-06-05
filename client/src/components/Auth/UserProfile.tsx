@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'wouter';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { 
@@ -10,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Shield } from 'lucide-react';
 
 export const UserProfile: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -41,6 +43,20 @@ export const UserProfile: React.FC = () => {
           </p>
         </div>
         <DropdownMenuSeparator />
+        
+        {/* Кнопка административной панели - только для администраторов */}
+        {user.role === 'administrator' && (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center">
+                <Shield className="mr-2 h-4 w-4 text-orange-600" />
+                <span className="text-orange-600 font-medium">Админ панель</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        
         <DropdownMenuItem>
           <i className="fas fa-user mr-2 h-4 w-4"></i>
           <span>Профиль</span>
