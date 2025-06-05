@@ -497,7 +497,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Property not found" });
       }
 
-      const analysis = await analyzePropertyInvestment({
+      // Use the simple investment analytics service that saves to database
+      const analytics = await simpleInvestmentAnalyticsService.calculateAnalytics(propertyId);
+      
+      // Also get OpenAI analysis for additional insights
+      const aiAnalysis = await analyzePropertyInvestment({
         price: property.price,
         pricePerSqm: property.pricePerSqm || 0,
         region: property.region?.name || "Unknown",
@@ -505,7 +509,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         area: parseFloat(property.area?.toString() || "0")
       });
       
-      res.json(analysis);
+      // Return combined result with database-persisted analytics
+      res.json({
+        ...analytics,
+        analysis: aiAnalysis.analysis,
+        marketTrend: aiAnalysis.marketTrend
+      });
     } catch (error) {
       console.error("Error calculating investment analytics:", error);
       res.status(500).json({ error: "Failed to calculate investment analytics" });
