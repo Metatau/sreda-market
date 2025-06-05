@@ -78,20 +78,20 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
           </Select>
         </div>
 
-        {/* Property Type Filter */}
+        {/* Market Type Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">Тип недвижимости</label>
           <div className="grid grid-cols-2 gap-3">
             <Button
-              variant={filters.propertyType === 'secondary' ? "default" : "outline"}
-              onClick={() => handleFilterChange('propertyType', filters.propertyType === 'secondary' ? null : 'secondary')}
+              variant={filters.marketType === 'secondary' ? "default" : "outline"}
+              onClick={() => handleFilterChange('marketType', filters.marketType === 'secondary' ? undefined : 'secondary')}
               className="h-10"
             >
               Вторичка
             </Button>
             <Button
-              variant={filters.propertyType === 'new' ? "default" : "outline"}
-              onClick={() => handleFilterChange('propertyType', filters.propertyType === 'new' ? null : 'new')}
+              variant={filters.marketType === 'new_construction' ? "default" : "outline"}
+              onClick={() => handleFilterChange('marketType', filters.marketType === 'new_construction' ? undefined : 'new_construction')}
               className="h-10"
             >
               Новостройки
