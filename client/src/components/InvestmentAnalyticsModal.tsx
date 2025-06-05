@@ -91,7 +91,6 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   analytics
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const getRatingColor = (rating: string) => {
     const colors = {
@@ -580,97 +579,7 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
           </div>
         </Card>
 
-        {/* Фотографии объекта */}
-        <Card className="p-4">
-          <h4 className="font-medium mb-4 flex items-center">
-            <ImageIcon className="w-4 h-4 mr-2" />
-            Фотографии объекта
-          </h4>
-          {(() => {
-            if (!property.imageUrl) {
-              return (
-                <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <div className="text-center">
-                    <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500">
-                      Фотографии недоступны
-                    </p>
-                  </div>
-                </div>
-              );
-            }
 
-            let imageList: string[] = [];
-            try {
-              const parsed = JSON.parse(property.imageUrl);
-              if (Array.isArray(parsed)) {
-                imageList = parsed;
-              } else if (parsed.imgurl) {
-                imageList = [parsed.imgurl];
-              } else if (typeof parsed === 'string') {
-                imageList = [parsed];
-              }
-            } catch {
-              // Если не JSON, возможно это просто URL
-              imageList = [property.imageUrl];
-            }
-
-            const validImages = imageList.filter(url => {
-              if (!url || typeof url !== 'string') return false;
-              return url.includes('http') && (
-                url.includes('.jpg') || 
-                url.includes('.jpeg') || 
-                url.includes('.png') || 
-                url.includes('.webp') ||
-                url.includes('cdn-cian') ||
-                url.includes('image')
-              );
-            });
-
-            if (validImages.length === 0) {
-              return (
-                <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  <div className="text-center">
-                    <ImageIcon className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500">
-                      Изображения не найдены
-                    </p>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {validImages.slice(0, 4).map((imageUrl, index) => (
-                  <div key={index} className="relative group cursor-pointer">
-                    <img
-                      src={imageUrl}
-                      alt={`Фото объекта ${index + 1}`}
-                      className="w-full h-48 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                      onClick={() => setSelectedImage(imageUrl)}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex items-center justify-center">
-                      <button 
-                        className="opacity-0 group-hover:opacity-100 bg-white text-gray-800 px-3 py-1 rounded-md text-sm font-medium transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedImage(imageUrl);
-                        }}
-                      >
-                        Увеличить
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </Card>
       </div>
     );
   };
@@ -763,30 +672,6 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
         </Tabs>
         </DialogContent>
       </Dialog>
-      
-      {/* Image Viewer Modal */}
-      {selectedImage && (
-        <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-black/90 border-0">
-            <div className="relative flex items-center justify-center h-full">
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 z-10 bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-              <img
-                src={selectedImage}
-                alt="Увеличенное фото объекта"
-                className="max-w-full max-h-full object-contain"
-                onClick={() => setSelectedImage(null)}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
     </TooltipProvider>
   );
 };
