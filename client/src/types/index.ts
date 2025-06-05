@@ -48,6 +48,7 @@ export interface Property {
   createdAt: string;
   updatedAt: string;
   investmentRating?: number;
+  images?: string[];
   region?: Region;
   propertyClass?: PropertyClass;
   analytics?: PropertyAnalytics;
@@ -69,13 +70,23 @@ export interface PropertyAnalytics {
 export interface InvestmentAnalytics {
   id: number;
   propertyId: number;
-  rentalRoi?: number;
-  flipRoi?: number;
+  priceChange1y?: string;
+  priceChange3m?: string;
+  priceVolatility?: string;
+  rentalYield?: string;
+  rentalIncomeMonthly?: number;
+  rentalRoiAnnual?: string;
+  rentalPaybackYears?: string;
+  flipPotentialProfit?: number;
+  flipRoi?: string;
+  flipTimeframeMonths?: number;
+  renovationCostEstimate?: number;
   safeHavenScore?: number;
-  renovationCost?: number;
-  valueIncrease?: number;
-  forecast3y?: number;
-  infrastructureImpact?: number;
+  capitalPreservationIndex?: string;
+  liquidityScore?: number;
+  priceForecast3y?: string;
+  infrastructureImpactScore?: string;
+  developmentRiskScore?: string;
   investmentRating?: string;
   riskLevel?: string;
   recommendedStrategy?: string;
