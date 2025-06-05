@@ -78,18 +78,18 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Region Filter */}
+        {/* City Filter */}
         <div className="space-y-2">
-          <Label>Регион</Label>
+          <Label>Город</Label>
           <Select
             value={filters.regionId?.toString() || "all"}
             onValueChange={(value) => handleFilterChange("regionId", value === "all" ? undefined : parseInt(value))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Все регионы" />
+              <SelectValue placeholder="Все города" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Все регионы</SelectItem>
+              <SelectItem value="all">Все города</SelectItem>
               {regions.map((region) => (
                 <SelectItem key={region.id} value={region.id.toString()}>
                   {region.name}

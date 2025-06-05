@@ -60,15 +60,15 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {/* Region Filter */}
+        {/* City Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Регион</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Город</label>
           <Select value={filters.regionId?.toString() || "all"} onValueChange={(value) => handleFilterChange('regionId', value === "all" ? null : parseInt(value))}>
             <SelectTrigger>
-              <SelectValue placeholder="Все регионы" />
+              <SelectValue placeholder="Все города" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Все регионы</SelectItem>
+              <SelectItem value="all">Все города</SelectItem>
               {sortedRegions.map((region) => (
                 <SelectItem key={region.id} value={region.id.toString()}>
                   {region.name}

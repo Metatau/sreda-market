@@ -72,16 +72,16 @@ export function Header({
 
           {/* Controls */}
           <div className="flex items-center space-x-4">
-            {/* Region Selector */}
+            {/* City Selector */}
             <Select
               value={selectedRegionId?.toString() || ""}
               onValueChange={(value) => onRegionChange?.(value ? parseInt(value) : undefined)}
             >
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Все регионы" />
+                <SelectValue placeholder="Все города" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все регионы</SelectItem>
+                <SelectItem value="">Все города</SelectItem>
                 {regions.map((region) => (
                   <SelectItem key={region.id} value={region.id.toString()}>
                     {region.name}
