@@ -75,12 +75,20 @@ export class AdsApiService {
     const auth = Buffer.from(`${authCredentials.email}:${authCredentials.password}`).toString('base64');
     headers['Authorization'] = `Basic ${auth}`;
 
+    console.log('Making request to:', url.toString());
+    console.log('Headers:', { ...headers, Authorization: '[REDACTED]' });
+
     const response = await fetch(url.toString(), {
       headers,
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
-      throw new Error(`ADS API error: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.log('Error response body:', errorText);
+      throw new Error(`ADS API error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     return response.json();
