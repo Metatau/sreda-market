@@ -22,8 +22,9 @@ export function PropertyMap({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
-  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [heatmapMode, setHeatmapMode] = useState<'none' | 'density' | 'price' | 'investment'>('none');
   const [selectedProperty, setSelectedProperty] = useState<any | null>(null);
+  const [heatmapIntensity, setHeatmapIntensity] = useState(0.8);
 
   const { data: mapData, isLoading } = useMapData({
     regionId: selectedRegionId,
@@ -97,75 +98,132 @@ export function PropertyMap({
     }
   }, [mapData, onPropertySelect]);
 
-  // Toggle heatmap
+  // Enhanced heatmap system
   useEffect(() => {
     if (!map.current || !mapData?.features) return;
 
-    if (showHeatmap) {
-      // Add heatmap source and layer
-      if (!map.current.getSource("properties-heat")) {
-        map.current.addSource("properties-heat", {
-          type: "geojson",
-          data: mapData,
-        });
+    // Remove existing heatmap layers
+    const layerIds = ['properties-heatmap-density', 'properties-heatmap-price', 'properties-heatmap-investment'];
+    layerIds.forEach(layerId => {
+      if (map.current!.getLayer(layerId)) {
+        map.current!.removeLayer(layerId);
+      }
+    });
 
-        map.current.addLayer({
-          id: "properties-heatmap",
-          type: "heatmap",
-          source: "properties-heat",
-          maxzoom: 15,
-          paint: {
-            "heatmap-weight": [
-              "interpolate",
-              ["linear"],
-              ["get", "price"],
-              0, 0,
-              50000000, 1,
-            ],
-            "heatmap-intensity": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0, 1,
-              15, 3,
-            ],
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
+    if (map.current!.getSource("properties-heat")) {
+      map.current!.removeSource("properties-heat");
+    }
+
+    if (heatmapMode !== 'none') {
+      // Add heatmap source
+      map.current.addSource("properties-heat", {
+        type: "geojson",
+        data: mapData,
+      });
+
+      let heatmapConfig;
+      
+      switch (heatmapMode) {
+        case 'density':
+          heatmapConfig = {
+            id: "properties-heatmap-density",
+            weight: 1,
+            colors: [
               0, "rgba(33,102,172,0)",
               0.2, "rgb(103,169,207)",
               0.4, "rgb(209,229,240)",
               0.6, "rgb(253,219,199)",
               0.8, "rgb(239,138,98)",
               1, "rgb(178,24,43)",
+            ]
+          };
+          break;
+        case 'price':
+          heatmapConfig = {
+            id: "properties-heatmap-price",
+            weight: [
+              "interpolate",
+              ["linear"],
+              ["get", "price"],
+              0,
+              0,
+              100000000,
+              1
+            ] as any,
+            colors: [
+              0, "rgba(0,255,0,0)",
+              0.2, "rgb(173,255,47)",
+              0.4, "rgb(255,255,0)",
+              0.6, "rgb(255,165,0)",
+              0.8, "rgb(255,69,0)",
+              1, "rgb(255,0,0)",
+            ]
+          };
+          break;
+        case 'investment':
+          heatmapConfig = {
+            id: "properties-heatmap-investment",
+            weight: [
+              "interpolate",
+              ["linear"],
+              ["get", "investmentScore"],
+              0,
+              0,
+              10,
+              1
+            ] as any,
+            colors: [
+              0, "rgba(128,0,128,0)",
+              0.2, "rgb(75,0,130)",
+              0.4, "rgb(0,0,255)",
+              0.6, "rgb(0,255,255)",
+              0.8, "rgb(0,255,0)",
+              1, "rgb(255,215,0)",
+            ]
+          };
+          break;
+      }
+
+      if (heatmapConfig) {
+        map.current.addLayer({
+          id: heatmapConfig.id,
+          type: "heatmap",
+          source: "properties-heat",
+          maxzoom: 16,
+          paint: {
+            "heatmap-weight": heatmapConfig.weight,
+            "heatmap-intensity": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              0, heatmapIntensity,
+              15, heatmapIntensity * 2,
+            ],
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              ...heatmapConfig.colors
             ],
             "heatmap-radius": [
               "interpolate",
               ["linear"],
               ["zoom"],
-              0, 2,
-              15, 20,
+              0, 4,
+              15, 30,
             ],
+            "heatmap-opacity": 0.8,
           },
         });
       }
 
-      // Hide markers
+      // Hide markers when heatmap is active
       markers.current.forEach((marker) => marker.getElement().style.display = "none");
     } else {
-      // Remove heatmap layer
-      if (map.current.getLayer("properties-heatmap")) {
-        map.current.removeLayer("properties-heatmap");
-      }
-      if (map.current.getSource("properties-heat")) {
-        map.current.removeSource("properties-heat");
-      }
-
-      // Show markers
+      // Show markers when heatmap is off
       markers.current.forEach((marker) => marker.getElement().style.display = "block");
     }
-  }, [showHeatmap, mapData]);
+  }, [heatmapMode, heatmapIntensity, mapData]);
 
   const getPropertyClassColor = (className?: string) => {
     const colors = {
@@ -194,20 +252,100 @@ export function PropertyMap({
   return (
     <Card className="overflow-hidden">
       <div className="relative">
-
-
-        {/* Map Legend */}
-        <div className="absolute top-4 right-4 z-10 bg-white/90 rounded-lg shadow-md p-3">
-          <h4 className="text-sm font-medium mb-2">Классы недвижимости</h4>
-          <div className="space-y-1 text-xs">
-            {["Эконом", "Стандарт", "Комфорт", "Бизнес", "Элит"].map((className) => (
-              <div key={className} className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${getPropertyClassColor(className)}`}></div>
-                <span>{className}</span>
+        {/* Heatmap Controls */}
+        <div className="absolute top-4 left-4 z-10 bg-white/95 rounded-lg shadow-lg p-4 border">
+          <h4 className="text-sm font-semibold mb-3 text-gray-800">Тепловые карты</h4>
+          
+          <div className="space-y-3">
+            {/* Heatmap Type Selection */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-gray-600">Тип визуализации</label>
+              <div className="grid grid-cols-2 gap-1">
+                <Button
+                  variant={heatmapMode === 'none' ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => setHeatmapMode('none')}
+                >
+                  Объекты
+                </Button>
+                <Button
+                  variant={heatmapMode === 'density' ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => setHeatmapMode('density')}
+                >
+                  Плотность
+                </Button>
+                <Button
+                  variant={heatmapMode === 'price' ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => setHeatmapMode('price')}
+                >
+                  Цены
+                </Button>
+                <Button
+                  variant={heatmapMode === 'investment' ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs h-7"
+                  onClick={() => setHeatmapMode('investment')}
+                >
+                  Инвестиции
+                </Button>
               </div>
-            ))}
+            </div>
+
+            {/* Intensity Control */}
+            {heatmapMode !== 'none' && (
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-gray-600">
+                  Интенсивность: {Math.round(heatmapIntensity * 100)}%
+                </label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="2"
+                  step="0.1"
+                  value={heatmapIntensity}
+                  onChange={(e) => setHeatmapIntensity(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+            )}
+
+            {/* Heatmap Legend */}
+            {heatmapMode !== 'none' && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="text-xs font-medium text-gray-600 mb-2">
+                  {heatmapMode === 'density' && 'Плотность объектов'}
+                  {heatmapMode === 'price' && 'Уровень цен (₽)'}
+                  {heatmapMode === 'investment' && 'Инвестиционный потенциал'}
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="text-xs text-gray-500">Низкий</span>
+                  <div className="flex-1 h-2 rounded-full bg-gradient-to-r from-blue-300 via-yellow-300 to-red-500"></div>
+                  <span className="text-xs text-gray-500">Высокий</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Map Legend */}
+        {heatmapMode === 'none' && (
+          <div className="absolute top-4 right-4 z-10 bg-white/90 rounded-lg shadow-md p-3">
+            <h4 className="text-sm font-medium mb-2">Классы недвижимости</h4>
+            <div className="space-y-1 text-xs">
+              {["Эконом", "Стандарт", "Комфорт", "Бизнес", "Элит"].map((className) => (
+                <div key={className} className="flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${getPropertyClassColor(className)}`}></div>
+                  <span>{className}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Map Container */}
         <div ref={mapContainer} className="h-96 w-full" />
