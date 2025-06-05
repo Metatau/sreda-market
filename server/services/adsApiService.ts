@@ -45,7 +45,7 @@ export class AdsApiService {
     }
   }
 
-  private async makeRequest<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
+  private async makeRequest<T>(endpoint: string, params?: Record<string, any>, credentials?: { email: string; password: string }): Promise<T> {
     if (!this.apiKey) {
       throw new Error('ADS API key not configured');
     }
@@ -59,11 +59,20 @@ export class AdsApiService {
       });
     }
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Используем Basic Auth если переданы учетные данные, иначе Bearer токен
+    if (credentials) {
+      const auth = Buffer.from(`${credentials.email}:${credentials.password}`).toString('base64');
+      headers['Authorization'] = `Basic ${auth}`;
+    } else {
+      headers['Authorization'] = `Bearer ${this.apiKey}`;
+    }
+
     const response = await fetch(url.toString(), {
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -149,7 +158,7 @@ export class AdsApiService {
     };
   }
 
-  async syncProperties(regions?: string[]): Promise<{
+  async syncProperties(regions?: string[], credentials?: { email: string; password: string }): Promise<{
     imported: number;
     updated: number;
     errors: string[];

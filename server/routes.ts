@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes for ADS API management
-  app.get("/api/admin/ads-api/status", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/admin/ads-api/status", async (req, res) => {
     try {
       const { adsApiService } = await import('./services/adsApiService');
       const status = await adsApiService.getStatus();
