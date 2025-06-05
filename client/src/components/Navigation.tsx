@@ -1,11 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Home, TrendingUp, Map, Heart, Scale, User, Building } from 'lucide-react';
+import { Home, TrendingUp, Map, Heart, Scale, User, Building, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { LoginButton } from "@/components/Auth/LoginButton";
+import { useUser } from "@/contexts/UserContext";
 
 export function Navigation() {
   const [location] = useLocation();
+  const { logout } = useUser();
 
   const navItems = [
     {
@@ -73,6 +75,15 @@ export function Navigation() {
           </div>
 
           <div className="flex items-center space-x-2">
+            <Button
+              onClick={logout}
+              variant="outline"
+              size="sm"
+              className="flex items-center space-x-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Выйти</span>
+            </Button>
             <LoginButton />
           </div>
         </div>
