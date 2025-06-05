@@ -8,6 +8,7 @@ import { useInvestmentAnalytics, useCalculateInvestmentAnalytics } from "@/hooks
 import { PropertyPreviewCard } from "@/components/PropertyPreviewCard";
 import { InvestmentAnalyticsModal } from "@/components/InvestmentAnalyticsModal";
 import { PropertyFilters } from "@/components/PropertyFilters";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Calculator, TrendingUp, Home, BarChart3 } from "lucide-react";
 import type { SearchFilters } from "@/types";
 
@@ -41,11 +42,34 @@ export default function InvestmentAnalyticsDemo() {
   const [selectedAnalytics, setSelectedAnalytics] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({});
+  const [sortBy, setSortBy] = useState<string>("date_desc");
 
   const { data: propertiesData, isLoading: isLoadingProperties } = useProperties(filters);
   const calculateAnalytics = useCalculateInvestmentAnalytics();
 
   const properties = propertiesData?.properties || [];
+
+  // Сортировка объектов
+  const sortedProperties = [...properties].sort((a, b) => {
+    switch (sortBy) {
+      case 'price_asc':
+        return a.price - b.price;
+      case 'price_desc':
+        return b.price - a.price;
+      case 'date_desc':
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      case 'area':
+        const aArea = parseFloat(a.area?.replace(/[^\d.]/g, '') || '0');
+        const bArea = parseFloat(b.area?.replace(/[^\d.]/g, '') || '0');
+        return bArea - aArea;
+      case 'roi_desc':
+        return (parseFloat(b.analytics?.roi?.toString() || '0')) - (parseFloat(a.analytics?.roi?.toString() || '0'));
+      case 'investment_score':
+        return (b.investmentAnalytics?.liquidityScore || 0) - (a.investmentAnalytics?.liquidityScore || 0);
+      default:
+        return 0;
+    }
+  });
 
   const handleCalculateAnalytics = async (property: Property) => {
     try {
@@ -186,7 +210,7 @@ export default function InvestmentAnalyticsDemo() {
           <Card>
             <CardContent className="p-6 text-center">
               <Home className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <div className="text-2xl font-bold text-gray-900">{properties.length}</div>
+              <div className="text-2xl font-bold text-gray-900">{sortedProperties.length}</div>
               <div className="text-sm text-gray-600">Объектов в базе</div>
             </CardContent>
           </Card>
@@ -295,13 +319,28 @@ export default function InvestmentAnalyticsDemo() {
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Объекты недвижимости</h2>
-              <div className="text-sm text-gray-600">
-                Найдено {properties.length} объектов
+              <div className="flex items-center space-x-4">
+                <div className="text-sm text-gray-600">
+                  Найдено {sortedProperties.length} объектов
+                </div>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Сортировка" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
+                    <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
+                    <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
+                    <SelectItem value="area">По площади</SelectItem>
+                    <SelectItem value="roi_desc">По доходности</SelectItem>
+                    <SelectItem value="investment_score">По рейтингу инвестиций</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {properties.slice(0, 12).map((property) => (
+              {sortedProperties.slice(0, 12).map((property) => (
                 <AnalyticsCard key={property.id} property={property} />
               ))}
             </div>
