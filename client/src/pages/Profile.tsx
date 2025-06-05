@@ -363,12 +363,7 @@ export function Profile() {
                           Сравнение до 5 объектов
                         </li>
                       </ul>
-                      <div className="space-y-3">
-                        <Input
-                          placeholder="Промокод"
-                          value={promoCodes.standard}
-                          onChange={(e) => setPromoCodes(prev => ({...prev, standard: e.target.value}))}
-                        />
+                      <div>
                         <Button 
                           className="w-full bg-blue-600 hover:bg-blue-700"
                           onClick={() => handlePayment('standard')}
@@ -415,12 +410,7 @@ export function Profile() {
                           Неограниченные сравнения
                         </li>
                       </ul>
-                      <div className="space-y-3">
-                        <Input
-                          placeholder="Промокод"
-                          value={promoCodes.professional}
-                          onChange={(e) => setPromoCodes(prev => ({...prev, professional: e.target.value}))}
-                        />
+                      <div>
                         <Button 
                           className="w-full bg-purple-600 hover:bg-purple-700"
                           onClick={() => handlePayment('professional')}
