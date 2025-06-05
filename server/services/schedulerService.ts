@@ -17,9 +17,9 @@ export class SchedulerService {
   public start(): void {
     console.log('Starting property synchronization scheduler...');
 
-    // Ежедневная синхронизация в 00:00 московского времени (UTC+3)
-    // Cron выражение: 0 0 21 * * * (21:00 UTC = 00:00 MSK)
-    cron.schedule('0 0 21 * * *', async () => {
+    // Ежедневная синхронизация в 02:00 московского времени (UTC+3)
+    // Cron выражение: 0 0 23 * * * (23:00 UTC = 02:00 MSK)
+    cron.schedule('0 0 23 * * *', async () => {
       if (this.isRunning) {
         console.log('Synchronization already in progress, skipping...');
         return;
@@ -464,13 +464,13 @@ export class SchedulerService {
 
   public getStatus(): { isRunning: boolean; nextRun: string } {
     const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0); // 00:00 следующего дня
+    const nextRun = new Date(now);
+    nextRun.setDate(nextRun.getDate() + 1);
+    nextRun.setHours(2, 0, 0, 0); // 02:00 следующего дня МСК
     
     return {
       isRunning: this.isRunning,
-      nextRun: tomorrow.toISOString()
+      nextRun: nextRun.toISOString()
     };
   }
 }
