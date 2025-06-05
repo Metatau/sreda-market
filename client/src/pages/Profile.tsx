@@ -78,6 +78,79 @@ export function Profile() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadReferralStats();
+      generateReferralCode();
+    }
+  }, [isAuthenticated, user]);
+
+  const loadReferralStats = async () => {
+    try {
+      const response = await fetch('/api/referrals/stats', {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const stats = await response.json();
+        setReferralStats({
+          totalReferrals: stats.totalReferrals || 0,
+          paidReferrals: stats.paidReferrals || 0,
+          totalEarned: stats.totalEarned || 0,
+          totalSpent: stats.totalSpent || 0,
+          bonusBalance: stats.bonusBalance || 0
+        });
+      }
+    } catch (error) {
+      console.error('Error loading referral stats:', error);
+    }
+  };
+
+  const generateReferralCode = () => {
+    if (user?.name) {
+      const code = `${user.name.substring(0, 6).toUpperCase()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      setReferralCode(code);
+    }
+  };
+
+  const calculatePrice = async (plan: string) => {
+    const planPrices = {
+      promo: 0,
+      standard: 990,
+      professional: 2490
+    };
+
+    const originalPrice = planPrices[plan as keyof typeof planPrices] || 0;
+
+    try {
+      const response = await fetch('/api/payments/calculate-price', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ originalPrice }),
+      });
+
+      if (response.ok) {
+        const calculation = await response.json();
+        setBonusCalculation(calculation);
+        return calculation;
+      }
+    } catch (error) {
+      console.error('Error calculating price:', error);
+    }
+
+    return {
+      originalPrice,
+      finalPrice: originalPrice,
+      bonusUsed: 0,
+      bonusAvailable: 0,
+      savings: 0
+    };
+  };
+
   const handleSave = () => {
     // В реальном приложении здесь бы отправлялся запрос на сервер
     setIsEditing(false);
@@ -463,7 +536,7 @@ export function Profile() {
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Бонусный счет</span>
-                    <span className="text-2xl font-bold text-blue-600">₽0</span>
+                    <span className="text-2xl font-bold text-blue-600">₽{referralStats.bonusBalance}</span>
                   </div>
                   <p className="text-xs text-gray-600">
                     Можно использовать до 50% от стоимости тарифа
@@ -479,7 +552,7 @@ export function Profile() {
                     <div className="flex mt-1">
                       <Input
                         id="referral-link"
-                        value="https://sreda.market/ref/USER123"
+                        value={`https://sreda.market/ref/${referralCode}`}
                         readOnly
                         className="rounded-r-none"
                       />
@@ -488,7 +561,7 @@ export function Profile() {
                         variant="outline"
                         className="rounded-l-none border-l-0"
                         onClick={() => {
-                          navigator.clipboard.writeText("https://sreda.market/ref/USER123");
+                          navigator.clipboard.writeText(`https://sreda.market/ref/${referralCode}`);
                           alert("Ссылка скопирована!");
                         }}
                       >
@@ -504,7 +577,7 @@ export function Profile() {
                     <div className="flex mt-1">
                       <Input
                         id="referral-code"
-                        value="USER123REF"
+                        value={referralCode}
                         readOnly
                         className="rounded-r-none"
                       />
@@ -513,7 +586,7 @@ export function Profile() {
                         variant="outline"
                         className="rounded-l-none border-l-0"
                         onClick={() => {
-                          navigator.clipboard.writeText("USER123REF");
+                          navigator.clipboard.writeText(referralCode);
                           alert("Промокод скопирован!");
                         }}
                       >
@@ -555,19 +628,19 @@ export function Profile() {
                 {/* Статистика рефералов */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">0</div>
+                    <div className="text-2xl font-bold text-gray-900">{referralStats.totalReferrals}</div>
                     <div className="text-xs text-gray-600">Приглашено</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">0</div>
+                    <div className="text-2xl font-bold text-gray-900">{referralStats.paidReferrals}</div>
                     <div className="text-xs text-gray-600">Оплатили</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">₽0</div>
+                    <div className="text-2xl font-bold text-green-600">₽{referralStats.totalEarned}</div>
                     <div className="text-xs text-gray-600">Заработано</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">₽0</div>
+                    <div className="text-2xl font-bold text-blue-600">₽{referralStats.totalSpent}</div>
                     <div className="text-xs text-gray-600">Потрачено</div>
                   </div>
                 </div>
