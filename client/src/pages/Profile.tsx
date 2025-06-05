@@ -29,6 +29,28 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export function Profile() {
   const { user, isAuthenticated, logout } = useAuth();
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Войдите в аккаунт
+              </h2>
+              <p className="text-gray-600">
+                Для просмотра профиля необходимо войти в систему
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(user?.name || '');
   const [promoCodes, setPromoCodes] = useState({
@@ -52,27 +74,6 @@ export function Profile() {
     bonusAvailable: 0,
     savings: 0
   });
-
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Card className="text-center">
-            <CardContent className="pt-6">
-              <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Войдите в аккаунт
-              </h2>
-              <p className="text-gray-600">
-                Для просмотра профиля необходимо войти в систему
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
