@@ -18,7 +18,10 @@ import {
   BarChart3,
   Edit3,
   Save,
-  X
+  X,
+  Crown,
+  Check,
+  CreditCard
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -26,6 +29,11 @@ export function Profile() {
   const { user, isAuthenticated, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(user?.name || '');
+  const [promoCodes, setPromoCodes] = useState({
+    promo: '',
+    standard: '',
+    professional: ''
+  });
 
   if (!isAuthenticated || !user) {
     return (
@@ -118,7 +126,7 @@ export function Profile() {
         </Card>
 
         <Tabs defaultValue="activity" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Активность
@@ -130,6 +138,10 @@ export function Profile() {
             <TabsTrigger value="comparisons" className="flex items-center gap-2">
               <Scale className="h-4 w-4" />
               Сравнения
+            </TabsTrigger>
+            <TabsTrigger value="subscription" className="flex items-center gap-2">
+              <Crown className="h-4 w-4" />
+              Подписка
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -215,6 +227,164 @@ export function Profile() {
                   <Button onClick={() => window.location.href = '/comparison'}>
                     Создать сравнение
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="subscription" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5" />
+                  Планы подписки
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Промо тариф */}
+                  <Card className="relative border-2 border-gray-200 hover:border-blue-300 transition-colors">
+                    <CardHeader className="text-center">
+                      <Badge className="mx-auto w-fit bg-green-100 text-green-700 border-green-200 font-medium border">
+                        Промо
+                      </Badge>
+                      <div className="mt-4">
+                        <div className="text-3xl font-bold text-gray-900">Бесплатно</div>
+                        <div className="text-sm text-gray-600">на 30 дней</div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          5 запросов к AI в день
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Базовый анализ инвестиций
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Доступ к карте недвижимости
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          До 10 избранных объектов
+                        </li>
+                      </ul>
+                      <div className="space-y-3">
+                        <Input
+                          placeholder="Промокод"
+                          value={promoCodes.promo}
+                          onChange={(e) => setPromoCodes(prev => ({...prev, promo: e.target.value}))}
+                        />
+                        <Button className="w-full">
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Активировать
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Стандарт тариф */}
+                  <Card className="relative border-2 border-blue-300 hover:border-blue-400 transition-colors">
+                    <CardHeader className="text-center">
+                      <Badge className="mx-auto w-fit bg-blue-100 text-blue-700 border-blue-200 font-medium border">
+                        Стандарт
+                      </Badge>
+                      <div className="mt-4">
+                        <div className="text-3xl font-bold text-gray-900">₽990</div>
+                        <div className="text-sm text-gray-600">в месяц</div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          50 запросов к AI в день
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Расширенный анализ инвестиций
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Прогнозы цен на недвижимость
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Неограниченное избранное
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Сравнение до 5 объектов
+                        </li>
+                      </ul>
+                      <div className="space-y-3">
+                        <Input
+                          placeholder="Промокод"
+                          value={promoCodes.standard}
+                          onChange={(e) => setPromoCodes(prev => ({...prev, standard: e.target.value}))}
+                        />
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Оплатить ₽990
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Профи тариф */}
+                  <Card className="relative border-2 border-purple-300 hover:border-purple-400 transition-colors">
+                    <CardHeader className="text-center">
+                      <Badge className="mx-auto w-fit bg-purple-100 text-purple-700 border-purple-200 font-medium border">
+                        Профи
+                      </Badge>
+                      <div className="mt-4">
+                        <div className="text-3xl font-bold text-gray-900">₽2490</div>
+                        <div className="text-sm text-gray-600">в месяц</div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Безлимитные запросы к AI
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Экспертный анализ инвестиций
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Персональные рекомендации
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Приоритетная поддержка
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          API доступ для интеграций
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-green-500" />
+                          Неограниченные сравнения
+                        </li>
+                      </ul>
+                      <div className="space-y-3">
+                        <Input
+                          placeholder="Промокод"
+                          value={promoCodes.professional}
+                          onChange={(e) => setPromoCodes(prev => ({...prev, professional: e.target.value}))}
+                        />
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Оплатить ₽2490
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
             </Card>
