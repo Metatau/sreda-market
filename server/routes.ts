@@ -566,7 +566,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments/create", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const { plan, promoCode, returnUrl, referralCode } = req.body;
-      const userId = parseInt(req.user.id);
+      const userId = parseInt(req.user?.id || '0');
       
       const planPrices = {
         promo: 0,
@@ -753,7 +753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/referrals/stats", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = parseInt(req.user.id);
+      const userId = parseInt(req.user?.id || '0');
       const stats = await ReferralService.getReferralStats(userId);
       res.json(stats);
     } catch (error) {
@@ -765,7 +765,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments/calculate-price", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const { originalPrice } = req.body;
-      const userId = parseInt(req.user.id);
+      const userId = parseInt(req.user?.id || '0');
       
       const priceCalculation = await ReferralService.calculateFinalPrice(userId, originalPrice);
       
