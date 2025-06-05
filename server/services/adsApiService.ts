@@ -223,14 +223,37 @@ export class AdsApiService {
   }
 
   private async convertAdsProperty(adsProperty: AdsApiProperty): Promise<InsertProperty> {
-    // Дополнительная проверка региона на уровне конвертации
+    // Дополнительная проверка региона на уровне конвертации с картой соответствий
     const allowedRegions = await storage.getRegions();
     const propertyRegion = (adsProperty.region || adsProperty.city || '').toLowerCase().trim();
     const allowedRegionNames = allowedRegions.map(r => r.name.toLowerCase());
     
-    const isValidRegion = allowedRegionNames.some(allowedRegion => 
-      propertyRegion.includes(allowedRegion) || allowedRegion.includes(propertyRegion)
-    );
+    // Карта соответствий регионов
+    const regionMapping: Record<string, string> = {
+      'москва': 'москва',
+      'московская область': 'московская область',
+      'санкт-петербург': 'санкт-петербург',
+      'ленинградская область': 'ленинградская область',
+      'новосибирск': 'новосибирск',
+      'новосибирская область': 'новосибирск',
+      'екатеринбург': 'екатеринбург',
+      'свердловская область': 'екатеринбург',
+      'казань': 'казань',
+      'татарстан': 'казань',
+      'нижний новгород': 'нижний новгород',
+      'нижегородская область': 'нижний новгород',
+      'уфа': 'уфа',
+      'башкортостан': 'уфа',
+      'красноярск': 'красноярск',
+      'красноярский край': 'красноярск',
+      'пермь': 'пермь',
+      'пермский край': 'пермь',
+      'калининград': 'калининград',
+      'калининградская область': 'калининград'
+    };
+
+    const mappedRegion = regionMapping[propertyRegion];
+    const isValidRegion = mappedRegion && allowedRegionNames.includes(mappedRegion);
     
     if (!isValidRegion) {
       throw new Error(`Property region "${propertyRegion}" is not in the allowed regions list`);
@@ -320,11 +343,35 @@ export class AdsApiService {
             console.log('Property data:', JSON.stringify(adsProperty, null, 2).substring(0, 500));
           }
 
-          // СТРОГАЯ ФИЛЬТРАЦИЯ: проверяем регион объекта
+          // СТРОГАЯ ФИЛЬТРАЦИЯ: проверяем регион объекта с улучшенным сопоставлением
           const propertyRegion = (adsProperty.region || adsProperty.city || '').toLowerCase().trim();
-          const isAllowedRegion = allowedRegionNames.some(allowedRegion => 
-            propertyRegion.includes(allowedRegion) || allowedRegion.includes(propertyRegion)
-          );
+          
+          // Создаем карту соответствий для точного сопоставления
+          const regionMapping: Record<string, string> = {
+            'москва': 'москва',
+            'московская область': 'московская область',
+            'санкт-петербург': 'санкт-петербург',
+            'ленинградская область': 'ленинградская область',
+            'новосибирск': 'новосибирск',
+            'новосибирская область': 'новосибирск',
+            'екатеринбург': 'екатеринбург',
+            'свердловская область': 'екатеринбург',
+            'казань': 'казань',
+            'татарстан': 'казань',
+            'нижний новгород': 'нижний новгород',
+            'нижегородская область': 'нижний новгород',
+            'уфа': 'уфа',
+            'башкортостан': 'уфа',
+            'красноярск': 'красноярск',
+            'красноярский край': 'красноярск',
+            'пермь': 'пермь',
+            'пермский край': 'пермь',
+            'калининград': 'калининград',
+            'калининградская область': 'калининград'
+          };
+
+          const mappedRegion = regionMapping[propertyRegion];
+          const isAllowedRegion = mappedRegion && allowedRegionNames.includes(mappedRegion);
 
           if (!isAllowedRegion) {
             console.log(`Skipping property ${adsProperty.id}: region "${propertyRegion}" not in allowed list`);
