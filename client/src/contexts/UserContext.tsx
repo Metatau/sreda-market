@@ -94,9 +94,17 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('userEmail');
-    setUser(null);
+  const logout = async () => {
+    try {
+      await apiRequest('POST', '/api/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('userEmail');
+      setUser(null);
+      // Принудительно перезагружаем страницу для перенаправления на Login
+      window.location.reload();
+    }
   };
 
   useEffect(() => {
