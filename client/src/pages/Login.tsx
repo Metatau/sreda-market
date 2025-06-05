@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Shield, User, Mail, UserPlus, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { TelegramLoginWidget } from '@/components/TelegramLoginWidget';
 
 export default function Login() {
   const { login } = useUser();
@@ -94,6 +95,28 @@ export default function Login() {
     }
   };
 
+  const handleTelegramAuth = async (telegramUser: any) => {
+    setIsLoading(true);
+    try {
+      // Используем email из Telegram данных или создаем временный
+      const email = telegramUser.email || `${telegramUser.id}@telegram.local`;
+      await login(email);
+      
+      toast({
+        title: "Успешный вход",
+        description: "Добро пожаловать в SREDA Market",
+      });
+    } catch (error) {
+      toast({
+        title: "Ошибка входа",
+        description: "Не удалось войти через Telegram",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -120,6 +143,27 @@ export default function Login() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Telegram Login */}
+        <Card className="border-blue-200 bg-blue-50">
+          <CardContent className="pt-6">
+            <div className="text-center mb-4">
+              <h3 className="font-semibold text-blue-900 mb-2">Быстрый вход через Telegram</h3>
+              <p className="text-sm text-blue-700">Безопасно и удобно</p>
+            </div>
+            <TelegramLoginWidget 
+              onAuth={handleTelegramAuth}
+              className="mb-2"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Разделитель */}
+        <div className="flex items-center justify-center">
+          <div className="border-t border-gray-300 w-full"></div>
+          <span className="px-4 text-gray-500 text-sm">или</span>
+          <div className="border-t border-gray-300 w-full"></div>
+        </div>
 
         {/* Табы для клиентов */}
         <Card>
