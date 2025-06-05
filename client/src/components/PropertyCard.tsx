@@ -146,9 +146,9 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             )}
           </div>
 
-          <div className="flex items-center justify-between">
-            {/* Investment Rating */}
-            <div className="flex-1 mr-6">
+          <div className="flex items-end justify-between">
+            {/* Investment Rating - positioned in bottom left */}
+            <div className="flex-1">
               {property.investmentAnalytics?.investmentRating && (
                 <Badge className={`${getInvestmentRatingColor(property.investmentAnalytics.investmentRating)} font-bold text-sm px-3 py-1`}>
                   {property.investmentAnalytics.investmentRating}
@@ -158,7 +158,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
 
             <Button 
               size="sm" 
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 ml-4"
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect?.(property);
