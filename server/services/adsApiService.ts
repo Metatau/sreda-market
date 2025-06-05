@@ -5,22 +5,28 @@ interface AdsApiProperty {
   id: string;
   title: string;
   price: number;
-  area: number;
-  rooms: number;
-  floor: number;
-  totalFloors: number;
-  address: string;
-  description: string;
-  coordinates: {
+  area?: number;
+  rooms?: number;
+  floor?: number;
+  totalFloors?: number;
+  address?: string;
+  description?: string;
+  coordinates?: {
     lat: number;
     lng: number;
   };
-  images: string[];
-  propertyType: string;
-  region: string;
-  district: string;
-  createdAt: string;
-  updatedAt: string;
+  images?: string[];
+  propertyType?: string;
+  region?: string;
+  district?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  // Добавляем поля из реальной структуры ads-api.ru
+  city?: string;
+  category?: string;
+  url?: string;
+  source?: string;
+  [key: string]: any; // Для дополнительных полей
 }
 
 interface AdsApiResponse {
@@ -191,29 +197,50 @@ export class AdsApiService {
   }
 
   private async convertAdsProperty(adsProperty: AdsApiProperty): Promise<InsertProperty> {
-    const pricePerSqm = Math.round(adsProperty.price / adsProperty.area);
-    const regionId = await this.mapRegion(adsProperty.region, adsProperty.district);
-    const propertyClassId = await this.mapPropertyClass(adsProperty.propertyType, pricePerSqm);
+    // Проверяем обязательные поля
+    if (!adsProperty.id || !adsProperty.title) {
+      throw new Error('Missing required fields: id or title');
+    }
+
+    // Безопасная обработка числовых значений
+    const area = typeof adsProperty.area === 'number' ? adsProperty.area : 50;
+    const price = typeof adsProperty.price === 'number' ? adsProperty.price : 0;
+    const pricePerSqm = area > 0 ? Math.round(price / area) : 0;
+    
+    const regionName = adsProperty.region || adsProperty.city || 'Неизвестный регион';
+    const regionId = await this.mapRegion(regionName, adsProperty.district || '');
+    const propertyClassId = await this.mapPropertyClass(
+      adsProperty.propertyType || adsProperty.category || 'квартира',
+      pricePerSqm
+    );
+
+    // Безопасная обработка координат
+    const defaultLat = 55.7558;
+    const defaultLng = 37.6176;
+    const lat = adsProperty.coordinates?.lat || defaultLat;
+    const lng = adsProperty.coordinates?.lng || defaultLng;
 
     return {
-      externalId: adsProperty.id,
+      externalId: String(adsProperty.id),
       regionId,
       propertyClassId,
-      title: adsProperty.title,
-      description: adsProperty.description,
-      price: adsProperty.price,
+      title: String(adsProperty.title),
+      description: String(adsProperty.description || 'Описание отсутствует'),
+      price,
       pricePerSqm,
-      area: adsProperty.area.toString(),
-      rooms: adsProperty.rooms,
-      floor: adsProperty.floor,
-      totalFloors: adsProperty.totalFloors,
-      address: adsProperty.address,
-      coordinates: `POINT(${adsProperty.coordinates.lng} ${adsProperty.coordinates.lat})`,
-      imageUrl: adsProperty.images[0] || null,
-      propertyType: adsProperty.propertyType,
+      area: String(area),
+      rooms: typeof adsProperty.rooms === 'number' ? adsProperty.rooms : 1,
+      floor: typeof adsProperty.floor === 'number' ? adsProperty.floor : 1,
+      totalFloors: typeof adsProperty.totalFloors === 'number' ? adsProperty.totalFloors : 5,
+      address: String(adsProperty.address || regionName),
+      coordinates: `POINT(${lng} ${lat})`,
+      imageUrl: (Array.isArray(adsProperty.images) && adsProperty.images.length > 0) 
+        ? adsProperty.images[0] 
+        : null,
+      propertyType: String(adsProperty.propertyType || adsProperty.category || 'квартира'),
       isActive: true,
-      createdAt: new Date(adsProperty.createdAt),
-      updatedAt: new Date(adsProperty.updatedAt),
+      createdAt: adsProperty.createdAt ? new Date(adsProperty.createdAt) : new Date(),
+      updatedAt: adsProperty.updatedAt ? new Date(adsProperty.updatedAt) : new Date(),
     };
   }
 
@@ -234,16 +261,27 @@ export class AdsApiService {
       const filters = regions ? { region: regions.join(',') } : {};
       const response = await this.fetchProperties(filters, credentials);
 
-      for (const adsProperty of response.data) {
+      console.log(`Processing ${response.data.length} properties from ADS API`);
+      
+      for (let i = 0; i < response.data.length; i++) {
+        const adsProperty = response.data[i];
+        
         try {
+          console.log(`Processing property ${i + 1}/${response.data.length}: ${adsProperty.id || 'unknown ID'}`);
+          
+          // Логируем структуру первого объекта для понимания
+          if (i === 0) {
+            console.log('Sample property structure:', Object.keys(adsProperty));
+            console.log('Property data:', JSON.stringify(adsProperty, null, 2).substring(0, 500));
+          }
+
+          const propertyData = await this.convertAdsProperty(adsProperty);
+          
           // Проверяем, существует ли объект
           const existingProperties = await storage.getProperties({});
-          
           const existingProperty = existingProperties.properties.find(p => 
             p.externalId === adsProperty.id
           );
-
-          const propertyData = await this.convertAdsProperty(adsProperty);
 
           if (existingProperty) {
             // Обновляем существующий объект
@@ -255,7 +293,10 @@ export class AdsApiService {
             imported++;
           }
         } catch (error) {
-          errors.push(`Error processing property ${adsProperty.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          const propertyId = adsProperty?.id || `index-${i}`;
+          console.error(`Error processing property ${propertyId}:`, error);
+          console.error('Property data that caused error:', JSON.stringify(adsProperty, null, 2).substring(0, 500));
+          errors.push(`Property ${propertyId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
