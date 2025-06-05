@@ -100,36 +100,33 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
         </div>
 
         {/* Property Class Filter */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label>Класс недвижимости</Label>
-          <div className="space-y-2">
-            {propertyClasses.map((propertyClass) => (
-              <Button
-                key={propertyClass.id}
-                variant="outline"
-                className={`w-full justify-between h-auto p-3 ${
-                  filters.propertyClassId === propertyClass.id
-                    ? getPropertyClassColor(propertyClass.name)
-                    : "hover:bg-gray-50"
-                }`}
-                onClick={() =>
-                  handleFilterChange(
-                    "propertyClassId",
-                    filters.propertyClassId === propertyClass.id ? undefined : propertyClass.id
-                  )
-                }
-              >
-                <span className="font-medium">{propertyClass.name}</span>
-                <span className="text-xs text-gray-500">
-                  {propertyClass.minPricePerSqm.toLocaleString()}-
-                  {propertyClass.maxPricePerSqm === 999999999 
-                    ? "∞" 
-                    : propertyClass.maxPricePerSqm.toLocaleString()
-                  } ₽/м²
-                </span>
-              </Button>
-            ))}
-          </div>
+          <Select
+            value={filters.propertyClassId?.toString() || "all"}
+            onValueChange={(value) => handleFilterChange("propertyClassId", value === "all" ? undefined : parseInt(value))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Все классы" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все классы</SelectItem>
+              {propertyClasses.map((propertyClass) => (
+                <SelectItem key={propertyClass.id} value={propertyClass.id.toString()}>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-medium">{propertyClass.name}</span>
+                    <span className="text-xs text-gray-500 ml-2">
+                      {propertyClass.minPricePerSqm.toLocaleString()}-
+                      {propertyClass.maxPricePerSqm === 999999999 
+                        ? "∞" 
+                        : propertyClass.maxPricePerSqm.toLocaleString()
+                      } ₽/м²
+                    </span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Price Range */}
