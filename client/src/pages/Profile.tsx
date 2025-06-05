@@ -255,7 +255,7 @@ export function Profile() {
         </Card>
 
         <Tabs defaultValue="activity" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Активность
@@ -271,10 +271,6 @@ export function Profile() {
             <TabsTrigger value="subscription" className="flex items-center gap-2">
               <Crown className="h-4 w-4" />
               Подписка
-            </TabsTrigger>
-            <TabsTrigger value="referrals" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Рефералы
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
