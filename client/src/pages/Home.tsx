@@ -199,16 +199,14 @@ export default function Home() {
 
             {/* Property Section Header */}
             <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="font-bold text-gray-900 text-[20px]">
-                  Недвижимость в {selectedRegionName}
-                </h2>
+              <h2 className="font-bold text-gray-900 text-[20px]">
+                Недвижимость в {selectedRegionName}
+              </h2>
+
+              <div className="flex items-center space-x-4">
                 <p className="text-sm text-gray-600">
                   Найдено {pagination?.total || 0} объектов
                 </p>
-              </div>
-
-              <div className="flex items-center space-x-4">
                 <Select defaultValue="price_asc">
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Сортировка" />
