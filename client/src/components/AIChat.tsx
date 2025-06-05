@@ -198,7 +198,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                       <i className="fas fa-robot text-white"></i>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Чат с AI помощником</h3>
+                      <h3 className="font-semibold text-gray-900">Чат с AI SREDA</h3>
                       <p className="text-sm text-gray-500">
                         Привет! Я AI-помощник SREDA Market. Могу помочь с анализом недвижимости, 
                         поиском объектов и инвестиционными расчетами. О чем хотите узнать?
