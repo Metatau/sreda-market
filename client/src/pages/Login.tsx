@@ -142,7 +142,7 @@ export default function Login() {
         {/* Заголовок */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">SREDA Market</h1>
-          <p className="text-gray-600">Интеллектуальный рынок недвижимости</p>
+          <p className="text-gray-600">Smart Real Estate</p>
         </div>
 
         {/* Кнопка входа администратора */}
