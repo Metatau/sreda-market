@@ -833,6 +833,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Тестовая синхронизация с ограниченным количеством объектов
+  app.post("/api/test-sync", async (req, res) => {
+    try {
+      console.log('Starting test synchronization for 10 properties...');
+      
+      const { AdsApiService } = await import('./services/adsApiService');
+      const adsApiService = new AdsApiService();
+      
+      // Получаем ограниченное количество объектов из ads-api.ru
+      const syncResult = await adsApiService.syncProperties(['Сочи', 'Екатеринбург']);
+      
+      console.log(`Test sync completed: ${syncResult.imported} imported, ${syncResult.updated} updated`);
+      
+      res.json({ 
+        success: true, 
+        message: "Test synchronization completed",
+        result: {
+          imported: syncResult.imported,
+          updated: syncResult.updated,
+          errors: syncResult.errors
+        }
+      });
+    } catch (error) {
+      console.error("Test sync error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to perform test synchronization", 
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // === DATA CLEANUP ROUTES ===
   
   // Запуск очистки невалидных объектов
