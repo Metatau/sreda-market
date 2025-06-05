@@ -200,7 +200,11 @@ export function HomePage() {
       </div>
 
       {/* AI Chat Widget */}
-      <AIChat onMessage={handleAISearch} />
+      <AIChat 
+        isOpen={isChatOpen} 
+        onToggle={() => setIsChatOpen(!isChatOpen)}
+        onMessage={handleAISearch} 
+      />
 
       {/* Property Detail Modal would go here */}
       {selectedProperty && (
