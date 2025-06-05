@@ -187,16 +187,32 @@ export class AdsApiService {
             imported++;
           }
         } catch (error) {
-          errors.push(`Error processing property ${adsProperty.id}: ${error.message}`);
+          errors.push(`Error processing property ${adsProperty.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
       console.log(`ADS API sync completed: ${imported} imported, ${updated} updated, ${errors.length} errors`);
     } catch (error) {
-      errors.push(`ADS API sync failed: ${error.message}`);
+      errors.push(`ADS API sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     return { imported, updated, errors };
+  }
+
+  async getStatus(): Promise<{ available: boolean; configured: boolean; regions: string[] }> {
+    const configured = !!this.apiKey;
+    
+    if (!configured) {
+      return { available: false, configured: false, regions: [] };
+    }
+
+    try {
+      const regions = await this.getRegions();
+      return { available: true, configured: true, regions };
+    } catch (error) {
+      console.error('ADS API not available:', error);
+      return { available: false, configured: true, regions: [] };
+    }
   }
 
   async getRegions(): Promise<string[]> {
