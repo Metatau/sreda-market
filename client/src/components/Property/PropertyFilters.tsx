@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React from "react";
 import { useRegions, usePropertyClasses } from "@/hooks/useProperties";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
   const aiSearchMutation = useAISearch();
   const { toast } = useToast();
 
-  const [aiQuery, setAiQuery] = useState("");
+  const [aiQuery, setAiQuery] = React.useState("");
 
   const handleFilterChange = (key: keyof PropertyFilters, value: any) => {
     onFiltersChange({

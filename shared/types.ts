@@ -20,7 +20,6 @@ export interface PaginatedResponse<T> {
     perPage: number;
     total: number;
     pages: number;
-    totalPages: number;
     hasNext: boolean;
     hasPrev: boolean;
   };

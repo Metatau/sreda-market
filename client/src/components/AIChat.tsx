@@ -8,7 +8,6 @@ import type { ChatMessage } from "@/types";
 interface AIChatProps {
   isOpen: boolean;
   onToggle: () => void;
-  onMessage?: (message: string) => void;
 }
 
 export function AIChat({ isOpen, onToggle }: AIChatProps) {
