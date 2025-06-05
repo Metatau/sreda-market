@@ -282,6 +282,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ADS API Integration endpoints
+  app.post("/api/admin/ads-api/sync", requireAdmin, async (req, res) => {
+    try {
+      const { regions } = req.body;
+      const result = await adsApiService.syncProperties(regions);
+      res.json({
+        success: true,
+        imported: result.imported,
+        updated: result.updated,
+        errors: result.errors
+      });
+    } catch (error) {
+      console.error('Error syncing with ADS API:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to sync with ADS API' 
+      });
+    }
+  });
+
+  app.get("/api/admin/ads-api/status", requireAdmin, async (req, res) => {
+    try {
+      const isAvailable = await adsApiService.isServiceAvailable();
+      const regions = isAvailable ? await adsApiService.getRegions() : [];
+      
+      res.json({
+        success: true,
+        available: isAvailable,
+        regions,
+        configured: !!process.env.ADS_API_KEY
+      });
+    } catch (error) {
+      console.error('Error checking ADS API status:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to check ADS API status' 
+      });
+    }
+  });
+
+  app.get("/api/admin/ads-api/regions", requireAdmin, async (req, res) => {
+    try {
+      const regions = await adsApiService.getRegions();
+      res.json({ success: true, regions });
+    } catch (error) {
+      console.error('Error fetching ADS API regions:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch regions from ADS API' 
+      });
+    }
+  });
+
   // AI Chat with role-based access and quota checking
   app.post("/api/chat", requireRoleAuth, checkAIQuota, async (req, res) => {
     try {
