@@ -141,7 +141,7 @@ export default function Login() {
       <div className="w-full max-w-md space-y-6">
         {/* Заголовок */}
         <div className="text-center">
-          <h1 className="text-3xl font-black text-gray-900 mb-2 tracking-wide">SREDA Market</h1>
+          <h1 className="text-3xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 mb-2 tracking-widest uppercase">SREDA Market</h1>
           <p className="text-gray-600">Smart Real Estate</p>
         </div>
 
