@@ -39,17 +39,21 @@ export class ReferralService {
       })
       .returning();
 
-    // Начисляем бонусы на счет реферера
-    await db
-      .update(users)
-      .set({
-        bonusBalance: db
-          .select({ balance: users.bonusBalance })
-          .from(users)
-          .where(eq(users.id, referrerId))
-          .then(([user]) => (parseFloat(user.balance) + bonusAmount).toString())
-      })
+    // Получаем текущий баланс пользователя
+    const [currentUser] = await db
+      .select({ balance: users.bonusBalance })
+      .from(users)
       .where(eq(users.id, referrerId));
+
+    if (currentUser) {
+      const newBalance = parseFloat(currentUser.balance) + bonusAmount;
+      
+      // Обновляем баланс пользователя
+      await db
+        .update(users)
+        .set({ bonusBalance: newBalance.toString() })
+        .where(eq(users.id, referrerId));
+    }
 
     // Создаем транзакцию начисления бонусов
     await db

@@ -5,17 +5,20 @@ import {
   propertyAnalytics,
   investmentAnalytics,
   chatMessages,
+  users,
   type Region,
   type PropertyClass,
   type Property,
   type PropertyAnalytics,
   type InvestmentAnalytics,
   type ChatMessage,
+  type User,
   type InsertRegion,
   type InsertPropertyClass,
   type InsertProperty,
   type InsertPropertyAnalytics,
   type InsertChatMessage,
+  type InsertUser,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, ilike, desc, sql } from "drizzle-orm";
@@ -46,6 +49,13 @@ export interface IStorage {
   
   // Analytics
   getNewPropertiesCount(since: Date, regionId?: number): Promise<number>;
+  
+  // User management
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<InsertUser>): Promise<User>;
+  updateUserBonusBalance(id: number, balance: string): Promise<void>;
 }
 
 export interface PropertyFilters {
@@ -397,6 +407,47 @@ export class DatabaseStorage implements IStorage {
       .where(and(...conditions));
     
     return result[0]?.count || 0;
+  }
+
+  // User management methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db
+      .insert(users)
+      .values(user)
+      .returning();
+    return newUser;
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+
+  async updateUserBonusBalance(id: number, balance: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ bonusBalance: balance })
+      .where(eq(users.id, id));
   }
 }
 

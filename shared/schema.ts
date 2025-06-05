@@ -191,7 +191,7 @@ export const users = pgTable("users", {
   username: varchar("username", { length: 100 }).notNull().unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   referralCode: varchar("referral_code", { length: 50 }).notNull().unique(),
-  referredBy: integer("referred_by").references(() => users.id),
+  referredBy: integer("referred_by"),
   bonusBalance: decimal("bonus_balance", { precision: 10, scale: 2 }).default("0.00").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

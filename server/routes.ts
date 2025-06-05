@@ -424,9 +424,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { payment_id, order_id, status } = req.body;
       
       if (status === 'PAID') {
-        // Здесь нужно активировать подписку для пользователя
         console.log(`Payment successful for order ${order_id}, payment ${payment_id}`);
-        // TODO: Обновить статус подписки пользователя в базе данных
+        
+        // Извлекаем метаданные из платежа
+        const paymentDetails = await blankBankPaymentService.getPaymentStatus(payment_id);
+        const metadata = paymentDetails.metadata;
+        
+        if (metadata) {
+          const { userId, bonusUsed, referrerId, subscriptionType, originalAmount } = metadata;
+          
+          // Списываем использованные бонусы
+          if (bonusUsed > 0) {
+            await ReferralService.spendBonuses(
+              userId, 
+              bonusUsed, 
+              `Оплата подписки ${subscriptionType} (частично бонусами)`
+            );
+          }
+          
+          // Начисляем реферальные бонусы
+          if (referrerId) {
+            await ReferralService.processReferralEarning(
+              referrerId, 
+              userId, 
+              originalAmount, 
+              subscriptionType
+            );
+          }
+        }
+        
+        // TODO: Активировать подписку пользователя
       }
 
       res.json({ success: true });
