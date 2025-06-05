@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useRegions, usePropertyClasses } from "@/hooks/useProperties";
-import { chatApi } from "@/services/api";
 import type { SearchFilters } from "@/types";
 
 interface PropertyFiltersProps {
@@ -22,9 +19,6 @@ const propertyClassColors = {
 };
 
 export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersProps) {
-  const [aiQuery, setAiQuery] = useState("");
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  
   const { data: regions = [] } = useRegions();
   const { data: propertyClasses = [] } = usePropertyClasses();
 
@@ -48,24 +42,6 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
   const clearFilters = () => {
     onFiltersChange({});
   };
-
-  const handleAiSearch = async () => {
-    if (!aiQuery.trim()) return;
-    
-    setIsAiLoading(true);
-    try {
-      const response = await chatApi.sendMessage(aiQuery);
-      // This would typically parse the AI response and apply filters
-      // For now, just clear the query
-      setAiQuery("");
-    } catch (error) {
-      console.error("AI search error:", error);
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
-  const selectedPropertyClass = propertyClasses.find(pc => pc.id === filters.propertyClassId);
 
   return (
     <Card className="w-full">
@@ -165,39 +141,6 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
               );
             })}
           </div>
-        </div>
-
-        {/* AI Search */}
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
-          <div className="flex items-center space-x-2 mb-2">
-            <i className="fas fa-robot text-blue-600"></i>
-            <h4 className="font-medium text-gray-900">ИИ-поиск</h4>
-          </div>
-          <p className="text-sm text-gray-600 mb-3">Опишите, что вы ищете</p>
-          <Textarea
-            placeholder="Например: 'Ищу квартиру для инвестиций с хорошей доходностью в центре Москвы'"
-            value={aiQuery}
-            onChange={(e) => setAiQuery(e.target.value)}
-            className="mb-3 resize-none"
-            rows={3}
-          />
-          <Button 
-            onClick={handleAiSearch}
-            disabled={!aiQuery.trim() || isAiLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700"
-          >
-            {isAiLoading ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Поиск...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-search mr-2"></i>
-                Найти с ИИ
-              </>
-            )}
-          </Button>
         </div>
       </CardContent>
     </Card>
