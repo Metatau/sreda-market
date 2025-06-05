@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'wouter';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import { 
   DropdownMenu,
@@ -14,15 +14,19 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Shield } from 'lucide-react';
 
 export const UserProfile: React.FC = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout } = useUser();
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return null;
   }
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return name ? name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
   };
+
+  const displayName = user.firstName && user.lastName 
+    ? `${user.firstName} ${user.lastName}` 
+    : user.username || 'User';
 
   return (
     <DropdownMenu>
@@ -30,16 +34,16 @@ export const UserProfile: React.FC = () => {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-blue-600 text-white">
-              {getInitials(user.name)}
+              {getInitials(displayName)}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <div className="flex flex-col space-y-1 p-2">
-          <p className="text-sm font-medium leading-none">{user.name}</p>
+          <p className="text-sm font-medium leading-none">{displayName}</p>
           <p className="text-xs leading-none text-muted-foreground">
-            ID: {user.id}
+            ID: {user.username}
           </p>
         </div>
         <DropdownMenuSeparator />
