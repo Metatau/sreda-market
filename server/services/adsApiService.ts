@@ -306,21 +306,42 @@ export class AdsApiService {
 
     // Дополнительная проверка региона на уровне конвертации с картой соответствий
     const allowedRegions = await storage.getRegions();
-    const propertyRegion = (adsProperty.region || adsProperty.city || '').toLowerCase().trim();
     const allowedRegionNames = allowedRegions.map(r => r.name.toLowerCase());
+    
+    // Извлекаем регион с той же логикой, что и в syncProperties
+    const cityField = (adsProperty.city || '').toLowerCase().trim();
+    const regionField = (adsProperty.region || '').toLowerCase().trim();
+    
+    // Извлекаем регион из поля city если оно содержит "область"
+    let propertyRegion = regionField;
+    if (cityField.includes('область')) {
+      const parts = cityField.split(',');
+      if (parts.length > 0) {
+        propertyRegion = parts[0].trim();
+      }
+    }
+    
+    // Если регион все еще пустой, используем city
+    if (!propertyRegion) {
+      propertyRegion = cityField;
+    }
     
     // Карта соответствий регионов
     const regionMapping: Record<string, string> = {
       'москва': 'москва',
+      'московская область': 'москва', // Московская область относится к Москве
       'санкт-петербург': 'санкт-петербург',
+      'ленинградская область': 'санкт-петербург',
       'новосибирск': 'новосибирск',
       'новосибирская область': 'новосибирск',
       'екатеринбург': 'екатеринбург',
       'свердловская область': 'екатеринбург',
       'казань': 'казань',
       'татарстан': 'казань',
+      'республика татарстан': 'казань',
       'уфа': 'уфа',
       'башкортостан': 'уфа',
+      'республика башкортостан': 'уфа',
       'красноярск': 'красноярск',
       'красноярский край': 'красноярск',
       'пермь': 'пермь',
@@ -335,6 +356,11 @@ export class AdsApiService {
 
     const mappedRegion = regionMapping[propertyRegion];
     const isValidRegion = mappedRegion && allowedRegionNames.includes(mappedRegion);
+    
+    console.log(`ConvertAdsProperty debug for region "${propertyRegion}":`);
+    console.log(`  Mapped region: "${mappedRegion}"`);
+    console.log(`  Is valid: ${isValidRegion}`);
+    console.log(`  Allowed regions: ${allowedRegionNames.join(', ')}`);
     
     if (!isValidRegion) {
       throw new Error(`Property region "${propertyRegion}" is not in the allowed regions list`);
