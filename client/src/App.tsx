@@ -6,6 +6,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "@/pages/Home";
 import MapPage from "@/pages/MapPage";
 import InvestmentAnalyticsDemo from "@/pages/InvestmentAnalyticsDemo";
+import { Favorites } from "@/pages/Favorites";
+import { Profile } from "@/pages/Profile";
+import { Comparison } from "@/pages/Comparison";
 import NotFound from "@/pages/not-found";
 
 function App() {
@@ -16,6 +19,9 @@ function App() {
           <Route path="/" component={Home} />
           <Route path="/map" component={MapPage} />
           <Route path="/analytics" component={InvestmentAnalyticsDemo} />
+          <Route path="/favorites" component={Favorites} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/comparison" component={Comparison} />
           <Route component={NotFound} />
         </Switch>
         <Toaster />

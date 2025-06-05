@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Home, BarChart3, Building } from 'lucide-react';
+import { Home, BarChart3, Building, Heart, Scale } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { LoginButton } from "@/components/Auth/LoginButton";
 import { UserProfile } from "@/components/Auth/UserProfile";
@@ -65,14 +65,18 @@ export function Navigation() {
             </div>
           ) : isAuthenticated ? (
             <>
-              <Button variant="outline" size="sm">
-                <i className="fas fa-heart mr-2"></i>
-                Избранное
-              </Button>
-              <Button variant="outline" size="sm">
-                <i className="fas fa-balance-scale mr-2"></i>
-                Сравнение
-              </Button>
+              <Link href="/favorites">
+                <Button variant="outline" size="sm">
+                  <Heart className="w-4 h-4 mr-2" />
+                  Избранное
+                </Button>
+              </Link>
+              <Link href="/comparison">
+                <Button variant="outline" size="sm">
+                  <Scale className="w-4 h-4 mr-2" />
+                  Сравнение
+                </Button>
+              </Link>
               <UserProfile />
             </>
           ) : (
