@@ -37,6 +37,7 @@ function Router() {
         <Route path="/favorites" component={Favorites} />
         <Route path="/profile" component={Profile} />
         <Route path="/comparison" component={Comparison} />
+        <Route path="/login" component={Login} />
         <Route component={NotFound} />
       </Switch>
     </AuthProvider>
