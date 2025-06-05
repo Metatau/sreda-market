@@ -55,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/ads-api/sync", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/admin/ads-api/sync", async (req, res) => {
     try {
       const { regions, credentials } = req.body;
       const { adsApiService } = await import('./services/adsApiService');

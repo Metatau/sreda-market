@@ -40,14 +40,22 @@ export class AdsApiService {
     this.baseUrl = process.env.ADS_API_URL || 'https://ads-api.ru/api/v1';
     this.apiKey = process.env.ADS_API_KEY || '';
 
-    if (!this.apiKey) {
-      console.warn('ADS_API_KEY not configured. Property synchronization will be disabled.');
-    }
+    console.log('ADS API Configuration:');
+    console.log('URL:', this.baseUrl);
+    console.log('Login configured:', !!process.env.ADS_API_LOGIN);
+    console.log('Password configured:', !!process.env.ADS_API_PASSWORD);
+    console.log('API Key configured:', !!this.apiKey);
   }
 
   private async makeRequest<T>(endpoint: string, params?: Record<string, any>, credentials?: { email: string; password: string }): Promise<T> {
-    if (!this.apiKey) {
-      throw new Error('ADS API key not configured');
+    // Используем учетные данные из переменных окружения если не переданы напрямую
+    const authCredentials = credentials || {
+      email: process.env.ADS_API_LOGIN || '',
+      password: process.env.ADS_API_PASSWORD || ''
+    };
+
+    if (!authCredentials.email || !authCredentials.password) {
+      throw new Error('ADS API credentials not configured');
     }
 
     const url = new URL(`${this.baseUrl}${endpoint}`);
@@ -63,13 +71,9 @@ export class AdsApiService {
       'Content-Type': 'application/json',
     };
 
-    // Используем Basic Auth если переданы учетные данные, иначе Bearer токен
-    if (credentials) {
-      const auth = Buffer.from(`${credentials.email}:${credentials.password}`).toString('base64');
-      headers['Authorization'] = `Basic ${auth}`;
-    } else {
-      headers['Authorization'] = `Bearer ${this.apiKey}`;
-    }
+    // Используем Basic Auth с учетными данными
+    const auth = Buffer.from(`${authCredentials.email}:${authCredentials.password}`).toString('base64');
+    headers['Authorization'] = `Basic ${auth}`;
 
     const response = await fetch(url.toString(), {
       headers,
@@ -89,7 +93,7 @@ export class AdsApiService {
     maxPrice?: number;
     page?: number;
     limit?: number;
-  }): Promise<AdsApiResponse> {
+  }, credentials?: { email: string; password: string }): Promise<AdsApiResponse> {
     return this.makeRequest<AdsApiResponse>('/properties', {
       region: filters?.region,
       property_type: filters?.propertyType,
@@ -97,7 +101,7 @@ export class AdsApiService {
       max_price: filters?.maxPrice,
       page: filters?.page || 1,
       limit: filters?.limit || 100,
-    });
+    }, credentials);
   }
 
   async getProperty(externalId: string): Promise<AdsApiProperty> {
@@ -173,7 +177,7 @@ export class AdsApiService {
 
     try {
       const filters = regions ? { region: regions.join(',') } : {};
-      const response = await this.fetchProperties(filters);
+      const response = await this.fetchProperties(filters, credentials);
 
       for (const adsProperty of response.data) {
         try {
@@ -224,9 +228,9 @@ export class AdsApiService {
     }
   }
 
-  async getRegions(): Promise<string[]> {
+  async getRegions(credentials?: { email: string; password: string }): Promise<string[]> {
     try {
-      const response = await this.makeRequest<{ regions: string[] }>('/regions');
+      const response = await this.makeRequest<{ regions: string[] }>('/regions', undefined, credentials);
       return response.regions;
     } catch (error) {
       console.error('Error fetching regions from ADS API:', error);
