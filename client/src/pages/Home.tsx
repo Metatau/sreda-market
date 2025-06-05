@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
-import { AIChat } from "@/components/AIChat";
+
 import { InvestmentAnalyticsModal } from "@/components/InvestmentAnalyticsModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("moscow");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
 
@@ -204,7 +204,7 @@ export default function Home() {
             )}
 
             {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
+            {pagination && pagination.pages > 1 && (
               <div className="flex justify-center space-x-2 mt-8">
                 <Button
                   variant="outline"
@@ -216,14 +216,14 @@ export default function Home() {
                 </Button>
                 
                 <span className="flex items-center px-3 text-sm text-gray-600">
-                  {currentPage} из {pagination.totalPages}
+                  {currentPage} из {pagination.pages}
                 </span>
                 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
-                  disabled={currentPage === pagination.totalPages}
+                  onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
+                  disabled={currentPage === pagination.pages}
                 >
                   Далее
                 </Button>
@@ -232,11 +232,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      {/* AI Chat */}
-      <AIChat 
-        isOpen={isChatOpen} 
-        onToggle={() => setIsChatOpen(!isChatOpen)} 
-      />
+
       {/* Investment Analytics Modal */}
       {selectedProperty && (
         <InvestmentAnalyticsModal

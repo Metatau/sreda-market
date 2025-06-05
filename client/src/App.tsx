@@ -4,6 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProvider, useUser } from "@/contexts/UserContext";
+import { AIChat } from "@/components/AIChat";
 import Home from "@/pages/Home";
 import MapPage from "@/pages/MapPage";
 import InvestmentAnalyticsDemo from "@/pages/InvestmentAnalyticsDemo";
@@ -40,6 +41,7 @@ function Router() {
         <Route path="/login" component={Login} />
         <Route component={NotFound} />
       </Switch>
+      <AIChat />
     </AuthProvider>
   );
 }

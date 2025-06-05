@@ -6,11 +6,16 @@ import { chatApi } from "@/services/api";
 import type { ChatMessage } from "@/types";
 
 interface AIChatProps {
-  isOpen: boolean;
-  onToggle: () => void;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
-export function AIChat({ isOpen, onToggle }: AIChatProps) {
+export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: AIChatProps = {}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const onToggle = externalOnToggle || (() => setInternalIsOpen(!internalIsOpen));
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 1,
