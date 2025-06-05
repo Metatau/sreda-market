@@ -20,6 +20,7 @@ export const propertyFiltersSchema = z.object({
   minArea: z.number().min(0).optional(),
   maxArea: z.number().min(0).optional(),
   propertyType: z.string().optional(),
+  marketType: z.enum(['secondary', 'new_construction']).optional(),
 }).refine(data => {
   if (data.minPrice && data.maxPrice && data.minPrice > data.maxPrice) {
     return false;
@@ -40,6 +41,7 @@ export const searchBodySchema = z.object({
   minArea: z.number().min(0).optional(),
   maxArea: z.number().min(0).optional(),
   propertyType: z.string().optional(),
+  marketType: z.enum(['secondary', 'new_construction']).optional(),
 });
 
 // Validation helper functions
@@ -75,6 +77,7 @@ export function validateFilters(query: Record<string, any>) {
     if (query.min_area) filters.minArea = parseFloat(query.min_area as string);
     if (query.max_area) filters.maxArea = parseFloat(query.max_area as string);
     if (query.property_type) filters.propertyType = query.property_type as string;
+    if (query.market_type) filters.marketType = query.market_type as string;
 
     return propertyFiltersSchema.parse(filters);
   } catch (error) {
