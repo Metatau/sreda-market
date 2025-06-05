@@ -131,7 +131,7 @@ export default function MapPage() {
             )}
 
             {/* Pagination */}
-            {pagination && pagination.totalPages > 1 && (
+            {pagination && pagination.pages > 1 && (
               <div className="flex justify-center space-x-2 mt-6">
                 <Button
                   variant="outline"
@@ -143,14 +143,14 @@ export default function MapPage() {
                 </Button>
                 
                 <span className="flex items-center px-3 text-sm text-gray-600">
-                  {currentPage} из {pagination.totalPages}
+                  {currentPage} из {pagination.pages}
                 </span>
                 
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))}
-                  disabled={currentPage === pagination.totalPages}
+                  onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
+                  disabled={currentPage === pagination.pages}
                 >
                   Далее
                 </Button>
