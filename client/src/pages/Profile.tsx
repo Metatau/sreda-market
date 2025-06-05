@@ -512,9 +512,7 @@ export function Profile() {
                       <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                         <span className="text-xs font-medium text-blue-600">1</span>
                       </div>
-                      <p className="text-sm text-gray-700">
-                        Поделитесь реферальной ссылкой и промокодом с друзьями
-                      </p>
+                      <p className="text-sm text-gray-700">Поделитесь реферальной ссылкой и промокодом с коллегами и друзьями</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
