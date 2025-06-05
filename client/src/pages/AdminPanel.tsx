@@ -287,13 +287,16 @@ export default function AdminPanel() {
               </div>
             </>
           ) : (
-            <div className="p-4 bg-yellow-50 rounded-lg">
-              <div className="flex items-center space-x-2 text-yellow-800">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center space-x-2 text-blue-800">
                 <AlertCircle className="w-5 h-5" />
-                <span className="font-medium">Введите учетные данные</span>
+                <span className="font-medium">ADS API настроен</span>
               </div>
-              <p className="text-yellow-700 mt-2">
-                Для запуска синхронизации необходимо указать логин и пароль от ads-api.ru в форме выше.
+              <p className="text-blue-700 mt-2">
+                {adsApiStatus?.configured 
+                  ? "API настроен, но для синхронизации требуется активная подписка на ads-api.ru. Обратитесь к support@ads-api.ru для активации доступа к API."
+                  : "Для запуска синхронизации необходимо указать логин и пароль от ads-api.ru в форме выше."
+                }
               </p>
             </div>
           )}

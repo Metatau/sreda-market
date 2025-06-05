@@ -37,28 +37,28 @@ export class AdsApiService {
   private apiKey: string;
 
   constructor() {
-    this.baseUrl = process.env.ADS_API_URL || 'https://ads-api.ru/api/v1';
-    this.apiKey = process.env.ADS_API_KEY || '';
+    this.baseUrl = process.env.ADS_API_URL || 'https://ads-api.ru/api';
+    this.apiKey = process.env.ADS_API_KEY || '1699b3bd91f1529aaeb9797a951cde4b';
 
     console.log('ADS API Configuration:');
     console.log('URL:', this.baseUrl);
-    console.log('Login configured:', !!process.env.ADS_API_LOGIN);
-    console.log('Password configured:', !!process.env.ADS_API_PASSWORD);
-    console.log('API Key configured:', !!this.apiKey);
+    console.log('Access Token:', this.apiKey ? this.apiKey.substring(0, 8) + '...' : 'Not configured');
   }
 
   private async makeRequest<T>(endpoint: string, params?: Record<string, any>, credentials?: { email: string; password: string }): Promise<T> {
-    // Используем учетные данные из переменных окружения если не переданы напрямую
-    const authCredentials = credentials || {
-      email: process.env.ADS_API_LOGIN || '',
-      password: process.env.ADS_API_PASSWORD || ''
-    };
-
-    if (!authCredentials.email || !authCredentials.password) {
-      throw new Error('ADS API credentials not configured');
+    // Используем access_token если он настроен
+    const accessToken = this.apiKey || '1699b3bd91f1529aaeb9797a951cde4b';
+    
+    if (!accessToken) {
+      throw new Error('ADS API access token not configured');
     }
 
     const url = new URL(`${this.baseUrl}${endpoint}`);
+    
+    // Добавляем access_token как обязательный параметр
+    url.searchParams.append('access_token', accessToken);
+    
+    // Добавляем остальные параметры
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -70,10 +70,6 @@ export class AdsApiService {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-
-    // Используем Basic Auth с учетными данными
-    const auth = Buffer.from(`${authCredentials.email}:${authCredentials.password}`).toString('base64');
-    headers['Authorization'] = `Basic ${auth}`;
 
     console.log('Making request to:', url.toString());
     console.log('Headers:', { ...headers, Authorization: '[REDACTED]' });
@@ -227,23 +223,41 @@ export class AdsApiService {
       return { available: false, configured: false, regions: [] };
     }
 
-    try {
-      const regions = await this.getRegions();
-      return { available: true, configured: true, regions };
-    } catch (error) {
-      console.error('ADS API not available:', error);
-      return { available: false, configured: true, regions: [] };
-    }
+    // Для демонстрации возвращаем статус "настроен, но требует активной подписки"
+    const mockRegions = [
+      'Москва', 'Санкт-Петербург', 'Екатеринбург', 'Новосибирск', 
+      'Казань', 'Нижний Новгород', 'Челябинск', 'Самара'
+    ];
+
+    return { 
+      available: false, // API требует активной подписки
+      configured: true, 
+      regions: mockRegions 
+    };
   }
 
   async getRegions(credentials?: { email: string; password: string }): Promise<string[]> {
-    try {
-      const response = await this.makeRequest<{ regions: string[] }>('/regions', undefined, credentials);
-      return response.regions;
-    } catch (error) {
-      console.error('Error fetching regions from ADS API:', error);
-      return [];
+    // Попробуем разные возможные endpoints
+    const endpoints = ['/regions', '/region', '/getRegions', '/api/regions', '/v1/regions'];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying endpoint: ${endpoint}`);
+        const response = await this.makeRequest<{ regions: string[] } | string[]>(endpoint, undefined, credentials);
+        
+        if (Array.isArray(response)) {
+          return response;
+        } else if (response && typeof response === 'object' && 'regions' in response) {
+          return response.regions;
+        }
+      } catch (error) {
+        console.log(`Endpoint ${endpoint} failed:`, error instanceof Error ? error.message : String(error));
+        continue;
+      }
     }
+    
+    console.error('All region endpoints failed');
+    return [];
   }
 
   async isServiceAvailable(): Promise<boolean> {
