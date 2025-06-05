@@ -4,22 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
-interface Property {
-  id: number;
-  title: string;
-  price: number;
-  pricePerSqm?: number;
-  coordinates: [number, number];
-  propertyClass?: string;
-  rooms?: number;
-  area?: string;
-  address?: string;
-  investmentScore?: number;
-  roi?: string;
-  liquidityScore?: number;
-  investmentRating?: string;
-}
+import type { Property } from '@/types';
 
 interface PropertyMapProps {
   properties: Property[];
@@ -52,7 +37,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN;
+    const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
     
     if (!mapboxToken) {
       console.error('Mapbox access token is required');
@@ -91,7 +76,11 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     if (heatmapMode === 'none') {
       // Add individual property markers
       properties.forEach((property) => {
-        if (!property.coordinates || property.coordinates.length !== 2) return;
+        if (!property.coordinates) return;
+        
+        // Parse coordinates from string format "lat,lng"
+        const coords = property.coordinates.split(',').map(Number);
+        if (coords.length !== 2 || isNaN(coords[0]) || isNaN(coords[1])) return;
 
         const el = document.createElement('div');
         el.className = 'property-marker';
@@ -101,7 +90,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         el.style.cursor = 'pointer';
         el.style.border = '2px solid white';
         
-        const colorClass = getPropertyClassColor(property.propertyClass || '');
+        const propertyClassName = property.propertyClass?.name || '';
+        const colorClass = getPropertyClassColor(propertyClassName);
         if (colorClass.includes('blue')) el.style.backgroundColor = '#3b82f6';
         else if (colorClass.includes('green')) el.style.backgroundColor = '#10b981';
         else if (colorClass.includes('yellow')) el.style.backgroundColor = '#f59e0b';
@@ -115,7 +105,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         });
 
         new mapboxgl.Marker(el)
-          .setLngLat([property.coordinates[0], property.coordinates[1]])
+          .setLngLat([coords[1], coords[0]]) // [lng, lat] for Mapbox
           .addTo(map.current!);
       });
     }
@@ -145,18 +135,22 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         if (heatmapMode === 'price') {
           weight = (property.pricePerSqm || property.price) / 100000; // Normalize price
         } else if (heatmapMode === 'investment') {
-          weight = property.investmentScore || Math.random() * 10; // Use investment score
+          weight = property.investmentRating || Math.random() * 10; // Use investment rating
         }
+        
+        if (!property.coordinates) return null;
+        const coords = property.coordinates.split(',').map(Number);
+        if (coords.length !== 2 || isNaN(coords[0]) || isNaN(coords[1])) return null;
         
         return {
           type: 'Feature',
           properties: { weight },
           geometry: {
             type: 'Point',
-            coordinates: [property.coordinates[0], property.coordinates[1]]
+            coordinates: [coords[1], coords[0]] // [lng, lat] for Mapbox
           }
         };
-      })
+      }).filter(Boolean)
     };
 
     // Add heatmap source
@@ -367,7 +361,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                   {selectedPropertyState.propertyClass && (
                     <div className="pt-2">
                       <Badge variant="secondary" className="text-xs">
-                        {selectedPropertyState.propertyClass}
+                        {selectedPropertyState.propertyClass.name}
                       </Badge>
                     </div>
                   )}
