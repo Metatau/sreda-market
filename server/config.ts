@@ -6,6 +6,7 @@ const configSchema = z.object({
   PORT: z.string().transform(Number).default('5000'),
   DATABASE_URL: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
+  JWT_SECRET: z.string().default('dev-jwt-secret-change-in-production'),
   SESSION_SECRET: z.string().default('dev-session-secret'),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_BOT_USERNAME: z.string().optional(),

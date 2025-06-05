@@ -194,6 +194,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 100 }).notNull().unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }), // Hashed password
   role: userRoleEnum("role").default('client').notNull(),
   telegramId: varchar("telegram_id", { length: 50 }).unique(),
   telegramHandle: varchar("telegram_handle", { length: 100 }),
@@ -207,6 +208,12 @@ export const users = pgTable("users", {
   subscriptionExpiresAt: timestamp("subscription_expires_at"),
   aiQueriesUsed: integer("ai_queries_used").default(0).notNull(),
   lastAiQueryReset: timestamp("last_ai_query_reset").defaultNow(),
+  emailVerified: boolean("email_verified").default(false),
+  emailVerificationToken: varchar("email_verification_token", { length: 255 }),
+  passwordResetToken: varchar("password_reset_token", { length: 255 }),
+  passwordResetExpiresAt: timestamp("password_reset_expires_at"),
+  lastLoginAt: timestamp("last_login_at"),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
