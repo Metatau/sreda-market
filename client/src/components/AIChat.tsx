@@ -122,7 +122,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                 {/* Header */}
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">AI SREDA</h2>
+                    <h2 className="text-xl font-quantum font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 tracking-wide uppercase">AI SREDA</h2>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -132,9 +132,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                       <i className="fas fa-times text-lg"></i>
                     </Button>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    Интеллектуальный анализ рынка недвижимости и персональные рекомендации
-                  </p>
+                  <p className="text-sm text-gray-600">SMART-анализ рынка и персональные рекомендации</p>
                 </div>
 
                 {/* Popular Questions */}
