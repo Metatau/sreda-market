@@ -675,7 +675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments/calculate-price", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const { originalPrice } = req.body;
-      const userId = parseInt(req.user.id);
+      const userId = req.user!.id;
       
       const priceCalculation = await ReferralService.calculateFinalPrice(userId, originalPrice);
       
