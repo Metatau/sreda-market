@@ -18,6 +18,9 @@ import { z } from "zod";
 // User roles enum
 export const userRoleEnum = pgEnum('user_role', ['administrator', 'client']);
 
+// Property market type enum
+export const propertyMarketTypeEnum = pgEnum('property_market_type', ['secondary', 'new_construction']);
+
 // Regions table
 export const regions = pgTable("regions", {
   id: serial("id").primaryKey(),
@@ -60,6 +63,7 @@ export const properties = pgTable("properties", {
   metroStation: varchar("metro_station", { length: 255 }),
   coordinates: text("coordinates"), // PostGIS POINT stored as text
   propertyType: varchar("property_type", { length: 50 }).default("apartment"),
+  marketType: propertyMarketTypeEnum("market_type").default("secondary"),
   source: varchar("source", { length: 50 }).default("ads-api.ru"),
   url: varchar("url", { length: 1000 }),
   phone: varchar("phone", { length: 50 }),
