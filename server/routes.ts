@@ -149,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User management endpoints
   app.get("/api/users/profile", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const user = await storage.getUser(parseInt(req.user!.id.toString()));
+      const user = await storage.getUser(req.user!.id);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -271,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/ai-limits", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const aiLimits = await UserService.getAILimits(parseInt(req.user!.id.toString()));
+      const aiLimits = await UserService.getAILimits(req.user!.id);
       res.json(aiLimits);
     } catch (error) {
       console.error('Error fetching AI limits:', error);
@@ -312,12 +312,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.saveChatMessage({
         sessionId: sessionId || `session_${Date.now()}`,
         role: "assistant",
-        content: typeof response === 'string' ? response : response.message || 'Response generated',
+        content: response,
         createdAt: new Date(),
       });
 
       res.json({
-        message: typeof response === 'string' ? response : response.message || 'Response generated',
+        message: response,
         sessionId: sessionId || `session_${Date.now()}`,
       });
     } catch (error) {
@@ -476,7 +476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/payments/create", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const { plan, promoCode, returnUrl, referralCode } = req.body;
-      const userId = parseInt(req.user.id);
+      const userId = req.user!.id;
       
       const planPrices = {
         promo: 0,
@@ -663,7 +663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/referrals/stats", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = parseInt(req.user.id);
+      const userId = req.user!.id;
       const stats = await ReferralService.getReferralStats(userId);
       res.json(stats);
     } catch (error) {
