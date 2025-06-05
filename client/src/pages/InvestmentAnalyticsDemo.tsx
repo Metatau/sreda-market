@@ -283,10 +283,12 @@ export default function InvestmentAnalyticsDemo() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Боковая панель с фильтрами */}
           <div className="lg:col-span-1">
-            <PropertyFilters 
-              filters={filters} 
-              onFiltersChange={setFilters}
-            />
+            <div className="lg:mt-[52px]"> {/* Отступ для выравнивания с заголовком карточек */}
+              <PropertyFilters 
+                filters={filters} 
+                onFiltersChange={setFilters}
+              />
+            </div>
           </div>
 
           {/* Список объектов с аналитикой */}
