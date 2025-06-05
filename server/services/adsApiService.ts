@@ -486,7 +486,7 @@ export class AdsApiService {
           };
 
           const mappedRegion = regionMapping[propertyRegion];
-          const isAllowedRegion = mappedRegion && allowedRegionNames.includes(mappedRegion);
+          const isAllowedRegion = mappedRegion && allowedCityNames.includes(mappedRegion);
 
           if (!isAllowedRegion) {
             console.log(`Skipping property ${adsProperty.id}: region "${propertyRegion}" not in allowed list`);
@@ -518,6 +518,7 @@ export class AdsApiService {
           errors.push(`Property ${propertyId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
+      }
 
       console.log(`ADS API sync completed: ${imported} imported, ${updated} updated, ${errors.length} errors`);
     } catch (error) {
@@ -540,24 +541,14 @@ export class AdsApiService {
       'Казань', 'Нижний Новгород', 'Челябинск', 'Самара'
     ];
 
-    try {
-      const regions = await this.getRegions();
-      return { 
-        available: regions.length > 0, // API доступен если получены регионы
-        configured: true, 
-        regions: regions.length > 0 ? regions : mockRegions 
-      };
-    } catch (error) {
-      console.error('ADS API not available:', error);
-      return { 
-        available: false, 
-        configured: true, 
-        regions: mockRegions 
-      };
-    }
+    return { 
+      available: false, 
+      configured: true, 
+      regions: mockRegions 
+    };
   }
 
-  async testApiEndpoints(): Promise<{ working: string[], failed: string[] }> {
+  async testApiEndpoints(): Promise<{ working: string[]; failed: string[] }> {
     // Тестируем официальные endpoints согласно документации ads-api.ru
     const testEndpoints = [
       '/api',           // Основной endpoint для получения объявлений
