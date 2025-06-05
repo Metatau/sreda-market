@@ -3,11 +3,12 @@ import { Link, useLocation } from 'wouter';
 import { Home, TrendingUp, Map, Heart, Scale, User, Building, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { LoginButton } from "@/components/Auth/LoginButton";
+import { UserProfile } from "@/components/Auth/UserProfile";
 import { useUser } from "@/contexts/UserContext";
 
 export function Navigation() {
   const [location] = useLocation();
-  const { logout } = useUser();
+  const { user, logout } = useUser();
 
   const navItems = [
     {
@@ -75,7 +76,7 @@ export function Navigation() {
           </div>
 
           <div className="flex items-center space-x-2">
-            <LoginButton />
+            {user ? <UserProfile /> : <LoginButton />}
           </div>
         </div>
       </div>
