@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User management endpoints
   app.get("/api/users/profile", requireRoleAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const user = await storage.getUser(req.user!.id);
+      const user = await storage.getUser(parseInt(req.user!.id.toString()));
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -200,7 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/ai-limits", requireRoleAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const aiLimits = await UserService.getAILimits(req.user!.id);
+      const aiLimits = await UserService.getAILimits(parseInt(req.user!.id.toString()));
       res.json(aiLimits);
     } catch (error) {
       console.error('Error fetching AI limits:', error);

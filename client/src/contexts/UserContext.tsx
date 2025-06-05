@@ -62,11 +62,18 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         return;
       }
 
-      const response = await apiRequest('GET', '/api/users/profile', undefined, {
-        'X-User-Email': currentEmail,
+      const response = await fetch('/api/users/profile', {
+        headers: {
+          'X-User-Email': currentEmail,
+        },
       });
 
-      setUser(response);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const userData = await response.json();
+      setUser(userData);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
       setUser(null);
