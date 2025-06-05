@@ -289,18 +289,16 @@ export class InvestmentCalculationService {
 
       const analyticsData = {
         propertyId,
-        monthlyRent: analytics.monthlyRent,
-        yearlyRent: analytics.yearlyRent,
-        grossROI: analytics.grossROI.toString(),
-        netROI: analytics.netROI.toString(),
-        operatingExpenses: analytics.operatingExpenses,
-        paybackPeriod: analytics.paybackPeriod,
+        rentalIncomeMonthly: analytics.monthlyRent,
+        rentalRoiAnnual: analytics.grossROI.toString(),
+        rentalPaybackYears: analytics.paybackPeriod?.toString(),
         liquidityScore: analytics.liquidityScore,
         investmentRating: analytics.investmentRating,
-        priceGrowthForecast: analytics.priceGrowthForecast.toString(),
-        riskRating: analytics.riskRating,
-        calculatedAt: analytics.calculatedAt,
-        updatedAt: new Date()
+        riskLevel: analytics.riskRating,
+        recommendedStrategy: 'rental', // Default strategy
+        priceForecast3y: analytics.priceGrowthForecast?.toString(),
+        calculatedAt: new Date(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
       };
 
       if (existing.length > 0) {
@@ -313,11 +311,9 @@ export class InvestmentCalculationService {
         // Создаём новую запись
         await db
           .insert(investmentAnalytics)
-          .values({
-            ...analyticsData,
-            createdAt: new Date()
-          });
+          .values(analyticsData);
       }
+      console.log(`Successfully saved investment analytics for property ${propertyId} with rating: ${analyticsData.investmentRating}`);
     } catch (error) {
       console.error(`Error saving investment analytics for property ${propertyId}:`, error);
       throw error;
