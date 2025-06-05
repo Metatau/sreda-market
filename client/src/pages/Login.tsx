@@ -51,6 +51,25 @@ export default function Login() {
     }
   };
 
+  const handleAdminLogin = async () => {
+    setIsLoading(true);
+    try {
+      await login('saabox@yandex.ru');
+      toast({
+        title: "Успешный вход",
+        description: "Добро пожаловать, Администратор",
+      });
+    } catch (error) {
+      toast({
+        title: "Ошибка входа",
+        description: "Не удалось войти как администратор",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -130,7 +149,7 @@ export default function Login() {
         <Card className="border-orange-200 bg-orange-50">
           <CardContent className="pt-6">
             <Button
-              onClick={loginAsAdmin}
+              onClick={handleAdminLogin}
               disabled={isLoading}
               className="w-full bg-orange-600 hover:bg-orange-700"
               size="lg"
