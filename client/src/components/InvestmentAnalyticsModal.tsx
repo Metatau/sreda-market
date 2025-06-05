@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -598,14 +598,14 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" aria-describedby="investment-analytics-description">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
               Инвестиционная аналитика
             </DialogTitle>
-            <div id="investment-analytics-description" className="text-sm text-gray-600">
+            <DialogDescription className="text-sm text-gray-600">
               Детальный анализ инвестиционной привлекательности объекта: {property.address}
-            </div>
+            </DialogDescription>
           </DialogHeader>
 
           {/* Основные метрики в шапке */}

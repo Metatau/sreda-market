@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { AI_SYSTEM_PROMPT } from "./aiPrompt";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -12,11 +13,7 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: `Вы - ИИ-консультант по недвижимости для российского рынка. 
-          Специализируетесь на инвестиционной недвижимости в крупных городах России.
-          Отвечайте на русском языке, давайте практические советы по покупке и инвестированию в недвижимость.
-          Учитывайте классификацию: Эконом, Стандарт, Комфорт, Бизнес, Элит.
-          Рассматривайте города: Москва, СПб, Новосибирск, Екатеринбург, Казань и другие.`
+          content: AI_SYSTEM_PROMPT
         },
         {
           role: "user",
