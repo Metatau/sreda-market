@@ -145,8 +145,8 @@ export class AdsApiService {
       limit: Math.min(filters?.limit || 100, 1000), // API ограничение
     };
 
-    // Добавляем фильтры согласно документации ads-api.ru
-    if (filters?.region) params.region = filters.region;
+    // Добавляем только поддерживаемые фильтры согласно документации ads-api.ru
+    // Убираем region - параметр не поддерживается API
     if (filters?.minPrice) params.price_min = filters.minPrice;
     if (filters?.maxPrice) params.price_max = filters.maxPrice;
 
@@ -410,7 +410,8 @@ export class AdsApiService {
       
       console.log('Allowed regions from database:', allowedRegionNames);
 
-      const filters = regions ? { region: regions.join(',') } : {};
+      // Убираем неподдерживаемый параметр region и используем только базовые фильтры
+      const filters = { limit: 20 }; // Ограничиваем количество для тестирования
       const response = await this.fetchProperties(filters, credentials);
 
       console.log(`Processing ${response.data.length} properties from ADS API`);

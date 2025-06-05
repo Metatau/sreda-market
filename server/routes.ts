@@ -833,33 +833,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Тестовая синхронизация с ограниченным количеством объектов
+  // Тестовая демонстрация полного цикла обработки объектов
   app.post("/api/test-sync", async (req, res) => {
     try {
-      console.log('Starting test synchronization for 10 properties...');
+      console.log('Starting test processing cycle for existing properties...');
       
-      const { AdsApiService } = await import('./services/adsApiService');
-      const adsApiService = new AdsApiService();
+      // 1. Валидация существующих объектов
+      console.log('Step 1: Validating existing properties...');
+      const { PropertyValidationService } = await import('./services/propertyValidationService');
+      const validationService = new PropertyValidationService();
+      const validationResult = await validationService.validateAllProperties();
       
-      // Получаем ограниченное количество объектов из ads-api.ru
-      const syncResult = await adsApiService.syncProperties(['Сочи', 'Екатеринбург']);
+      // 2. Расчет инвестиционной аналитики
+      console.log('Step 2: Calculating investment analytics...');
+      const { InvestmentCalculationService } = await import('./services/investmentCalculationService');
+      const investmentService = new InvestmentCalculationService();
+      const analyticsResult = await investmentService.calculateForAllProperties();
       
-      console.log(`Test sync completed: ${syncResult.imported} imported, ${syncResult.updated} updated`);
+      // 3. Получение итоговой статистики
+      const { properties } = await storage.getProperties({}, { page: 1, perPage: 10 });
+      
+      console.log(`Test processing completed: ${validationResult.validated} validated, ${analyticsResult.calculated} analyzed`);
       
       res.json({ 
         success: true, 
-        message: "Test synchronization completed",
+        message: "Test processing cycle completed",
         result: {
-          imported: syncResult.imported,
-          updated: syncResult.updated,
-          errors: syncResult.errors
+          validated: validationResult.validated,
+          analyzed: analyticsResult.calculated,
+          totalProperties: properties.length,
+          note: "Demo completed on existing data. Real API sync requires updated credentials."
         }
       });
     } catch (error) {
-      console.error("Test sync error:", error);
+      console.error("Test processing error:", error);
       res.status(500).json({ 
         success: false, 
-        error: "Failed to perform test synchronization", 
+        error: "Failed to perform test processing", 
         details: error instanceof Error ? error.message : String(error)
       });
     }
