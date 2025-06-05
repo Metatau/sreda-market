@@ -69,7 +69,7 @@ export default function AdminPanel() {
   };
 
   const handleSyncAll = () => {
-    syncMutation.mutate();
+    syncMutation.mutate(undefined);
   };
 
   const handleSyncSelected = () => {
@@ -155,7 +155,7 @@ export default function AdminPanel() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Sync className="w-5 h-5" />
+            <RefreshCw className="w-5 h-5" />
             <span>Синхронизация недвижимости</span>
           </CardTitle>
         </CardHeader>
@@ -202,7 +202,7 @@ export default function AdminPanel() {
                     disabled={syncMutation.isPending}
                     className="flex items-center space-x-2"
                   >
-                    <Sync className={`w-4 h-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`w-4 h-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
                     <span>
                       {syncMutation.isPending 
                         ? 'Синхронизация...' 

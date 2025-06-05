@@ -37,6 +37,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Admin routes for ADS API management
+  app.get("/api/admin/ads-api/status", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { adsApiService } = await import('./services/adsApiService');
+      const status = await adsApiService.getStatus();
+      res.json({ success: true, data: status });
+    } catch (error) {
+      console.error("Error getting ADS API status:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: { 
+          message: "Failed to get ADS API status", 
+          type: "INTERNAL_ERROR" 
+        } 
+      });
+    }
+  });
+
+  app.post("/api/admin/ads-api/sync", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { regions } = req.body;
+      const { adsApiService } = await import('./services/adsApiService');
+      const result = await adsApiService.syncProperties(regions);
+      res.json({ success: true, ...result });
+    } catch (error) {
+      console.error("Error syncing properties:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: { 
+          message: "Failed to sync properties", 
+          type: "SYNC_ERROR" 
+        } 
+      });
+    }
+  });
+
   // Authentication routes
   app.get("/api/auth/status", (req, res) => {
     const userId = req.headers['x-replit-user-id'];

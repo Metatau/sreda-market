@@ -11,6 +11,7 @@ import InvestmentAnalyticsDemo from "@/pages/InvestmentAnalyticsDemo";
 import { Favorites } from "@/pages/Favorites";
 import { Profile } from "@/pages/Profile";
 import { Comparison } from "@/pages/Comparison";
+import AdminPanel from "@/pages/AdminPanel";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -38,6 +39,7 @@ function Router() {
         <Route path="/favorites" component={Favorites} />
         <Route path="/profile" component={Profile} />
         <Route path="/comparison" component={Comparison} />
+        <Route path="/admin" component={AdminPanel} />
         <Route path="/login" component={Login} />
         <Route component={NotFound} />
       </Switch>
