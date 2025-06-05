@@ -274,7 +274,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                       disabled={!inputMessage.trim() || isLoading}
                       className="h-12 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     >
-                      <i className="fas fa-paper-plane text-lg"></i>
+                      <Send className="w-5 h-5" />
                     </Button>
                   </div>
                 </div>
