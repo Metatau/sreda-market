@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { generateAIResponse, generatePropertyRecommendations, analyzePropertyInvestment } from "./services/openai";
 import { simpleInvestmentAnalyticsService } from "./services/simpleInvestmentAnalytics";
 import { analyticsService } from "./services/analyticsService";
+import { blankBankPaymentService } from "./services/paymentService";
 import { requireAuth, optionalAuth, type AuthenticatedRequest } from "./middleware/auth";
 import { RegionController } from "./controllers/RegionController";
 import { PropertyClassController } from "./controllers/PropertyClassController";
@@ -302,6 +303,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching update status:", error);
       res.status(500).json({ error: "Failed to fetch update status" });
+    }
+  });
+
+  // Payment routes for Blank Bank
+  app.post("/api/payments/create", async (req, res) => {
+    try {
+      const { plan, promoCode, returnUrl } = req.body;
+      
+      const planPrices = {
+        promo: 0,
+        standard: 990,
+        professional: 2490
+      };
+
+      const amount = planPrices[plan as keyof typeof planPrices];
+      if (amount === undefined) {
+        return res.status(400).json({ error: "Invalid subscription plan" });
+      }
+
+      if (amount === 0) {
+        // Для промо тарифа просто возвращаем успех
+        return res.json({
+          success: true,
+          plan: 'promo',
+          message: 'Промо план активирован бесплатно на 30 дней'
+        });
+      }
+
+      const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const description = `Подписка SREDA Market - ${plan === 'standard' ? 'Стандарт' : 'Профи'}`;
+
+      const payment = await blankBankPaymentService.createPayment({
+        amount,
+        orderId,
+        description,
+        returnUrl: returnUrl || `${req.protocol}://${req.get('host')}/profile?tab=subscription`,
+        customerEmail: req.body.email
+      });
+
+      res.json({
+        success: true,
+        paymentId: payment.paymentId,
+        paymentUrl: payment.paymentUrl,
+        orderId
+      });
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      res.status(500).json({ error: "Failed to create payment" });
+    }
+  });
+
+  app.get("/api/payments/:paymentId/status", async (req, res) => {
+    try {
+      const { paymentId } = req.params;
+      const status = await blankBankPaymentService.getPaymentStatus(paymentId);
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting payment status:", error);
+      res.status(500).json({ error: "Failed to get payment status" });
+    }
+  });
+
+  app.post("/api/payments/callback", async (req, res) => {
+    try {
+      const isValid = blankBankPaymentService.verifyCallback(req.body);
+      
+      if (!isValid) {
+        return res.status(400).json({ error: "Invalid callback signature" });
+      }
+
+      const { payment_id, order_id, status } = req.body;
+      
+      if (status === 'PAID') {
+        // Здесь нужно активировать подписку для пользователя
+        console.log(`Payment successful for order ${order_id}, payment ${payment_id}`);
+        // TODO: Обновить статус подписки пользователя в базе данных
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error processing payment callback:", error);
+      res.status(500).json({ error: "Failed to process callback" });
+    }
+  });
+
+  app.post("/api/payments/:paymentId/refund", async (req, res) => {
+    try {
+      const { paymentId } = req.params;
+      const { amount } = req.body;
+      
+      const refund = await blankBankPaymentService.refundPayment(paymentId, amount);
+      res.json(refund);
+    } catch (error) {
+      console.error("Error refunding payment:", error);
+      res.status(500).json({ error: "Failed to refund payment" });
     }
   });
 

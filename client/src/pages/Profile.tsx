@@ -34,6 +34,7 @@ export function Profile() {
     standard: '',
     professional: ''
   });
+  const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
 
   if (!isAuthenticated || !user) {
     return (
@@ -68,6 +69,45 @@ export function Profile() {
   const handleCancel = () => {
     setEditedName(user.name);
     setIsEditing(false);
+  };
+
+  const handlePayment = async (plan: string) => {
+    try {
+      setPaymentLoading(plan);
+      
+      const promoCode = promoCodes[plan as keyof typeof promoCodes];
+      
+      const response = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plan,
+          promoCode,
+          email: 'user@example.com', // В реальном приложении получать из профиля пользователя
+          returnUrl: window.location.origin + '/profile?tab=subscription'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (plan === 'promo') {
+          alert('Промо план активирован бесплатно на 30 дней!');
+        } else if (data.paymentUrl) {
+          // Перенаправляем на страницу оплаты Бланк банка
+          window.location.href = data.paymentUrl;
+        }
+      } else {
+        alert('Ошибка создания платежа: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Произошла ошибка при создании платежа');
+    } finally {
+      setPaymentLoading(null);
+    }
   };
 
   return (
@@ -278,9 +318,13 @@ export function Profile() {
                           value={promoCodes.promo}
                           onChange={(e) => setPromoCodes(prev => ({...prev, promo: e.target.value}))}
                         />
-                        <Button className="w-full">
+                        <Button 
+                          className="w-full" 
+                          onClick={() => handlePayment('promo')}
+                          disabled={paymentLoading === 'promo'}
+                        >
                           <CreditCard className="h-4 w-4 mr-2" />
-                          Активировать
+                          {paymentLoading === 'promo' ? 'Активация...' : 'Активировать'}
                         </Button>
                       </div>
                     </CardContent>
@@ -326,9 +370,13 @@ export function Profile() {
                           value={promoCodes.standard}
                           onChange={(e) => setPromoCodes(prev => ({...prev, standard: e.target.value}))}
                         />
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                        <Button 
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={() => handlePayment('standard')}
+                          disabled={paymentLoading === 'standard'}
+                        >
                           <CreditCard className="h-4 w-4 mr-2" />
-                          Оплатить ₽990
+                          {paymentLoading === 'standard' ? 'Обработка...' : 'Оплатить ₽990'}
                         </Button>
                       </div>
                     </CardContent>
@@ -378,9 +426,13 @@ export function Profile() {
                           value={promoCodes.professional}
                           onChange={(e) => setPromoCodes(prev => ({...prev, professional: e.target.value}))}
                         />
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                        <Button 
+                          className="w-full bg-purple-600 hover:bg-purple-700"
+                          onClick={() => handlePayment('professional')}
+                          disabled={paymentLoading === 'professional'}
+                        >
                           <CreditCard className="h-4 w-4 mr-2" />
-                          Оплатить ₽2490
+                          {paymentLoading === 'professional' ? 'Обработка...' : 'Оплатить ₽2490'}
                         </Button>
                       </div>
                     </CardContent>
