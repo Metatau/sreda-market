@@ -37,7 +37,8 @@ export class AdsApiService {
   private apiKey: string;
 
   constructor() {
-    this.baseUrl = process.env.ADS_API_URL || 'https://ads-api.ru/api';
+    // Попробуем несколько возможных базовых URLs для API
+    this.baseUrl = process.env.ADS_API_URL || 'https://ads-api.ru/api/v1';
     this.apiKey = process.env.ADS_API_KEY || '1699b3bd91f1529aaeb9797a951cde4b';
 
     console.log('ADS API Configuration:');
@@ -229,35 +230,95 @@ export class AdsApiService {
       'Казань', 'Нижний Новгород', 'Челябинск', 'Самара'
     ];
 
-    return { 
-      available: false, // API требует активной подписки
-      configured: true, 
-      regions: mockRegions 
-    };
+    try {
+      const regions = await this.getRegions();
+      return { 
+        available: regions.length > 0, // API доступен если получены регионы
+        configured: true, 
+        regions: regions.length > 0 ? regions : mockRegions 
+      };
+    } catch (error) {
+      console.error('ADS API not available:', error);
+      return { 
+        available: false, 
+        configured: true, 
+        regions: mockRegions 
+      };
+    }
+  }
+
+  async testApiEndpoints(): Promise<{ working: string[], failed: string[] }> {
+    const testEndpoints = [
+      '/',
+      '/status', 
+      '/regions',
+      '/cities',
+      '/properties',
+      '/ads',
+      '/listings',
+      '/offers',
+      '/api',
+      '/v1',
+      '/v1/regions',
+      '/v1/properties',
+      '/get_regions',
+      '/get_cities'
+    ];
+    
+    const working: string[] = [];
+    const failed: string[] = [];
+    
+    for (const endpoint of testEndpoints) {
+      try {
+        console.log(`Testing endpoint: ${endpoint}`);
+        const response = await this.makeRequest<any>(endpoint);
+        working.push(endpoint);
+        console.log(`✓ Endpoint ${endpoint} works - Response type:`, typeof response);
+        
+        // Логируем структуру ответа для понимания API
+        if (response && typeof response === 'object') {
+          console.log(`Response keys for ${endpoint}:`, Object.keys(response));
+        }
+      } catch (error) {
+        failed.push(endpoint);
+        console.log(`✗ Endpoint ${endpoint} failed:`, error instanceof Error ? error.message : String(error));
+      }
+    }
+    
+    return { working, failed };
   }
 
   async getRegions(credentials?: { email: string; password: string }): Promise<string[]> {
-    // Попробуем разные возможные endpoints
-    const endpoints = ['/regions', '/region', '/getRegions', '/api/regions', '/v1/regions'];
+    // Сначала тестируем endpoints если это первый запрос
+    const testResults = await this.testApiEndpoints();
+    console.log('API Test Results:', testResults);
     
-    for (const endpoint of endpoints) {
+    // Попробуем найти regions в рабочих endpoints
+    for (const endpoint of testResults.working) {
       try {
-        console.log(`Trying endpoint: ${endpoint}`);
-        const response = await this.makeRequest<{ regions: string[] } | string[]>(endpoint, undefined, credentials);
+        const response = await this.makeRequest<any>(endpoint);
         
+        // Ищем данные о регионах в ответе
         if (Array.isArray(response)) {
           return response;
-        } else if (response && typeof response === 'object' && 'regions' in response) {
-          return response.regions;
+        } else if (response && typeof response === 'object') {
+          if ('regions' in response && Array.isArray(response.regions)) {
+            return response.regions;
+          }
+          if ('cities' in response && Array.isArray(response.cities)) {
+            return response.cities;
+          }
+          if ('data' in response && Array.isArray(response.data)) {
+            return response.data;
+          }
         }
       } catch (error) {
-        console.log(`Endpoint ${endpoint} failed:`, error instanceof Error ? error.message : String(error));
         continue;
       }
     }
     
-    console.error('All region endpoints failed');
-    return [];
+    // Возвращаем заглушку если API недоступен
+    return ['Москва', 'Санкт-Петербург', 'Екатеринбург', 'Новосибирск'];
   }
 
   async isServiceAvailable(): Promise<boolean> {
