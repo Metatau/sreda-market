@@ -71,7 +71,7 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Фильтры поиска</CardTitle>
+          <CardTitle className="font-semibold tracking-tight text-[18px]">Фильтры</CardTitle>
           <Button variant="ghost" size="sm" onClick={clearFilters}>
             Очистить
           </Button>

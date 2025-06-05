@@ -34,7 +34,7 @@ export function PropertyMap({
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -194,26 +194,7 @@ export function PropertyMap({
   return (
     <Card className="overflow-hidden">
       <div className="relative">
-        {/* Map Controls */}
-        <div className="absolute top-4 left-4 z-10 flex space-x-2">
-          <Button
-            variant={showHeatmap ? "default" : "secondary"}
-            size="sm"
-            onClick={() => setShowHeatmap(!showHeatmap)}
-            className="bg-white/90 hover:bg-white shadow-md"
-          >
-            <i className="fas fa-fire mr-1"></i>
-            Тепловая карта
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="bg-white/90 hover:bg-white shadow-md"
-          >
-            <i className="fas fa-layer-group mr-1"></i>
-            Кластеры
-          </Button>
-        </div>
+
 
         {/* Map Legend */}
         <div className="absolute top-4 right-4 z-10 bg-white/90 rounded-lg shadow-md p-3">
