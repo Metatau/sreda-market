@@ -53,7 +53,7 @@ export function Navigation() {
           {/* Логотип */}
           <div className="flex items-center">
             <Building className="w-8 h-8 text-blue-600 mr-3" />
-            <div className="text-xl font-bold text-gray-900">
+            <div className="text-xl font-quantum font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 tracking-wide uppercase">
               SREDA Market
             </div>
           </div>
