@@ -96,7 +96,6 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
           <i className="far fa-heart"></i>
         </Button>
       </div>
-
       <CardContent className="p-5">
         <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{property.title}</h3>
 
@@ -106,7 +105,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
         </div>
 
         <div className="flex items-center justify-between mb-4">
-          <div className="text-2xl font-bold text-gray-900">{property.price.toLocaleString()} ₽</div>
+          <div className="font-bold text-gray-900 text-[16px]">{property.price.toLocaleString()} ₽</div>
           {property.pricePerSqm && (
             <div className="text-sm text-gray-500">{property.pricePerSqm.toLocaleString()} ₽/м²</div>
           )}
