@@ -110,7 +110,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
             onClick={onToggle}
             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
           >
-            <i className="fas fa-robot text-xl"></i>
+            <span className="font-quantum text-white text-sm font-bold">AI</span>
           </Button>
         </div>
       )}
@@ -197,7 +197,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                 <div className="p-6 border-b border-gray-200 bg-white">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                      <i className="fas fa-robot text-white"></i>
+                      <span className="font-quantum text-white text-xs font-bold">AI</span>
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Чат с AI агентом</h3>
@@ -236,7 +236,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                     >
                       {message.role === 'assistant' && (
                         <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm flex-shrink-0">
-                          <i className="fas fa-robot"></i>
+                          <span className="font-quantum text-white text-xs font-bold">AI</span>
                         </div>
                       )}
                       <div
@@ -262,7 +262,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                   {isLoading && (
                     <div className="flex space-x-3">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm">
-                        <i className="fas fa-robot"></i>
+                        <span className="font-quantum text-white text-xs font-bold">AI</span>
                       </div>
                       <div className="bg-gray-100 rounded-2xl px-4 py-3">
                         <div className="flex space-x-1">
