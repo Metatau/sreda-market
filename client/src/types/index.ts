@@ -71,6 +71,7 @@ export interface InvestmentAnalytics {
   rentalRoi?: number;
   flipRoi?: number;
   safeHavenScore?: number;
+  liquidityScore?: number;
   renovationCost?: number;
   valueIncrease?: number;
   forecast3y?: number;
@@ -100,6 +101,7 @@ export interface Pagination {
   perPage: number;
   total: number;
   pages: number;
+  totalPages: number;
   hasNext: boolean;
   hasPrev: boolean;
 }
