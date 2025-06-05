@@ -125,7 +125,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
 
         {/* Investment Metrics */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             {roi && (
               <div className="flex items-center bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs">
                 <i className="fas fa-chart-line mr-1"></i>
