@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat
-  app.post("/api/chat", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/chat", async (req, res) => {
     try {
       const { message, sessionId } = req.body;
       
@@ -160,7 +160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Property Recommendations
-  app.post("/api/ai/recommendations", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/ai/recommendations", async (req, res) => {
     try {
       const { budget, purpose, region, rooms } = req.body;
       
@@ -194,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/properties/:id/analyze-investment", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/properties/:id/analyze-investment", async (req, res) => {
     try {
       const propertyId = parseInt(req.params.id);
       if (isNaN(propertyId)) {
