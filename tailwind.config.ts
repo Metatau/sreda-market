@@ -8,6 +8,9 @@ export default {
       fontFamily: {
         'orbitron': ['Orbitron', 'monospace'],
         'digital': ['Orbitron', 'monospace'],
+        'quantum': ['Audiowide', 'monospace'],
+        'futuristic': ['Exo 2', 'sans-serif'],
+        'cyber': ['Audiowide', 'cursive'],
       },
       borderRadius: {
         lg: "var(--radius)",
