@@ -5,9 +5,10 @@ import { PropertyList } from "@/components/PropertyList";
 import { PropertyMap } from "@/components/PropertyMap";
 import { AIChat } from "@/components/AIChat";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Map, List, BarChart3 } from "lucide-react";
+import { Map, List, BarChart3, TrendingUp, Home, DollarSign } from "lucide-react";
+import { useNewProperties } from "@/hooks/useNewProperties";
 import type { SearchFilters, Property } from "@/types";
 
 export function HomePage() {
@@ -15,6 +16,7 @@ export function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("map");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const { data: newPropertiesData } = useNewProperties();
 
   const handleRegionChange = (regionId: number | undefined) => {
     setFilters(prev => ({ ...prev, regionId }));
@@ -65,12 +67,58 @@ export function HomePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
             <PropertyFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}
-              onAISearch={handleAISearch}
             />
+            
+            {/* Analytics Metrics */}
+            <div className="space-y-4">
+              {/* Average Yield Card */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
+                    <DollarSign className="h-4 w-4 mr-2 text-green-500" />
+                    Средняя доходность
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-2xl font-bold text-green-600">8.2%</div>
+                  <p className="text-xs text-gray-500 mt-1">+0.3% за месяц</p>
+                </CardContent>
+              </Card>
+
+              {/* Market Trend Card */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
+                    <TrendingUp className="h-4 w-4 mr-2 text-blue-500" />
+                    Рыночный тренд
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-2xl font-bold text-blue-600">↗ Рост</div>
+                  <p className="text-xs text-gray-500 mt-1">+2.1% за квартал</p>
+                </CardContent>
+              </Card>
+
+              {/* New Properties Card */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
+                    <Home className="h-4 w-4 mr-2 text-orange-500" />
+                    Новые объекты
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {newPropertiesData?.count || 0}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">за {newPropertiesData?.period || '24ч'}</p>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Main Content */}
