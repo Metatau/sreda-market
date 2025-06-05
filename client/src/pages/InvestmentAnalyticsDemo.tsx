@@ -197,12 +197,9 @@ export default function InvestmentAnalyticsDemo() {
       <div className="max-w-7xl mx-auto p-6">
         {/* Заголовок */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="font-bold text-gray-900 mb-2 text-[24px] text-center">
             Система инвестиционной аналитики SREDA Market
           </h1>
-          <p className="text-gray-600">
-            Комплексный анализ инвестиционной привлекательности российской недвижимости
-          </p>
         </div>
 
         {/* Статистика */}
