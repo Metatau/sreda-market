@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { requireAuth, type AuthenticatedRequest } from '../middleware/auth';
-import { apiRateLimit } from '../middleware/rateLimiting';
+import { mapRateLimit } from '../middleware/rateLimiting';
 import { validateQuery, validateBody } from '../validation/schemas';
 import { infrastructureService } from '../services/infrastructureService';
-import { polygonService } from '../services/polygonService';
+// Polygon service import removed - functionality integrated into map routes
 import { z } from 'zod';
 
 const router = Router();
@@ -33,7 +33,7 @@ const polygonSchema = z.object({
 
 // Get infrastructure data for map bounds
 router.get('/infrastructure', 
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   validateQuery(boundsSchema),
   async (req: AuthenticatedRequest, res) => {
@@ -66,7 +66,7 @@ router.get('/infrastructure',
 
 // Get heatmap data
 router.get('/heatmap',
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   validateQuery(heatmapSchema),
   async (req: AuthenticatedRequest, res) => {
@@ -115,7 +115,7 @@ router.get('/heatmap',
 
 // Get transport accessibility for property
 router.get('/transport-accessibility/:propertyId',
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -149,7 +149,7 @@ router.get('/transport-accessibility/:propertyId',
 
 // Analyze districts in region
 router.get('/districts/analysis/:regionId',
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -183,7 +183,7 @@ router.get('/districts/analysis/:regionId',
 
 // Create custom polygon
 router.post('/polygons',
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   validateBody(polygonSchema),
   async (req: AuthenticatedRequest, res) => {
@@ -218,7 +218,7 @@ router.post('/polygons',
 
 // Get user polygons
 router.get('/polygons',
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -244,7 +244,7 @@ router.get('/polygons',
 
 // Analyze area within polygon
 router.post('/polygons/:polygonId/analyze',
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   async (req: AuthenticatedRequest, res) => {
     try {
@@ -279,7 +279,7 @@ router.post('/polygons/:polygonId/analyze',
 
 // Delete polygon
 router.delete('/polygons/:polygonId',
-  apiRateLimit,
+  mapRateLimit,
   requireAuth,
   async (req: AuthenticatedRequest, res) => {
     try {

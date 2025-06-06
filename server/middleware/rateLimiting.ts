@@ -124,6 +124,12 @@ export const apiRateLimit = createRateLimit({
   message: 'Too many API requests, please slow down'
 });
 
+export const mapRateLimit = createRateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // Map operations need higher limits
+  message: 'Too many map requests, please slow down'
+});
+
 // Cleanup on process exit
 process.on('SIGTERM', () => rateLimiter.destroy());
 process.on('SIGINT', () => rateLimiter.destroy());
