@@ -3,7 +3,7 @@ import type { Property } from '@/types';
 import { safePromise } from '@/lib/errorHandling';
 import { trackMapEvent } from '@/lib/yandexMetrika';
 import { leafletMapService } from '@/services/leafletMapService';
-import { FullscreenMapModal } from './FullscreenMapModal';
+
 import { MapControls } from './components/MapControls';
 import { SearchResults } from './components/SearchResults';
 import { PropertyPopup } from './components/PropertyPopup';
@@ -47,8 +47,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     setSearchResults,
     isSearching,
     setIsSearching,
-    showFullscreenModal,
-    setShowFullscreenModal
+
   } = useMapState();
 
   const { performSearch, handleSearchResultSelect } = useMapSearch(
@@ -196,7 +195,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         onHeatmapModeChange={setHeatmapMode}
         heatmapIntensity={heatmapIntensity}
         onHeatmapIntensityChange={setHeatmapIntensity}
-        onFullscreenToggle={() => setShowFullscreenModal(true)}
+        onFullscreenToggle={() => {}}
         isSearching={isSearching}
       />
 
@@ -218,15 +217,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         </div>
       )}
 
-      {/* Fullscreen Modal */}
-      {showFullscreenModal && (
-        <FullscreenMapModal
-          properties={properties}
-          selectedProperty={selectedPropertyState}
-          onPropertySelect={onPropertySelect}
-          onClose={() => setShowFullscreenModal(false)}
-        />
-      )}
+
     </div>
   );
 }

@@ -13,7 +13,7 @@ export function useMapState() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [showFullscreenModal, setShowFullscreenModal] = useState(false);
+
 
   return {
     mapContainer,
@@ -32,8 +32,6 @@ export function useMapState() {
     searchResults,
     setSearchResults,
     isSearching,
-    setIsSearching,
-    showFullscreenModal,
-    setShowFullscreenModal
+    setIsSearching
   };
 }
