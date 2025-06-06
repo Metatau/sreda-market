@@ -121,15 +121,11 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       if (initResult) {
         const status = dataSourceManager.current.getStatus();
         
-        if (status.activeSource === 'vector') {
-          setUseMapboxTileset(true);
-          safePromise(Promise.resolve(trackMapEvent('data_source_initialized', { source: 'vector_tiles' })));
-          console.log('Using vector tiles source');
-        } else if (status.activeSource === 'geojson') {
+        if (status.activeSource === 'geojson') {
           safePromise(Promise.resolve(trackMapEvent('data_source_initialized', { source: 'geojson_api' })));
           console.log('Using GeoJSON API source');
         } else {
-          console.log('Using fallback data display');
+          console.log('Using properties data display');
         }
       }
 

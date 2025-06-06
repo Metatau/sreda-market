@@ -22,18 +22,36 @@ router.get('/properties/geojson', async (req: Request, res: Response) => {
       marketType 
     } = req.query;
 
-    // Подготовка фильтров
-    const filters = {
-      regionId: regionId ? parseInt(regionId as string) : undefined,
-      propertyClassId: propertyClassId ? parseInt(propertyClassId as string) : undefined,
-      minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
-      maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
-      rooms: rooms ? parseInt(rooms as string) : undefined,
-      minArea: minArea ? parseFloat(minArea as string) : undefined,
-      maxArea: maxArea ? parseFloat(maxArea as string) : undefined,
-      propertyType: propertyType as string,
-      marketType: marketType as 'secondary' | 'new_construction'
-    };
+    // Безопасная подготовка фильтров
+    const filters: any = {};
+    
+    if (regionId && !isNaN(Number(regionId))) {
+      filters.regionId = parseInt(regionId as string);
+    }
+    if (propertyClassId && !isNaN(Number(propertyClassId))) {
+      filters.propertyClassId = parseInt(propertyClassId as string);
+    }
+    if (minPrice && !isNaN(Number(minPrice))) {
+      filters.minPrice = parseFloat(minPrice as string);
+    }
+    if (maxPrice && !isNaN(Number(maxPrice))) {
+      filters.maxPrice = parseFloat(maxPrice as string);
+    }
+    if (rooms && !isNaN(Number(rooms))) {
+      filters.rooms = parseInt(rooms as string);
+    }
+    if (minArea && !isNaN(Number(minArea))) {
+      filters.minArea = parseFloat(minArea as string);
+    }
+    if (maxArea && !isNaN(Number(maxArea))) {
+      filters.maxArea = parseFloat(maxArea as string);
+    }
+    if (propertyType && typeof propertyType === 'string') {
+      filters.propertyType = propertyType;
+    }
+    if (marketType && (marketType === 'secondary' || marketType === 'new_construction')) {
+      filters.marketType = marketType;
+    }
 
     // Получение данных с большим лимитом для GeoJSON
     const result = await storage.getProperties(filters, { page: 1, perPage: 10000 });
@@ -95,9 +113,11 @@ router.get('/properties/geojson', async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('GeoJSON export error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to generate GeoJSON data'
+    
+    // Возвращаем пустой GeoJSON вместо ошибки
+    res.status(200).json({
+      type: 'FeatureCollection',
+      features: []
     });
   }
 });

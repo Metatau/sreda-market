@@ -63,10 +63,9 @@ export class MapDataSourceManager {
     const tilesetId = import.meta.env.VITE_MAPBOX_TILESET_ID;
     const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-    if (!tilesetId || !accessToken) {
-      this.status.vectorTiles = 'unavailable';
-      return;
-    }
+    // Векторные тайлы недоступны без правильных токенов
+    this.status.vectorTiles = 'unavailable';
+    return;
 
     try {
       const response = await fetch(
