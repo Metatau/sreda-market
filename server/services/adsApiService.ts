@@ -270,6 +270,70 @@ export class AdsApiService {
     return this.convertAdsProperty(adsProperty);
   }
 
+  private extractValidImageUrl(adsProperty: AdsApiProperty): string | null {
+    const images = this.extractValidImages(adsProperty);
+    return images.length > 0 ? images[0] : null;
+  }
+
+  private extractValidImages(adsProperty: AdsApiProperty): string[] {
+    const images: string[] = [];
+    
+    // Проверяем поле images
+    if (Array.isArray(adsProperty.images)) {
+      images.push(...adsProperty.images);
+    }
+    
+    // Проверяем другие возможные поля с изображениями
+    const imageFields = ['photos', 'photo', 'img', 'picture', 'pictures'];
+    for (const field of imageFields) {
+      const fieldValue = (adsProperty as any)[field];
+      if (Array.isArray(fieldValue)) {
+        images.push(...fieldValue);
+      } else if (typeof fieldValue === 'string' && fieldValue.trim()) {
+        images.push(fieldValue);
+      }
+    }
+    
+    // Фильтруем валидные URL изображений
+    return images
+      .filter(img => typeof img === 'string' && img.trim())
+      .map(img => img.trim())
+      .filter(img => 
+        img.startsWith('http') && 
+        (img.includes('.jpg') || img.includes('.jpeg') || img.includes('.png') || img.includes('.webp'))
+      )
+      .slice(0, 10); // Ограничиваем до 10 изображений
+  }
+
+  private isRentalProperty(adsProperty: AdsApiProperty): boolean {
+    const rentalKeywords = [
+      'аренда', 'сдам', 'сдается', 'сдаю', 'снять', 'сниму', 'снимем',
+      'арендовать', 'арендую', 'в аренду', 'долгосрочная аренда',
+      'посуточно', 'на сутки', 'суточная аренда', 'краткосрочная аренда',
+      'съем', 'съём', 'rental', 'rent', 'месяц', 'мес.', 'мес',
+      'в месяц', '/мес', 'помесячно', 'ежемесячно', 'за месяц',
+      'руб/мес', 'руб./мес', 'р/мес', 'р./мес', '₽/мес', '₽./мес',
+      'тыс.руб/мес', 'тысяч в месяц', 'тыс/мес', 'тыс в месяц',
+      'сдаётся', 'сдается в аренду', 'для аренды', 'под аренду'
+    ];
+
+    const title = (adsProperty.title || '').toLowerCase();
+    const description = (adsProperty.description || '').toLowerCase();
+    const url = (adsProperty.url || '').toLowerCase();
+    const fullText = `${title} ${description} ${url}`;
+
+    // Проверяем наличие слов указывающих на аренду
+    const hasRentalKeywords = rentalKeywords.some(keyword => 
+      fullText.includes(keyword.toLowerCase())
+    );
+
+    // Проверяем цену - аренда обычно дешевле продажи
+    const price = adsProperty.price || 0;
+    const suspiciouslyLowPrice = price < 500000; // Меньше 500k руб. может быть аренда
+
+    return hasRentalKeywords || (suspiciouslyLowPrice && !fullText.includes('продажа') && !fullText.includes('продам'));
+  }
+
   determineMarketType(adsProperty: AdsApiProperty): 'secondary' | 'new_construction' {
     const title = (adsProperty.title || '').toLowerCase();
     const description = (adsProperty.description || '').toLowerCase();
@@ -452,10 +516,8 @@ export class AdsApiService {
       totalFloors: typeof adsProperty.totalFloors === 'number' ? adsProperty.totalFloors : 5,
       address: String(adsProperty.address || regionName),
       coordinates: `POINT(${lng} ${lat})`,
-      imageUrl: (Array.isArray(adsProperty.images) && adsProperty.images.length > 0) 
-        ? adsProperty.images[0] 
-        : null,
-      images: Array.isArray(adsProperty.images) ? adsProperty.images : [],
+      imageUrl: this.extractValidImageUrl(adsProperty),
+      images: this.extractValidImages(adsProperty),
       propertyType: String(adsProperty.propertyType || adsProperty.category || 'квартира'),
       marketType: this.determineMarketType(adsProperty),
       url: adsProperty.url || null,
@@ -596,6 +658,13 @@ export class AdsApiService {
             continue;
           }
 
+          // КРИТИЧЕСКАЯ ПРОВЕРКА: блокируем аренду до создания объекта
+          const isRental = this.isRentalProperty(adsProperty);
+          if (isRental) {
+            console.log(`Skipping property ${adsProperty.id}: detected as rental property`);
+            continue;
+          }
+
           console.log(`Region "${propertyRegion}" is allowed, processing property`);
           const propertyData = await this.convertAdsProperty(adsProperty);
           
@@ -611,8 +680,19 @@ export class AdsApiService {
             updated++;
           } else {
             // Создаем новый объект
-            await storage.createProperty(propertyData);
+            const newProperty = await storage.createProperty(propertyData);
             imported++;
+            
+            // АВТОМАТИЧЕСКИ рассчитываем инвестиционный рейтинг для нового объекта
+            try {
+              console.log(`Calculating investment analytics for new property ${newProperty.id}`);
+              const { investmentAnalyticsService } = await import('./investmentAnalyticsService');
+              const analytics = await investmentAnalyticsService.calculateAdvancedAnalytics(newProperty.id);
+              console.log(`Investment analytics calculated for property ${newProperty.id}: ${analytics.investmentRating}`);
+            } catch (analyticsError) {
+              console.error(`Failed to calculate analytics for property ${newProperty.id}:`, analyticsError);
+              // Не прерываем загрузку, продолжаем с следующим объектом
+            }
           }
         } catch (error) {
           const propertyId = adsProperty?.id || `index-${i}`;
