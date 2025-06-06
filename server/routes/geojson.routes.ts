@@ -89,7 +89,7 @@ router.get('/properties/geojson', async (req: Request, res: Response) => {
               regionName: property.region?.name,
               propertyClassName: property.propertyClass?.name,
               investmentRating: property.investmentAnalytics?.investmentRating,
-              roi: property.investmentAnalytics?.roi,
+              rentalRoi: property.investmentAnalytics?.rentalRoiAnnual,
               liquidityScore: property.investmentAnalytics?.liquidityScore
             },
             geometry: {

@@ -49,9 +49,9 @@ class PerformanceMonitor {
       const originalEnd = res.end;
       const originalJson = res.json;
 
-      res.end = function(...args) {
+      res.end = function(chunk?: any, encoding?: BufferEncoding, cb?: () => void) {
         recordMetrics();
-        return originalEnd.apply(this, args);
+        return originalEnd.call(this, chunk, encoding, cb);
       };
 
       res.json = function(data) {

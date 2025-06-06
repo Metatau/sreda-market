@@ -31,11 +31,20 @@ interface InvestmentAnalytics {
 export function useInvestmentAnalytics(propertyId: number) {
   return useQuery<InvestmentAnalytics>({
     queryKey: ['/api/investment-analytics', propertyId],
-    enabled: !!propertyId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    queryFn: async () => {
+      const response = await fetch(`/api/investment-analytics?propertyId=${propertyId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch investment analytics');
+      }
+      return response.json();
+    },
+    enabled: !!propertyId && propertyId > 0,
+    staleTime: 30 * 60 * 1000, // 30 минут для инвестиционной аналитики
+    gcTime: 60 * 60 * 1000, // 1 час
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    refetchInterval: false,
+    retry: 1,
   });
 }
 

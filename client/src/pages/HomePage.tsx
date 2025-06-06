@@ -203,7 +203,7 @@ export function HomePage() {
       </div>
 
       {/* AI Chat Widget */}
-      <AIChat onMessage={handleAISearch} />
+      <AIChat />
 
       {/* Property Detail Modal would go here */}
       {selectedProperty && (

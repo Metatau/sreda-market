@@ -490,7 +490,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Новые API маршруты для фронтенда
+  // API маршруты для фронтенда
+  app.get("/api/investment-analytics", async (req, res) => {
+    try {
+      const propertyId = parseInt(req.query.propertyId as string);
+      if (isNaN(propertyId) || !propertyId) {
+        return res.status(400).json({ error: "Property ID is required" });
+      }
+
+      const analytics = await simpleInvestmentAnalyticsService.getAnalytics(propertyId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching investment analytics:", error);
+      res.status(500).json({ error: "Failed to fetch investment analytics" });
+    }
+  });
+
   app.get("/api/investment-analytics/:id", async (req, res) => {
     try {
       const propertyId = parseInt(req.params.id);
