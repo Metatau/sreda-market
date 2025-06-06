@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { User, Mail, UserPlus, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { TelegramLoginWidget } from '@/components/TelegramLoginWidget';
+import { TelegramAuthButton } from '@/components/Auth/TelegramAuthButton';
 
 export default function Login() {
   const { login } = useUser();
@@ -144,7 +144,7 @@ export default function Login() {
             <div className="text-center mb-4">
               <h3 className="font-semibold text-blue-900 mb-2">Быстрый вход через Telegram</h3>
             </div>
-            <TelegramLoginWidget 
+            <TelegramAuthButton 
               onAuth={handleTelegramAuth}
               className="mb-2"
             />
