@@ -126,7 +126,7 @@ export const apiRateLimit = createRateLimit({
 
 export const mapRateLimit = createRateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 100, // Map operations need higher limits
+  max: 500, // Very high limits for map functionality
   message: 'Too many map requests, please slow down'
 });
 
