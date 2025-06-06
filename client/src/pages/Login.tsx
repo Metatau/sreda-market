@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, User, Mail, UserPlus, MessageCircle } from 'lucide-react';
+import { User, Mail, UserPlus, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { TelegramLoginWidget } from '@/components/TelegramLoginWidget';
@@ -100,24 +100,7 @@ export default function Login() {
     }
   };
 
-  const loginAsAdmin = async () => {
-    setIsLoading(true);
-    try {
-      await login('saabox@yandex.ru');
-      toast({
-        title: "Администратор",
-        description: "Вход выполнен с правами администратора",
-      });
-    } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Не удалось войти как администратор",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   const handleTelegramAuth = async (telegramUser: any) => {
     setIsLoading(true);
@@ -153,23 +136,7 @@ export default function Login() {
           <p className="text-gray-600">Smart Real Estate</p>
         </div>
 
-        {/* Кнопка входа администратора */}
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="pt-6">
-            <Button
-              onClick={handleAdminLogin}
-              disabled={isLoading}
-              className="w-full bg-orange-600 hover:bg-orange-700"
-              size="lg"
-            >
-              <Shield className="mr-2 h-5 w-5" />
-              Вход как Администратор
-            </Button>
-            <p className="text-xs text-orange-700 text-center mt-2">
-              Только для saabox@yandex.ru
-            </p>
-          </CardContent>
-        </Card>
+
 
         {/* Telegram Login */}
         <Card className="border-blue-200 bg-blue-50">
