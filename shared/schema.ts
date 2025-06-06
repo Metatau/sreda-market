@@ -26,12 +26,15 @@ export const regions = pgTable("regions", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
   regionType: varchar("region_type", { length: 20 }).notNull(),
-  coordinates: text("coordinates"), // PostGIS POINT stored as text for simplicity
+  coordinates: text("coordinates"), // Will migrate to geometry in next release
   timezone: varchar("timezone", { length: 50 }).default("Europe/Moscow"),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  nameIdx: index("idx_regions_name").on(table.name),
+  activeIdx: index("idx_regions_active").on(table.isActive),
+}));
 
 // Property classes table
 export const propertyClasses = pgTable("property_classes", {

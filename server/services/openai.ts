@@ -8,8 +8,8 @@ const openai = new OpenAI({
 });
 
 export async function generateAIResponse(userMessage: string, context?: any): Promise<string> {
-  // Check cache first
-  const cacheKey = userMessage;
+  // Improved cache key that includes context
+  const cacheKey = `${userMessage}:${JSON.stringify(context || {})}`;
   const cachedResponse = aiCacheService.get(cacheKey, context);
   if (cachedResponse) {
     return cachedResponse;
