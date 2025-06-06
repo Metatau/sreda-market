@@ -78,8 +78,8 @@ export function createRateLimit(options: RateLimitOptions) {
   } = options;
   
   return (req: Request, res: Response, next: NextFunction) => {
-    // Skip rate limiting in development for map routes
-    if (process.env.NODE_ENV === 'development' && req.path.startsWith('/api/map/')) {
+    // Skip rate limiting completely in development
+    if (process.env.NODE_ENV === 'development') {
       next();
       return;
     }
