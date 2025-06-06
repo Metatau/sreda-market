@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { Property } from '@/types';
+
+// Используем глобальный объект mapboxgl из CDN
+declare global {
+  interface Window {
+    mapboxgl: any;
+  }
+}
 
 interface PropertyMapProps {
   properties: Property[];
@@ -27,7 +32,7 @@ const getPropertyClassColor = (className: string) => {
 
 export function PropertyMap({ properties, selectedProperty, onPropertySelect }: PropertyMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const map = useRef<any>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
   const [heatmapIntensity, setHeatmapIntensity] = useState<number>(1);
@@ -39,16 +44,15 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
 
     const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
     
-    if (!mapboxToken) {
-      console.warn('Mapbox access token not configured');
-      // Показываем fallback UI вместо карты
+    if (!mapboxToken || !window.mapboxgl) {
+      console.warn('Mapbox access token not configured or Mapbox GL JS not loaded');
       setMapLoaded(true);
       return;
     }
 
-    mapboxgl.accessToken = mapboxToken;
+    window.mapboxgl.accessToken = mapboxToken;
 
-    map.current = new mapboxgl.Map({
+    map.current = new window.mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
       center: [60.6122, 56.8431], // Екатеринбург
@@ -106,7 +110,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
           onPropertySelect?.(property);
         });
 
-        new mapboxgl.Marker(el)
+        new window.mapboxgl.Marker(el)
           .setLngLat([coords[1], coords[0]]) // [lng, lat] for Mapbox
           .addTo(map.current!);
       });
