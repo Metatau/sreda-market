@@ -21,6 +21,7 @@ import { corsMiddleware } from "./middleware/cors";
 import { generalRateLimit, authRateLimit, aiRateLimit, apiRateLimit } from "./middleware/rateLimiting";
 import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, chatMessageSchema, investmentAnalysisSchema } from "./validation/schemas";
 import { imageRoutes } from "./routes/imageRoutes";
+import { mapRoutes } from "./routes/mapRoutes";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -43,6 +44,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Image serving routes
   app.use('/api', imageRoutes);
+
+  // Map functionality routes
+  app.use('/api/map', mapRoutes);
 
   // Health check
   app.get("/api/health", (req, res) => {
