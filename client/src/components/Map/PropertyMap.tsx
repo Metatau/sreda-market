@@ -46,20 +46,16 @@ const getPropertyClassColor = (className: string) => {
 
 export function PropertyMap({ properties, selectedProperty, onPropertySelect }: PropertyMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
+  const [mapId, setMapId] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
   const [heatmapIntensity, setHeatmapIntensity] = useState<number>(1);
   const [selectedPropertyState, setSelectedProperty] = useState<Property | null>(null);
-  const [useMapboxTileset, setUseMapboxTileset] = useState(false);
   const [drawingMode, setDrawingMode] = useState<'none' | 'polygon' | 'rectangle'>('none');
   const [drawnArea, setDrawnArea] = useState<DrawnArea | null>(null);
-  
-  // Инициализация сервисов
-  const mapboxTilesetService = useRef(createMapboxTilesetService());
-  const dataSourceManager = useRef(createMapDataSourceManager());
-  const drawingService = useRef(createMapDrawingService());
-  const performanceMonitor = useRef<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Initialize map
   useEffect(() => {
