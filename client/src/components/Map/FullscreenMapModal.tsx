@@ -140,47 +140,28 @@ export function FullscreenMapModal({
         
         if (filteredProperties.length === 0) return;
         
-        // Add markers in batches to improve performance
-        const batchSize = 10;
-        for (let i = 0; i < filteredProperties.length; i += batchSize) {
-          const batch = filteredProperties.slice(i, i + batchSize);
-          
-          batch.forEach((property) => {
-            if (property.coordinates) {
-              const [lon, lat] = property.coordinates.split(',').map(Number);
-              if (!isNaN(lon) && !isNaN(lat)) {
-                const isSelected = selectedPropertyState?.id === property.id;
-                
-                leafletMapService.addMarker(mapId, [lon, lat], {
-                  title: property.title,
-                  popup: `
-                    <div style="min-width: 250px; max-width: 300px;">
-                      <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #1f2937;">${property.title}</h3>
-                      <div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 8px;">
-                        <p style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #059669;">₽${property.price?.toLocaleString()}</p>
-                        ${property.pricePerSqm ? `<p style="margin: 0; color: #6b7280; font-size: 14px;">₽${property.pricePerSqm.toLocaleString()} за м²</p>` : ''}
-                      </div>
-                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 14px;">
-                        ${property.rooms ? `<div><strong>Комнат:</strong> ${property.rooms}</div>` : ''}
-                        ${property.area ? `<div><strong>Площадь:</strong> ${property.area} м²</div>` : ''}
-                        ${property.floor ? `<div><strong>Этаж:</strong> ${property.floor}</div>` : ''}
-                        ${property.propertyType ? `<div><strong>Тип:</strong> ${property.propertyType === 'apartment' ? 'Квартира' : 'Дом'}</div>` : ''}
-                      </div>
-                      ${property.address ? `<p style="margin: 8px 0 0 0; color: #6b7280; font-size: 12px;">${property.address}</p>` : ''}
-                      ${property.propertyClass ? `<div style="margin-top: 8px;"><span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${property.propertyClass.name}</span></div>` : ''}
+        // Add all markers at once for faster loading
+        filteredProperties.forEach((property) => {
+          if (property.coordinates) {
+            const [lon, lat] = property.coordinates.split(',').map(Number);
+            if (!isNaN(lon) && !isNaN(lat)) {
+              leafletMapService.addMarker(mapId, [lon, lat], {
+                title: property.title,
+                popup: `
+                  <div style="min-width: 200px; max-width: 250px;">
+                    <h3 style="margin: 0 0 6px 0; font-size: 14px; font-weight: bold;">${property.title}</h3>
+                    <p style="margin: 0 0 4px 0; font-size: 16px; font-weight: 600; color: #059669;">₽${property.price?.toLocaleString()}</p>
+                    <div style="font-size: 12px; color: #6b7280;">
+                      ${property.rooms ? `${property.rooms} комн. ` : ''}
+                      ${property.area ? `${property.area} м²` : ''}
                     </div>
-                  `,
-                  clickable: true
-                });
-              }
+                  </div>
+                `,
+                clickable: true
+              });
             }
-          });
-          
-          // Small delay between batches to prevent UI blocking
-          if (i + batchSize < filteredProperties.length) {
-            await new Promise(resolve => setTimeout(resolve, 10));
           }
-        }
+        });
         
         if (filteredProperties.length > 0) {
           leafletMapService.fitToMarkers(mapId, 50);
