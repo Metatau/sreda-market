@@ -225,6 +225,22 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       {/* Map Controls */}
       {mapLoaded && (
         <div className="absolute top-4 left-4 z-10 space-y-2">
+          {/* Fullscreen Button - Primary Position */}
+          <Card className="p-3 bg-white shadow-lg border-2 border-blue-200">
+            <Button
+              variant="default"
+              size="lg"
+              onClick={() => {
+                setShowFullscreenModal(true);
+                console.log('Opening fullscreen modal');
+              }}
+              className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3"
+            >
+              <Maximize2 className="h-5 w-5" />
+              <span>Полноэкранный режим</span>
+            </Button>
+          </Card>
+
           {/* Search Control */}
           <Card className="p-2">
             <div className="flex items-center space-x-2 mb-2">
@@ -259,22 +275,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
             </div>
           </Card>
 
-          {/* Fullscreen Button */}
-          <Card className="p-2">
-            <div className="flex items-center space-x-2 mb-2">
-              <Maximize2 className="h-4 w-4" />
-              <span className="text-sm font-medium">Просмотр</span>
-            </div>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => setShowFullscreenModal(true)}
-              className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <Maximize2 className="h-4 w-4" />
-              <span className="text-sm font-medium">Полный экран</span>
-            </Button>
-          </Card>
+
 
           {/* Map Info */}
           <Card className="p-2">
