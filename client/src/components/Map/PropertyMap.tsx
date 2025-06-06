@@ -222,22 +222,6 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         style={{ minHeight: '400px' }}
       />
 
-      {/* Floating Fullscreen Button - Always Visible */}
-      <div className="absolute top-4 right-4 z-50">
-        <Button
-          variant="default"
-          size="lg"
-          onClick={() => {
-            console.log('Fullscreen button clicked');
-            setShowFullscreenModal(true);
-          }}
-          className="bg-blue-600 hover:bg-blue-700 text-white shadow-xl border-2 border-white"
-        >
-          <Maximize2 className="h-5 w-5 mr-2" />
-          Полный экран
-        </Button>
-      </div>
-
       {/* Map Controls */}
       {mapLoaded && (
         <div className="absolute top-4 left-4 z-10 space-y-2 max-w-xs">
@@ -327,6 +311,22 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
           )}
         </div>
       )}
+
+      {/* Floating Fullscreen Button - Always Visible */}
+      <div className="absolute top-4 right-4 z-50">
+        <Button
+          variant="default"
+          size="lg"
+          onClick={() => {
+            console.log('Fullscreen button clicked');
+            setShowFullscreenModal(true);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white shadow-xl border-2 border-white"
+        >
+          <Maximize2 className="h-5 w-5 mr-2" />
+          Полный экран
+        </Button>
+      </div>
 
       {/* Loading indicator */}
       {!mapLoaded && (
