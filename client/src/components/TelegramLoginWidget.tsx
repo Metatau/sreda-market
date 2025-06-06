@@ -110,8 +110,9 @@ export const TelegramLoginWidget = ({
     console.log('Widget attributes set:', {
       login: username,
       size: buttonSize,
-      radius: cornerRadius,
-      authUrl: `${window.location.origin}/api/auth/telegram`
+      userpic: 'false',
+      authUrl: 'https://sreda.market/',
+      requestAccess: requestAccess
     });
 
     // Добавляем скрипт в контейнер
