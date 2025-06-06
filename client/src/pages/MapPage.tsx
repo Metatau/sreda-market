@@ -24,8 +24,8 @@ export default function MapPage() {
   });
 
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 20);
-  const properties = propertiesData?.properties || [];
-  const pagination = propertiesData?.pagination;
+  const properties = propertiesData?.data?.properties || [];
+  const pagination = propertiesData?.data?.pagination;
 
   const handlePropertyClick = (property: Property) => {
     setSelectedProperty(property);
