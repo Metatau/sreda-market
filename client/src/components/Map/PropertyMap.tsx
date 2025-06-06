@@ -71,48 +71,159 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     };
   }, []);
 
-  // Add property markers
+  // Add property layers with clustering support
   useEffect(() => {
-    if (!map.current || !mapLoaded || !properties?.length) return;
+    if (!map.current || !mapLoaded) return;
+
+    // Remove existing layers and sources
+    const layersToRemove = ['property-clusters', 'property-count', 'unclustered-point', 'heatmap-layer', 'heatmap-circle'];
+    layersToRemove.forEach(layerId => {
+      if (map.current!.getLayer(layerId)) {
+        map.current!.removeLayer(layerId);
+      }
+    });
+
+    const sourcesToRemove = ['properties', 'heatmap-data'];
+    sourcesToRemove.forEach(sourceId => {
+      if (map.current!.getSource(sourceId)) {
+        map.current!.removeSource(sourceId);
+      }
+    });
 
     // Clear existing markers
     const existingMarkers = document.querySelectorAll('.property-marker');
     existingMarkers.forEach(marker => marker.remove());
 
-    if (heatmapMode === 'none') {
-      // Add individual property markers
-      properties.forEach((property) => {
-        if (!property.coordinates) return;
+    if (!properties?.length) return;
+
+    // Create GeoJSON data
+    const geojsonData = {
+      type: 'FeatureCollection',
+      features: properties.map(property => {
+        if (!property.coordinates) return null;
         
-        // Parse coordinates from string format "lat,lng"
         const coords = property.coordinates.split(',').map(Number);
-        if (coords.length !== 2 || isNaN(coords[0]) || isNaN(coords[1])) return;
+        if (coords.length !== 2 || isNaN(coords[0]) || isNaN(coords[1])) return null;
 
-        const el = document.createElement('div');
-        el.className = 'property-marker';
-        el.style.width = '10px';
-        el.style.height = '10px';
-        el.style.borderRadius = '50%';
-        el.style.cursor = 'pointer';
-        el.style.border = '2px solid white';
+        let value = 1;
+        switch (heatmapMode) {
+          case 'price':
+            value = property.price || 0;
+            break;
+          case 'investment':
+            value = property.investmentAnalytics?.roi ? parseFloat(property.investmentAnalytics.roi) : 0;
+            break;
+          case 'density':
+          default:
+            value = 1;
+            break;
+        }
+
+        return {
+          type: 'Feature',
+          properties: { 
+            value,
+            id: property.id,
+            title: property.title,
+            price: property.price,
+            rooms: property.rooms,
+            area: property.totalArea
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: [coords[1], coords[0]]
+          }
+        };
+      }).filter(Boolean)
+    };
+
+    if (heatmapMode === 'none') {
+      // Add clustered source for normal view
+      map.current!.addSource('properties', {
+        type: 'geojson',
+        data: geojsonData,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50
+      });
+
+      // Add cluster circles
+      map.current!.addLayer({
+        id: 'property-clusters',
+        type: 'circle',
+        source: 'properties',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            '#51bbd6',
+            100, '#f1f075',
+            750, '#f28cb1'
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20, 100, 30, 750, 40
+          ]
+        }
+      });
+
+      // Add cluster count labels
+      map.current!.addLayer({
+        id: 'property-count',
+        type: 'symbol',
+        source: 'properties',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        }
+      });
+
+      // Add unclustered points
+      map.current!.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'properties',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#11b4da',
+          'circle-radius': 8,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
+        }
+      });
+
+      // Add click handlers
+      map.current!.on('click', 'property-clusters', (e: any) => {
+        const features = map.current!.queryRenderedFeatures(e.point, {
+          layers: ['property-clusters']
+        });
+        const clusterId = features[0].properties.cluster_id;
+        map.current!.getSource('properties').getClusterExpansionZoom(
+          clusterId,
+          (err: any, zoom: number) => {
+            if (err) return;
+            map.current!.easeTo({
+              center: features[0].geometry.coordinates,
+              zoom: zoom
+            });
+          }
+        );
+      });
+
+      map.current!.on('click', 'unclustered-point', (e: any) => {
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const clickedPropertyId = e.features[0].properties.id;
         
-        const propertyClassName = property.propertyClass?.name || '';
-        const colorClass = getPropertyClassColor(propertyClassName);
-        if (colorClass.includes('blue')) el.style.backgroundColor = '#3b82f6';
-        else if (colorClass.includes('green')) el.style.backgroundColor = '#10b981';
-        else if (colorClass.includes('yellow')) el.style.backgroundColor = '#f59e0b';
-        else if (colorClass.includes('orange')) el.style.backgroundColor = '#f97316';
-        else if (colorClass.includes('red')) el.style.backgroundColor = '#ef4444';
-        else el.style.backgroundColor = '#6b7280';
-
-        el.addEventListener('click', () => {
+        // Find the property by ID and trigger selection
+        const property = properties.find((p: Property) => p.id === clickedPropertyId);
+        if (property) {
           setSelectedProperty(property);
           onPropertySelect?.(property);
-        });
-
-        new window.mapboxgl.Marker(el)
-          .setLngLat([coords[1], coords[0]]) // [lng, lat] for Mapbox
-          .addTo(map.current!);
+        }
       });
     }
   }, [properties, mapLoaded, heatmapMode, onPropertySelect]);
