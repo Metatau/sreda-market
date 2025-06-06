@@ -431,3 +431,49 @@ export type InsertReferralEarning = typeof referralEarnings.$inferInsert;
 
 export type BonusTransaction = typeof bonusTransactions.$inferSelect;
 export type InsertBonusTransaction = typeof bonusTransactions.$inferInsert;
+
+// Insights table for analytical notes
+export const insights = pgTable("insights", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 500 }).notNull(),
+  content: text("content").notNull(),
+  summary: text("summary").notNull(),
+  publishDate: timestamp("publish_date").defaultNow().notNull(),
+  tags: varchar("tags", { length: 255 }).array().default([]),
+  readTime: integer("read_time").default(5),
+  sources: varchar("sources", { length: 255 }).array().default([]),
+  chartData: jsonb("chart_data"),
+  isPublished: boolean("is_published").default(true),
+  authorId: integer("author_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  publishDateIdx: index("idx_insights_publish_date").on(table.publishDate),
+  isPublishedIdx: index("idx_insights_published").on(table.isPublished),
+  tagsIdx: index("idx_insights_tags").on(table.tags),
+}));
+
+export type Insight = typeof insights.$inferSelect;
+export type InsertInsight = typeof insights.$inferInsert;
+
+// Data sources table for admin management
+export const dataSources = pgTable("data_sources", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 50 }).notNull(), // telegram_channel, website, rss_feed, uploaded_file, etc.
+  config: jsonb("config").notNull(), // source-specific configuration
+  tags: varchar("tags", { length: 255 }).array().default([]),
+  isActive: boolean("is_active").default(true),
+  frequency: varchar("frequency", { length: 20 }).default('daily'), // hourly, daily, weekly
+  lastUpdated: timestamp("last_updated"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  nameIdx: index("idx_data_sources_name").on(table.name),
+  typeIdx: index("idx_data_sources_type").on(table.type),
+  isActiveIdx: index("idx_data_sources_active").on(table.isActive),
+}));
+
+export type DataSource = typeof dataSources.$inferSelect;
+export type InsertDataSource = typeof dataSources.$inferInsert;

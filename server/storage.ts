@@ -6,6 +6,8 @@ import {
   investmentAnalytics,
   chatMessages,
   users,
+  insights,
+  dataSources,
   type Region,
   type PropertyClass,
   type Property,
@@ -19,6 +21,10 @@ import {
   type InsertPropertyAnalytics,
   type InsertChatMessage,
   type InsertUser,
+  type Insight,
+  type InsertInsight,
+  type DataSource,
+  type InsertDataSource,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, ilike, desc, sql } from "drizzle-orm";
@@ -62,6 +68,22 @@ export interface IStorage {
   checkAIQuotaLimit(userId: number): Promise<{ canUse: boolean; dailyLimit: number; used: number }>;
   incrementAIUsage(userId: number): Promise<void>;
   updateSubscription(userId: number, type: string, expiresAt: Date): Promise<void>;
+  
+  // Insights management
+  getInsights(filters?: InsightFilters, pagination?: Pagination): Promise<{ insights: Insight[]; total: number }>;
+  getInsight(id: number): Promise<Insight | undefined>;
+  getInsightTags(): Promise<string[]>;
+  createInsight(insight: InsertInsight): Promise<Insight>;
+  updateInsight(id: number, updates: Partial<InsertInsight>): Promise<Insight | undefined>;
+  deleteInsight(id: number): Promise<boolean>;
+  
+  // Data sources management
+  getDataSources(filters?: DataSourceFilters): Promise<DataSource[]>;
+  getDataSource(id: number): Promise<DataSource | undefined>;
+  createDataSource(source: InsertDataSource): Promise<DataSource>;
+  updateDataSource(id: number, updates: Partial<InsertDataSource>): Promise<DataSource | undefined>;
+  deleteDataSource(id: number): Promise<boolean>;
+  toggleDataSourceStatus(id: number): Promise<boolean>;
 }
 
 export interface PropertyFilters {
@@ -111,6 +133,19 @@ export interface RegionAnalytics {
   maxPrice: number;
   avgRoi?: number;
   avgLiquidity?: number;
+}
+
+export interface InsightFilters {
+  dateFrom?: Date;
+  dateTo?: Date;
+  tags?: string[];
+  search?: string;
+}
+
+export interface DataSourceFilters {
+  type?: string;
+  isActive?: boolean;
+  tags?: string[];
 }
 
 export class DatabaseStorage implements IStorage {
