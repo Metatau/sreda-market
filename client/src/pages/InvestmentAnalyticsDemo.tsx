@@ -11,6 +11,8 @@ import { InvestmentAnalyticsModal } from "@/components/InvestmentAnalyticsModal"
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Calculator, TrendingUp, Home, BarChart3 } from "lucide-react";
+import { AdvancedPropertyMap } from "@/components/Map/AdvancedPropertyMap";
+import { useRegions } from "@/hooks/useRegions";
 import type { SearchFilters } from "@/types";
 
 interface Property {
@@ -46,6 +48,7 @@ export default function InvestmentAnalyticsDemo() {
   const [sortBy, setSortBy] = useState<string>("date_desc");
 
   const { data: propertiesData, isLoading: isLoadingProperties } = useProperties(filters);
+  const { data: regionsData } = useRegions();
   const calculateAnalytics = useCalculateInvestmentAnalytics();
 
   const properties = propertiesData?.properties || [];
@@ -322,6 +325,23 @@ export default function InvestmentAnalyticsDemo() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Интерактивная карта */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Карта инвестиционных объектов</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <AdvancedPropertyMap
+                properties={sortedProperties}
+                filters={filters}
+                selectedRegion={regionsData?.find(r => r.id === filters.regionId)}
+                onPropertySelect={(property) => handleCalculateAnalytics(property)}
+              />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Основной контент с фильтрами и объектами */}
