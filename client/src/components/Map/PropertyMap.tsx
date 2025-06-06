@@ -91,22 +91,33 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       setMapLoaded(true);
       
       // Отслеживаем загрузку карты
-      trackMapEvent('load', { 
-        center: map.current.getCenter(),
-        zoom: map.current.getZoom() 
-      });
+      try {
+        trackMapEvent('load', { 
+          center: map.current.getCenter(),
+          zoom: map.current.getZoom() 
+        });
+      } catch (error) {
+        console.warn('Failed to track map load event:', error);
+      }
       
       // Инициализируем гибридную систему источников данных
       try {
-        await dataSourceManager.current.initializeDataSources(map.current);
-        const status = dataSourceManager.current.getStatus();
+        const status = await dataSourceManager.current.initializeDataSources(map.current);
         
         if (status.activeSource === 'vector') {
           setUseMapboxTileset(true);
-          trackMapEvent('data_source_initialized', { source: 'vector_tiles' });
+          try {
+            trackMapEvent('data_source_initialized', { source: 'vector_tiles' });
+          } catch (error) {
+            console.warn('Failed to track data source event:', error);
+          }
           console.log('Using vector tiles source');
         } else if (status.activeSource === 'geojson') {
-          trackMapEvent('data_source_initialized', { source: 'geojson_api' });
+          try {
+            trackMapEvent('data_source_initialized', { source: 'geojson_api' });
+          } catch (error) {
+            console.warn('Failed to track data source event:', error);
+          }
           console.log('Using GeoJSON API source');
         } else {
           console.warn('No data sources available');
@@ -120,10 +131,14 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         setDrawnArea(area);
         if (area) {
           // Отслеживаем рисование областей
-          trackAreaDrawing({
-            area: area.area,
-            type: area.type
-          });
+          try {
+            trackAreaDrawing({
+              area: area.area,
+              type: area.type
+            });
+          } catch (error) {
+            console.warn('Failed to track area drawing event:', error);
+          }
           
           console.log('Area drawn:', {
             area: (area.area / 1000000).toFixed(2) + ' км²',
@@ -134,7 +149,11 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
 
       // Отслеживаем время загрузки карты
       const loadTime = performance.now() - loadStartTime;
-      trackPerformance('map_load_time', loadTime);
+      try {
+        trackPerformance('map_load_time', loadTime);
+      } catch (error) {
+        console.warn('Failed to track performance metric:', error);
+      }
     });
 
     return () => {

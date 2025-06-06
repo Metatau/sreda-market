@@ -31,7 +31,7 @@ export function initYandexMetrika(config: Partial<YandexMetrikaConfig> = {}): vo
   const finalConfig = { ...defaultMetrikaConfig, ...config };
 
   // Проверяем, что Метрика еще не инициализирована
-  if (window.ym) {
+  if (typeof window.ym === 'function') {
     console.log('Yandex Metrika already initialized');
     return;
   }
@@ -42,10 +42,13 @@ export function initYandexMetrika(config: Partial<YandexMetrikaConfig> = {}): vo
   // Функция инициализации
   const initMetrika = () => {
     try {
-      window.ym = window.ym || function (id: number, method: string, ...params: any[]) {
-        (window.ym.a = window.ym.a || []).push([id, method, ...params]);
-      };
-      window.ym.l = +new Date();
+      if (!window.ym) {
+        window.ym = function (id: number, method: string, ...params: any[]) {
+          (window.ym as any).a = (window.ym as any).a || [];
+          (window.ym as any).a.push([id, method, ...params]);
+        };
+        (window.ym as any).l = +new Date();
+      }
 
       // Инициализация счетчика
       window.ym(finalConfig.id, 'init', {
