@@ -256,6 +256,31 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
     };
   }, [mapRef, isDrawingPolygon]);
 
+  // Update map view when region changes
+  useEffect(() => {
+    if (!mapInstance || !selectedRegion) return;
+
+    // Define region coordinates
+    const regionCoordinates: Record<number, { lat: number; lng: number; zoom: number }> = {
+      1: { lat: 55.7558, lng: 37.6176, zoom: 11 }, // Moscow
+      2: { lat: 59.9311, lng: 30.3609, zoom: 11 }, // Saint Petersburg
+      3: { lat: 55.0084, lng: 82.9357, zoom: 11 }, // Novosibirsk
+      4: { lat: 56.8431, lng: 60.6454, zoom: 11 }, // Ekaterinburg
+      5: { lat: 55.1644, lng: 61.4368, zoom: 11 }, // Chelyabinsk
+      6: { lat: 53.2001, lng: 50.1500, zoom: 11 }, // Samara
+      7: { lat: 56.3269, lng: 44.0075, zoom: 11 }, // Nizhny Novgorod
+      8: { lat: 51.5336, lng: 46.0340, zoom: 11 }, // Saratov
+      9: { lat: 47.2220, lng: 39.7200, zoom: 11 }, // Rostov-on-Don
+      10: { lat: 45.0401, lng: 38.9760, zoom: 11 } // Krasnodar
+    };
+
+    const coords = regionCoordinates[selectedRegion.id];
+    if (coords) {
+      console.log(`Switching map to ${selectedRegion.name} at ${coords.lat}, ${coords.lng}`);
+      mapInstance.setView([coords.lat, coords.lng], coords.zoom);
+    }
+  }, [mapInstance, selectedRegion]);
+
   // Add property markers
   useEffect(() => {
     if (!mapInstance || !properties.length) return;

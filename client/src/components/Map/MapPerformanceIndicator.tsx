@@ -5,7 +5,7 @@ import { Zap, Database, Clock, MapPin } from 'lucide-react';
 
 interface PerformanceData {
   cached: boolean;
-  source: 'preloaded' | 'database' | 'default';
+  source: string;
   loadTime?: number;
   dataSize?: number;
 }
