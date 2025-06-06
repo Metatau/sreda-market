@@ -336,7 +336,6 @@ export default function InvestmentAnalyticsDemo() {
             <CardContent className="p-0">
               <AdvancedPropertyMap
                 properties={sortedProperties}
-                filters={filters}
                 selectedRegion={regionsData?.find(r => r.id === filters.regionId)}
                 onPropertySelect={(property) => handleCalculateAnalytics(property)}
               />
