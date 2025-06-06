@@ -382,7 +382,13 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
       let lat, lng;
       try {
         if (typeof property.coordinates === 'string') {
-          if (property.coordinates.includes(',')) {
+          // Handle POINT(lng lat) format from database
+          if (property.coordinates.startsWith('POINT(')) {
+            const pointData = property.coordinates.replace('POINT(', '').replace(')', '');
+            const [lngStr, latStr] = pointData.split(' ');
+            lng = parseFloat(lngStr);
+            lat = parseFloat(latStr);
+          } else if (property.coordinates.includes(',')) {
             [lat, lng] = property.coordinates.split(',').map(Number);
           } else {
             const coords = JSON.parse(property.coordinates);
@@ -395,6 +401,7 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
         }
         if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
       } catch (e) {
+        console.error('Error parsing coordinates for property:', property.id, property.coordinates);
         return;
       }
       
