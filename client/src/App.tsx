@@ -16,7 +16,7 @@ import { Suspense, lazy } from "react";
 // Lazy load страниц для оптимизации
 const Landing = lazy(() => import("@/pages/Landing"));
 const InvestmentAnalyticsDemo = lazy(() => import("@/pages/InvestmentAnalyticsDemo"));
-const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
+const Insights = lazy(() => import("@/pages/Insights"));
 const Favorites = lazy(() => import("@/pages/Favorites").then(module => ({ default: module.Favorites })));
 const Profile = lazy(() => import("@/pages/Profile").then(module => ({ default: module.Profile })));
 const Comparison = lazy(() => import("@/pages/Comparison").then(module => ({ default: module.Comparison })));
@@ -64,7 +64,7 @@ function Router() {
           <AuthProvider>
             <ErrorBoundary fallback={<ErrorPage title="Ошибка страницы" />}>
               <Route path="/" component={InvestmentAnalyticsDemo} />
-              <Route path="/insights" component={InsightsPage} />
+              <Route path="/insights" component={Insights} />
               <Route path="/favorites" component={Favorites} />
               <Route path="/profile" component={Profile} />
               <Route path="/comparison" component={Comparison} />

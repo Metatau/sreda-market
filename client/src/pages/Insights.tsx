@@ -1,441 +1,380 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Search, 
-  Calendar as CalendarIcon, 
-  Filter, 
-  Clock, 
-  TrendingUp, 
-  BarChart3,
-  FileText,
-  Tag,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  RefreshCw
-} from 'lucide-react';
-import { format, isAfter, isBefore, subDays, startOfDay, endOfDay } from 'date-fns';
+import { CalendarIcon, SearchIcon, TagIcon, ClockIcon, ExternalLinkIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
 
-interface InsightNote {
-  id: string;
+interface Insight {
+  id: number;
   title: string;
   content: string;
   summary: string;
-  publishDate: Date;
+  publishDate: string;
   tags: string[];
   readTime: number;
   sources: string[];
-  charts?: ChartData[];
-}
-
-interface ChartData {
-  type: 'line' | 'bar' | 'pie' | 'area';
-  title: string;
-  data: any[];
-  config: any;
+  chartData?: any;
+  isPublished: boolean;
+  authorId?: number;
 }
 
 interface InsightFilters {
-  dateFrom?: Date;
-  dateTo?: Date;
-  tags: string[];
   search: string;
+  tags: string[];
+  sortBy: 'date' | 'popularity';
 }
 
 export default function Insights() {
-  const { toast } = useToast();
-  const [insights, setInsights] = useState<InsightNote[]>([]);
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [filters, setFilters] = useState<InsightFilters>({
+    search: '',
     tags: [],
-    search: ''
+    sortBy: 'date'
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
 
-  // Debounceed search
-  const [searchDebounce, setSearchDebounce] = useState<NodeJS.Timeout>();
+  // Fetch insights data
+  const { data: insightsData, isLoading: insightsLoading } = useQuery({
+    queryKey: ['/api/insights', { 
+      search: filters.search,
+      tags: filters.tags.join(','),
+      page: currentPage,
+      limit: 12
+    }],
+    enabled: true
+  });
 
-  const fetchInsights = useCallback(async (page = 1) => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '12'
-      });
+  // Fetch available tags
+  const { data: tagsData } = useQuery({
+    queryKey: ['/api/insights/tags'],
+    enabled: true
+  });
 
-      if (filters.dateFrom) {
-        params.append('date_from', format(filters.dateFrom, 'yyyy-MM-dd'));
-      }
-      if (filters.dateTo) {
-        params.append('date_to', format(filters.dateTo, 'yyyy-MM-dd'));
-      }
-      if (filters.tags.length > 0) {
-        params.append('tags', filters.tags.join(','));
-      }
-      if (filters.search.trim()) {
-        params.append('search', filters.search.trim());
-      }
+  const insights = insightsData?.data?.insights || [];
+  const totalPages = insightsData?.data?.totalPages || 1;
+  const availableTags = tagsData?.data || [];
 
-      const response = await apiRequest('GET', `/api/insights?${params.toString()}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setInsights(data.data.insights);
-        setTotalPages(data.data.totalPages);
-        setCurrentPage(page);
-      } else {
-        throw new Error(data.error || 'Ошибка загрузки инсайтов');
-      }
-    } catch (error) {
-      console.error('Error fetching insights:', error);
-      toast({
-        title: "Ошибка загрузки",
-        description: "Не удалось загрузить аналитические заметки",
-        variant: "destructive",
-      });
-      // Mock data for development
-      setInsights([
-        {
-          id: '1',
-          title: 'Анализ рынка недвижимости Москвы - Октябрь 2024',
-          summary: 'Рынок недвижимости Москвы показывает стабильный рост цен на 3.2% за месяц. Наибольший спрос наблюдается в сегменте 1-2 комнатных квартир.',
-          content: 'Детальный анализ показывает, что рынок недвижимости Москвы продолжает демонстрировать устойчивую динамику роста. Средняя стоимость квадратного метра увеличилась на 3.2% по сравнению с предыдущим месяцем...',
-          publishDate: new Date('2024-10-15'),
-          tags: ['Москва', 'Аналитика', 'Цены', 'Тренды'],
-          readTime: 5,
-          sources: ['Avito', 'ЦИАН', 'Domofond']
-        },
-        {
-          id: '2',
-          title: 'Инвестиционная привлекательность районов СПБ',
-          summary: 'Исследование показывает рост инвестиционной привлекательности спальных районов Санкт-Петербурга на фоне развития транспортной инфраструктуры.',
-          content: 'Анализ данных за последние 6 месяцев выявил значительное увеличение спроса на недвижимость в отдаленных районах города...',
-          publishDate: new Date('2024-10-14'),
-          tags: ['СПБ', 'Инвестиции', 'Районы', 'Транспорт'],
-          readTime: 7,
-          sources: ['СПБ.Недвижимость', 'Петербургская недвижимость']
-        }
-      ]);
-      setTotalPages(1);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filters, toast]);
-
-  const fetchTags = useCallback(async () => {
-    try {
-      const response = await apiRequest('GET', '/api/insights/tags');
-      const data = await response.json();
-      
-      if (data.success) {
-        setAvailableTags(data.data);
-      } else {
-        throw new Error(data.error || 'Ошибка загрузки тегов');
-      }
-    } catch (error) {
-      console.error('Error fetching tags:', error);
-      // Mock tags for development
-      setAvailableTags([
-        'Москва', 'СПБ', 'Аналитика', 'Цены', 'Тренды', 
-        'Инвестиции', 'Районы', 'Транспорт', 'Новостройки', 
-        'Вторичный рынок', 'Коммерческая недвижимость'
-      ]);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTags();
-  }, [fetchTags]);
-
-  useEffect(() => {
-    fetchInsights(1);
-  }, [fetchInsights]);
-
-  const handleSearchChange = (value: string) => {
-    setFilters(prev => ({ ...prev, search: value }));
-    
-    if (searchDebounce) {
-      clearTimeout(searchDebounce);
-    }
-    
-    const timeout = setTimeout(() => {
-      setCurrentPage(1);
-    }, 300);
-    
-    setSearchDebounce(timeout);
+  const handleSearch = (searchTerm: string) => {
+    setFilters(prev => ({ ...prev, search: searchTerm }));
+    setCurrentPage(1);
   };
 
-  const handleTagToggle = (tag: string) => {
+  const handleTagFilter = (tag: string) => {
     setFilters(prev => ({
       ...prev,
-      tags: prev.tags.includes(tag)
+      tags: prev.tags.includes(tag) 
         ? prev.tags.filter(t => t !== tag)
         : [...prev.tags, tag]
     }));
     setCurrentPage(1);
   };
 
-  const handleDateFilter = (dateFrom?: Date, dateTo?: Date) => {
-    setFilters(prev => ({ ...prev, dateFrom, dateTo }));
-    setCurrentPage(1);
+  const formatDate = (date: string) => {
+    return format(new Date(date), 'd MMMM yyyy', { locale: ru });
   };
 
-  const clearFilters = () => {
-    setFilters({ tags: [], search: '' });
-    setCurrentPage(1);
+  const renderCharts = (chartData: any) => {
+    if (!chartData?.charts) return null;
+
+    return (
+      <div className="mt-6">
+        <h4 className="text-lg font-semibold mb-4">Аналитические данные</h4>
+        {chartData.charts.map((chart: any, index: number) => (
+          <div key={index} className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <h5 className="font-medium mb-3">{chart.title}</h5>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {chart.type === 'line' && (
+                <div>
+                  <p>Динамика изменений:</p>
+                  {chart.data?.map((item: any, i: number) => (
+                    <div key={i} className="flex justify-between py-1">
+                      <span>{item.month || item.region}</span>
+                      <span>{Object.entries(item).filter(([key]) => key !== 'month' && key !== 'region').map(([key, value]) => `${key}: ${value}`).join(', ')}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {chart.type === 'bar' && (
+                <div>
+                  <p>Рейтинговые данные:</p>
+                  {chart.data?.map((item: any, i: number) => (
+                    <div key={i} className="flex justify-between py-1">
+                      <span>{item.region || item.type}</span>
+                      <span className="font-medium">{item.score || item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {chart.type === 'pie' && (
+                <div>
+                  <p>Изменения по категориям:</p>
+                  {chart.data?.map((item: any, i: number) => (
+                    <div key={i} className="flex justify-between py-1">
+                      <span>{item.type}</span>
+                      <span className={`font-medium ${item.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {item.change > 0 ? '+' : ''}{item.change}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
-  const toggleCardExpansion = (id: string) => {
-    setExpandedCard(expandedCard === id ? null : id);
-  };
-
-  const formatDate = (date: Date) => {
-    return format(date, 'd MMMM yyyy', { locale: ru });
-  };
-
-  const getReadTimeText = (minutes: number) => {
-    if (minutes === 1) return '1 минута';
-    if (minutes < 5) return `${minutes} минуты`;
-    return `${minutes} минут`;
-  };
+  if (insightsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="animate-pulse">
+                <CardHeader>
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Аналитические инсайты
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Ежедневные аналитические заметки на основе данных рынка недвижимости
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Аналитические Инсайты
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Глубокая аналитика рынка недвижимости, инвестиционные тренды и прогнозы от экспертов SREDA Market
+          </p>
+        </div>
 
-      {/* Filters */}
-      <Card className="mb-6">
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Filter className="h-5 w-5" />
-              Фильтры
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              {showFilters ? 'Скрыть' : 'Показать'}
-            </Button>
-          </div>
-        </CardHeader>
-        
-        {showFilters && (
-          <CardContent className="space-y-4">
-            {/* Search */}
+        {/* Filters */}
+        <div className="mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:gap-4">
+          <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Поиск по ключевым словам..."
+                placeholder="Поиск по заголовкам и содержанию..."
                 value={filters.search}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
                 className="pl-10"
               />
             </div>
-
-            {/* Date filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.dateFrom ? formatDate(filters.dateFrom) : "Дата от"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.dateFrom}
-                    onSelect={(date) => handleDateFilter(date, filters.dateTo)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filters.dateTo ? formatDate(filters.dateTo) : "Дата до"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={filters.dateTo}
-                    onSelect={(date) => handleDateFilter(filters.dateFrom, date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <h4 className="text-sm font-medium mb-2">Теги</h4>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant={filters.tags.includes(tag) ? "default" : "outline"}
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => handleTagToggle(tag)}
-                  >
-                    <Tag className="h-3 w-3 mr-1" />
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Clear filters */}
-            <div className="flex justify-between items-center pt-2">
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                <X className="h-4 w-4 mr-1" />
-                Сбросить фильтры
-              </Button>
-              <Button size="sm" onClick={() => fetchInsights(1)}>
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Обновить
-              </Button>
-            </div>
-          </CardContent>
-        )}
-      </Card>
-
-      {/* Loading state */}
-      {isLoading && (
-        <div className="flex justify-center items-center py-12">
-          <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
-          <span className="ml-2 text-gray-600">Загрузка инсайтов...</span>
+          </div>
+          
+          <Select value={filters.sortBy} onValueChange={(value: 'date' | 'popularity') => setFilters(prev => ({ ...prev, sortBy: value }))}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Сортировка" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">По дате</SelectItem>
+              <SelectItem value="popularity">По популярности</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      )}
 
-      {/* Insights Grid */}
-      {!isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
-          {insights.map((insight) => (
-            <Card key={insight.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-4">
-                <div className="flex justify-between items-start mb-2">
-                  <CardTitle className="text-lg leading-tight line-clamp-2">
+        {/* Tags Filter */}
+        {availableTags.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Фильтр по тегам:</h3>
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag: string) => (
+                <Badge
+                  key={tag}
+                  variant={filters.tags.includes(tag) ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900"
+                  onClick={() => handleTagFilter(tag)}
+                >
+                  <TagIcon className="h-3 w-3 mr-1" />
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Insights Grid */}
+        {insights.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-gray-500 dark:text-gray-400 mb-4">
+              <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg">Аналитические материалы не найдены</p>
+              <p className="text-sm">Попробуйте изменить параметры поиска</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {insights.map((insight: Insight) => (
+              <Card 
+                key={insight.id} 
+                className="hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 border-l-blue-500"
+                onClick={() => setSelectedInsight(insight)}
+              >
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold line-clamp-2 text-gray-900 dark:text-white">
                     {insight.title}
                   </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleCardExpansion(insight.id)}
-                  >
-                    {expandedCard === insight.id ? (
-                      <ChevronLeft className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
+                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <CalendarIcon className="h-4 w-4" />
+                      {formatDate(insight.publishDate)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ClockIcon className="h-4 w-4" />
+                      {insight.readTime} мин
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                    {insight.summary}
+                  </p>
+                  
+                  {insight.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {insight.tags.slice(0, 3).map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {insight.tags.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{insight.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  <Button variant="outline" size="sm" className="w-full">
+                    Читать полностью
+                    <ExternalLinkIcon className="h-4 w-4 ml-2" />
                   </Button>
-                </div>
-                
-                <CardDescription className="flex items-center gap-4 text-xs">
-                  <span className="flex items-center gap-1">
-                    <CalendarIcon className="h-3 w-3" />
-                    {formatDate(insight.publishDate)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {getReadTimeText(insight.readTime)}
-                  </span>
-                </CardDescription>
-              </CardHeader>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-              <CardContent>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
-                  {expandedCard === insight.id ? insight.content : insight.summary}
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Назад
+            </Button>
+            
+            {[...Array(totalPages)].map((_, i) => (
+              <Button
+                key={i + 1}
+                variant={currentPage === i + 1 ? "default" : "outline"}
+                onClick={() => setCurrentPage(i + 1)}
+                className="w-10"
+              >
+                {i + 1}
+              </Button>
+            ))}
+            
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Вперед
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Insight Detail Modal */}
+      {selectedInsight && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {selectedInsight.title}
+                  </h2>
+                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <CalendarIcon className="h-4 w-4" />
+                      {formatDate(selectedInsight.publishDate)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ClockIcon className="h-4 w-4" />
+                      {selectedInsight.readTime} мин чтения
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedInsight(null)}
+                >
+                  ×
+                </Button>
+              </div>
+
+              <div className="prose prose-lg max-w-none dark:prose-invert mb-6">
+                <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                  {selectedInsight.summary}
                 </p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {insight.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+                <div className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                  {selectedInsight.content}
                 </div>
+              </div>
 
-                {/* Sources */}
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <FileText className="h-3 w-3" />
-                  <span>Источники: {insight.sources.join(', ')}</span>
+              {selectedInsight.chartData && renderCharts(selectedInsight.chartData)}
+
+              {selectedInsight.tags.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Теги:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedInsight.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+              )}
 
-      {/* Empty state */}
-      {!isLoading && insights.length === 0 && (
-        <div className="text-center py-12">
-          <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Инсайты не найдены
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            По заданным фильтрам аналитические заметки не найдены
-          </p>
-          <Button onClick={clearFilters}>
-            Сбросить фильтры
-          </Button>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {!isLoading && insights.length > 0 && totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fetchInsights(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Назад
-          </Button>
-          
-          <span className="px-4 py-2 text-sm">
-            Страница {currentPage} из {totalPages}
-          </span>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fetchInsights(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Вперед
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+              {selectedInsight.sources.length > 0 && (
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Источники:</h4>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400">
+                    {selectedInsight.sources.map((source, index) => (
+                      <li key={index}>• {source}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
