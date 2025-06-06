@@ -84,3 +84,24 @@
   font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif;
   font-weight: 900;
 }
+
+/* Ensure modal dialogs appear above Leaflet maps */
+[data-radix-popper-content-wrapper],
+[data-radix-dialog-overlay],
+[data-radix-dialog-content] {
+  z-index: 10000 !important;
+}
+
+/* Leaflet map containers should have lower z-index */
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+/* Investment analytics modal specific overrides */
+.investment-modal-overlay {
+  z-index: 10000 !important;
+}
+
+.investment-modal-content {
+  z-index: 10001 !important;
+}
