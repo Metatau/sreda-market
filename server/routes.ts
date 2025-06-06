@@ -38,6 +38,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
+  // Serve sitemap.xml
+  app.get("/sitemap.xml", (req, res) => {
+    res.set('Content-Type', 'application/xml');
+    res.sendFile('sitemap.xml', { root: '.' });
+  });
+
   // Admin routes for ADS API management
   app.get("/api/admin/ads-api/status", async (req, res) => {
     try {
