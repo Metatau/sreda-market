@@ -314,6 +314,18 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         // Find the property by ID and trigger selection
         const property = properties.find((p: Property) => p.id === clickedPropertyId);
         if (property) {
+          // Отслеживаем клик по объекту
+          try {
+            trackPropertyClick(property.id, {
+              propertyType: property.propertyClass?.name,
+              price: property.price,
+              region: property.region?.name,
+              rooms: property.rooms
+            });
+          } catch (error) {
+            console.warn('Failed to track property click:', error);
+          }
+          
           setSelectedProperty(property);
           onPropertySelect?.(property);
         }
