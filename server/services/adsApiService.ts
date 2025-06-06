@@ -43,7 +43,7 @@ export class AdsApiService {
   private apiKey: string;
   private userEmail: string;
   private lastRequestTime: number = 0;
-  private readonly rateLimitMs = 5000; // 5 секунд между запросами
+  private readonly rateLimitMs = 10000; // 10 секунд между запросами для избежания 429 ошибок
 
   constructor() {
     this.baseUrl = 'https://ads-api.ru/main';
@@ -57,79 +57,108 @@ export class AdsApiService {
   }
 
   private async makeRequest<T>(endpoint: string, params?: Record<string, any>, credentials?: { email: string; password: string }): Promise<T> {
-    // Соблюдаем лимит частоты запросов (1 запрос каждые 5 секунд)
-    const now = Date.now();
-    const timeSinceLastRequest = now - this.lastRequestTime;
-    
-    if (timeSinceLastRequest < this.rateLimitMs) {
-      const waitTime = this.rateLimitMs - timeSinceLastRequest;
-      console.log(`Rate limit: waiting ${waitTime}ms before next request`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-    }
-    
-    this.lastRequestTime = Date.now();
+    return this.makeRequestWithRetry<T>(endpoint, params, credentials, 3);
+  }
 
-    const url = new URL(`${this.baseUrl}${endpoint}`);
+  private async makeRequestWithRetry<T>(endpoint: string, params?: Record<string, any>, credentials?: { email: string; password: string }, maxRetries: number = 3): Promise<T> {
+    let lastError: Error | null = null;
     
-    // Добавляем обязательные параметры для ads-api.ru согласно документации
-    const userEmail = credentials?.email || this.userEmail;
-    const token = this.apiKey;
-    
-    if (!userEmail || !token) {
-      throw new Error('ADS API requires user email and token for authentication');
-    }
-    
-    // Обязательные параметры согласно документации ads-api.ru
-    url.searchParams.set('user', userEmail);
-    url.searchParams.set('token', token);
-    url.searchParams.set('format', 'json');
-    
-    // Добавляем дополнительные параметры
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.set(key, String(value));
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // Соблюдаем лимит частоты запросов
+        const now = Date.now();
+        const timeSinceLastRequest = now - this.lastRequestTime;
+        
+        if (timeSinceLastRequest < this.rateLimitMs) {
+          const waitTime = this.rateLimitMs - timeSinceLastRequest;
+          console.log(`Rate limit: waiting ${waitTime}ms before next request (attempt ${attempt}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
         }
-      });
-    }
+        
+        this.lastRequestTime = Date.now();
 
-    // Скрываем конфиденциальные данные в логах
-    const sanitizedUrl = url.toString().replace(token, '[TOKEN]').replace(userEmail, '[EMAIL]');
-    console.log(`Making ADS API request to: ${sanitizedUrl}`);
+        const url = new URL(`${this.baseUrl}${endpoint}`);
+        
+        // Добавляем обязательные параметры для ads-api.ru согласно документации
+        const userEmail = credentials?.email || this.userEmail;
+        const token = this.apiKey;
+        
+        if (!userEmail || !token) {
+          throw new Error('ADS API requires user email and token for authentication');
+        }
+        
+        // Обязательные параметры согласно документации ads-api.ru
+        url.searchParams.set('user', userEmail);
+        url.searchParams.set('token', token);
+        url.searchParams.set('format', 'json');
+        
+        // Добавляем дополнительные параметры
+        if (params) {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              url.searchParams.set(key, String(value));
+            }
+          });
+        }
 
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'SREDA-Market/1.0'
+        // Скрываем конфиденциальные данные в логах
+        const sanitizedUrl = url.toString().replace(token, '[TOKEN]').replace(userEmail, '[EMAIL]');
+        console.log(`Making ADS API request to: ${sanitizedUrl}`);
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'SREDA-Market/1.0'
+          }
+        });
+
+        console.log(`ADS API response status: ${response.status}`);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          
+          // Обрабатываем специально ошибку лимита частоты для повторной попытки
+          if (response.status === 429) {
+            console.warn(`ADS API rate limit exceeded on attempt ${attempt}/${maxRetries}`);
+            if (attempt < maxRetries) {
+              const retryDelay = this.rateLimitMs * attempt; // Экспоненциальная задержка
+              console.log(`Waiting ${retryDelay}ms before retry...`);
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
+              continue; // Повторяем попытку
+            }
+            throw new Error('Rate limit exceeded after all retry attempts');
+          }
+          
+          console.error('ADS API Error Response:', errorText.substring(0, 500));
+          throw new Error(`ADS API error: ${response.status} ${response.statusText}`);
+        }
+
+        const responseText = await response.text();
+        
+        try {
+          const jsonResponse = JSON.parse(responseText) as T;
+          console.log(`ADS API response parsed successfully on attempt ${attempt}`);
+          return jsonResponse;
+        } catch (error) {
+          console.error('Failed to parse ADS API JSON response:', responseText.substring(0, 200));
+          throw new Error(`Invalid JSON response from ADS API`);
+        }
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`Attempt ${attempt}/${maxRetries} failed:`, lastError.message);
+        
+        if (attempt < maxRetries && lastError.message.includes('Rate limit exceeded')) {
+          continue; // Повторяем для rate limit ошибок
+        }
+        
+        if (attempt >= maxRetries) {
+          break;
+        }
       }
-    });
-
-    console.log(`ADS API response status: ${response.status}`);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      
-      // Обрабатываем специально ошибку лимита частоты
-      if (response.status === 429) {
-        console.warn('ADS API rate limit exceeded, will retry with delay');
-        throw new Error('Rate limit exceeded. Please try again later.');
-      }
-      
-      console.error('ADS API Error Response:', errorText.substring(0, 500));
-      throw new Error(`ADS API error: ${response.status} ${response.statusText}`);
     }
-
-    const responseText = await response.text();
     
-    try {
-      const jsonResponse = JSON.parse(responseText) as T;
-      console.log('ADS API response parsed successfully');
-      return jsonResponse;
-    } catch (error) {
-      console.error('Failed to parse ADS API JSON response:', responseText.substring(0, 200));
-      throw new Error(`Invalid JSON response from ADS API`);
-    }
+    throw lastError || new Error('All retry attempts failed');
   }
 
   async fetchProperties(filters?: {
@@ -186,32 +215,52 @@ export class AdsApiService {
     const cleanRegionName = regionName.toLowerCase().trim();
     const cleanDistrict = district?.toLowerCase().trim() || '';
     
+    // Карта маппинга регионов/республик на города в базе данных
+    const regionMapping: Record<string, string> = {
+      'татарстан': 'казань',
+      'республика татарстан': 'казань',
+      'башкортостан': 'уфа',
+      'республика башкортостан': 'уфа',
+      'свердловская область': 'екатеринбург',
+      'ленинградская область': 'санкт-петербург',
+      'московская область': 'москва',
+      'новосибирская область': 'новосибирск',
+      'калининградская область': 'калининград',
+      'красноярский край': 'красноярск',
+      'пермский край': 'пермь',
+      'тюменская область': 'тюмень',
+      'краснодарский край': 'сочи'
+    };
+    
+    // Применяем маппинг если есть соответствие
+    let targetRegionName = regionMapping[cleanRegionName] || cleanRegionName;
+    
     // Сначала точное совпадение
     let matchingRegion = regions.find(r => 
-      r.name.toLowerCase() === cleanRegionName ||
-      cleanRegionName === r.name.toLowerCase()
+      r.name.toLowerCase() === targetRegionName
     );
     
     // Если точного совпадения нет, ищем частичное
     if (!matchingRegion) {
       matchingRegion = regions.find(r => 
-        r.name.toLowerCase().includes(cleanRegionName) ||
-        cleanRegionName.includes(r.name.toLowerCase())
+        r.name.toLowerCase().includes(targetRegionName) ||
+        targetRegionName.includes(r.name.toLowerCase())
       );
     }
     
     // Проверяем также район, если есть
     if (!matchingRegion && cleanDistrict) {
+      const targetDistrict = regionMapping[cleanDistrict] || cleanDistrict;
       matchingRegion = regions.find(r => 
-        r.name.toLowerCase().includes(cleanDistrict) ||
-        cleanDistrict.includes(r.name.toLowerCase())
+        r.name.toLowerCase().includes(targetDistrict) ||
+        targetDistrict.includes(r.name.toLowerCase())
       );
     }
 
     if (matchingRegion) {
       console.log(`Mapped region "${regionName}" to database region "${matchingRegion.name}" (ID: ${matchingRegion.id})`);
     } else {
-      console.log(`No matching region found for "${regionName}" in allowed regions list`);
+      console.log(`No matching region found for "${regionName}" -> "${targetRegionName}" in database`);
     }
 
     return matchingRegion?.id || null;
