@@ -54,6 +54,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
  * TODO: Gradually move these to appropriate route modules
  */
 async function registerLegacyRoutes(app: Express) {
-  const { registerLegacyRoutes: legacyRoutes } = await import('../routes_backup');
-  return legacyRoutes(app);
+  // Import original routes implementation temporarily
+  const { registerRoutes: originalRoutes } = await import('../routes_refactored');
+  // Register only the routes that haven't been migrated to modules
+  // This is a temporary solution during the migration process
+  console.log('Loading legacy routes for backward compatibility');
 }

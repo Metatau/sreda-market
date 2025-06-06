@@ -4,6 +4,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProvider, useUser } from "@/contexts/UserContext";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { AIChat } from "@/components/AIChat";
 import { YandexMetrika } from "@/components/YandexMetrika";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -71,14 +72,16 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <UserProvider>
-        <YandexMetrika />
-        <Router />
-        <CookieConsent />
-        <Toaster />
-      </UserProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <UserProvider>
+          <YandexMetrika />
+          <Router />
+          <CookieConsent />
+          <Toaster />
+        </UserProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
