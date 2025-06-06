@@ -42,33 +42,30 @@ router.get('/telegram/config', handleAsyncError(async (req, res) => {
 }));
 
 /**
- * POST /api/auth/telegram - Handle Telegram authentication
+ * GET /api/auth/telegram - Handle Telegram authentication callback
  */
-router.post('/telegram', handleAsyncError(async (req, res) => {
-  const { id, username, first_name, last_name, auth_date, hash } = req.body;
+router.get('/telegram', handleAsyncError(async (req, res) => {
+  const { id, username, first_name, last_name, auth_date, hash } = req.query;
 
   if (!id || !hash) {
-    return ResponseHelper.validationError(res, 'Missing required Telegram authentication data');
+    return res.redirect('/?error=telegram_auth_failed');
   }
 
   try {
     const user = await TelegramAuthService.authenticateUser({
-      id: parseInt(id),
-      username,
-      first_name,
-      last_name,
-      auth_date: parseInt(auth_date),
-      hash
+      id: parseInt(id as string),
+      username: username as string,
+      first_name: first_name as string,
+      last_name: last_name as string,
+      auth_date: parseInt(auth_date as string),
+      hash: hash as string
     });
 
-    ResponseHelper.success(res, {
-      user,
-      authenticated: true,
-      message: 'Successfully authenticated with Telegram'
-    });
+    // Успешная аутентификация - перенаправляем на главную страницу
+    res.redirect('/?telegram_auth=success');
   } catch (error) {
     console.error('Telegram authentication error:', error);
-    ResponseHelper.error(res, 'Failed to authenticate with Telegram', 'TELEGRAM_AUTH_ERROR', 401);
+    res.redirect('/?error=telegram_auth_failed');
   }
 }));
 

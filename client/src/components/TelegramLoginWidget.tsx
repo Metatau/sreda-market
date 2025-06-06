@@ -75,16 +75,9 @@ export const TelegramLoginWidget = ({
       return;
     }
 
-    // Создаем уникальную функцию для обработки аутентификации
-    const callbackName = `telegramCallback_${Math.random().toString(36).substr(2, 9)}`;
+    // Согласно документации Telegram, используем auth_url для callback
+    const authUrl = `${window.location.origin}/api/auth/telegram`;
     
-    // Создаем глобальную функцию для обработки результата
-    (window as any)[callbackName] = (user: any) => {
-      handleTelegramAuth(user);
-      // Удаляем глобальную функцию после использования
-      delete (window as any)[callbackName];
-    };
-
     // Создаем скрипт для Telegram Login Widget
     const script = document.createElement('script');
     script.async = true;
@@ -92,9 +85,8 @@ export const TelegramLoginWidget = ({
     script.setAttribute('data-telegram-login', username);
     script.setAttribute('data-size', buttonSize);
     script.setAttribute('data-radius', cornerRadius.toString());
-    script.setAttribute('data-onauth', callbackName);
+    script.setAttribute('data-auth-url', authUrl);
     script.setAttribute('data-request-access', requestAccess);
-    script.setAttribute('data-userpic', usePic.toString());
 
     // Очищаем контейнер и добавляем скрипт
     containerRef.current.innerHTML = '';
