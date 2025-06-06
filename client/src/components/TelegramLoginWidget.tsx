@@ -55,11 +55,12 @@ export const TelegramLoginWidget = ({
   const initializeTelegramWidget = (username: string) => {
     if (!containerRef.current) return;
 
-    // Для разработки используем упрощенную кнопку
-    if (window.location.hostname.includes('replit') || window.location.hostname === 'localhost') {
+    // Проверяем, если это домен sreda.market - используем полноценный виджет
+    // Для других доменов (включая Replit) показываем информационную кнопку
+    if (!window.location.hostname.includes('sreda.market')) {
       containerRef.current.innerHTML = `
         <button 
-          onclick="alert('Для работы Telegram входа необходимо настроить домен в @BotFather.\\n\\nВыполните команду:\\n/setdomain\\n\\nИ укажите домен: ${window.location.hostname}')"
+          onclick="alert('Telegram вход настроен для домена sreda.market.\\n\\nТекущий домен: ${window.location.hostname}\\n\\nДля полной функциональности используйте основной домен.')"
           class="bg-[#0088cc] hover:bg-[#006699] text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

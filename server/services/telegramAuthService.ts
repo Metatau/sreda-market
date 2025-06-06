@@ -115,6 +115,24 @@ export class TelegramAuthService {
     return `https://oauth.telegram.org/auth?bot_id=${this.getBotId()}&origin=${encodeURIComponent(redirectUrl)}&${params}`;
   }
 
+  // Получение конфигурации бота для frontend
+  static async getBotConfig() {
+    if (!this.BOT_TOKEN) {
+      return { error: 'TELEGRAM_BOT_TOKEN not configured' };
+    }
+
+    const botUsername = process.env.TELEGRAM_BOT_USERNAME;
+    if (!botUsername) {
+      return { error: 'TELEGRAM_BOT_USERNAME not configured' };
+    }
+
+    return {
+      botId: this.getBotId(),
+      botUsername: botUsername,
+      configured: true
+    };
+  }
+
   private static getBotId(): string {
     if (!this.BOT_TOKEN) {
       throw new Error('TELEGRAM_BOT_TOKEN not configured');
