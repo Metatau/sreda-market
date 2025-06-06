@@ -53,9 +53,13 @@ export function PropertyCard({ property, onSelect, onFavorite, isFavorite = fals
         {/* Property Image */}
         <div className="h-48 bg-gray-200 rounded-t-lg overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop"
+            src={property.imageUrl || `/api/properties/${property.id}/image`}
             alt={property.title}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = `/api/images/property-default-${(property.id % 4) + 1}.jpg`;
+            }}
           />
         </div>
         

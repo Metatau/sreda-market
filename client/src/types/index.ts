@@ -29,7 +29,6 @@ export interface Property {
   price: number;
   pricePerSqm?: number;
   area?: string;
-  totalArea?: number;
   rooms?: number;
   floor?: number;
   totalFloors?: number;
@@ -42,13 +41,19 @@ export interface Property {
   source: string;
   url?: string;
   phone?: string;
+  imageUrl?: string;
+  images?: string[];
+  totalArea?: number;
+  livingArea?: number;
+  kitchenArea?: number;
+  floorsTotal?: number;
+  metroDistance?: number;
   autoClassified: boolean;
   manualOverride: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   investmentRating?: number;
-  images?: string[];
   region?: Region;
   propertyClass?: PropertyClass;
   analytics?: PropertyAnalytics;
@@ -59,12 +64,17 @@ export interface PropertyAnalytics {
   id: number;
   propertyId: number;
   regionId?: number;
-  roi?: string;
+  roi?: number;
+  rentalYield?: number;
+  appreciation?: number;
   liquidityScore?: number;
+  investmentScore?: number;
   investmentRating?: string;
   priceGrowthRate?: string;
   marketTrend?: string;
   calculatedAt: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InvestmentAnalytics {

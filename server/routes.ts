@@ -20,6 +20,7 @@ import { globalErrorHandler } from "./utils/errors";
 import { corsMiddleware } from "./middleware/cors";
 import { generalRateLimit, authRateLimit, aiRateLimit, apiRateLimit } from "./middleware/rateLimiting";
 import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, chatMessageSchema, investmentAnalysisSchema } from "./validation/schemas";
+import { imageRoutes } from "./routes/imageRoutes";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -39,6 +40,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const regionController = new RegionController();
   const propertyClassController = new PropertyClassController();
   const propertyController = new PropertyController(propertyService);
+
+  // Image serving routes
+  app.use('/api', imageRoutes);
 
   // Health check
   app.get("/api/health", (req, res) => {
