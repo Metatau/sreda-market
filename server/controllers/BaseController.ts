@@ -1,40 +1,56 @@
 
 import { Request, Response } from "express";
-import { AppError, ValidationError } from "../utils/errors";
+import { ResponseHelper } from "../utils/response-helpers";
+import { ValidationService } from "../services/ValidationService";
+import type { AuthenticatedRequest } from "../middleware/unified-auth";
 
 export abstract class BaseController {
+  /**
+   * Send successful response
+   */
   protected sendSuccess<T>(res: Response, data: T, statusCode: number = 200): void {
-    res.status(statusCode).json({
-      success: true,
-      data,
-    });
+    ResponseHelper.success(res, data, statusCode);
   }
 
-  protected sendError(res: Response, error: AppError): void {
-    res.status(error.statusCode).json({
-      success: false,
-      error: {
-        message: error.message,
-        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
-      }
-    });
+  /**
+   * Send error response
+   */
+  protected sendError(res: Response, message: string, type: string = 'ERROR', statusCode: number = 500): void {
+    ResponseHelper.error(res, message, type, statusCode);
   }
 
-  protected validateId(id: string): number {
-    const numId = parseInt(id, 10);
-    if (isNaN(numId) || numId <= 0) {
-      throw new ValidationError("Invalid ID provided");
-    }
-    return numId;
+  /**
+   * Validate ID parameter
+   */
+  protected validateId(id: string, fieldName: string = 'ID'): number {
+    return ValidationService.validateId(id, fieldName);
   }
 
+  /**
+   * Validate pagination parameters
+   */
   protected validatePagination(page?: string, perPage?: string) {
-    const pageNum = page ? parseInt(page, 10) : 1;
-    const perPageNum = perPage ? parseInt(perPage, 10) : 20;
-    
-    if (pageNum < 1) throw new ValidationError("Page must be greater than 0");
-    if (perPageNum < 1 || perPageNum > 100) throw new ValidationError("Per page must be between 1 and 100");
-    
-    return { page: pageNum, perPage: perPageNum };
+    return ValidationService.validatePagination(page, perPage);
+  }
+
+  /**
+   * Get authenticated user from request
+   */
+  protected getAuthenticatedUser(req: AuthenticatedRequest) {
+    if (!req.user) {
+      throw new Error('User not authenticated');
+    }
+    return req.user;
+  }
+
+  /**
+   * Check if user is admin
+   */
+  protected requireAdmin(req: AuthenticatedRequest) {
+    const user = this.getAuthenticatedUser(req);
+    if (user.role !== 'administrator') {
+      throw new Error('Administrator access required');
+    }
+    return user;
   }
 }
