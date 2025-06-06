@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Layers, Search, BarChart3, Maximize2 } from 'lucide-react';
+import { MapPin, Layers, Search, BarChart3 } from 'lucide-react';
 import { safePromise } from '@/lib/errorHandling';
 import { trackMapEvent } from '@/lib/yandexMetrika';
 import { leafletMapService } from '@/services/leafletMapService';
@@ -41,7 +41,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [showFullscreenModal, setShowFullscreenModal] = useState(false);
+
 
   // Initialize map
   useEffect(() => {
@@ -222,25 +222,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         style={{ minHeight: '400px' }}
       />
 
-      {/* CRITICAL: Floating Fullscreen Button - ALWAYS VISIBLE */}
-      <Button
-        variant="default"
-        size="sm"
-        onClick={() => {
-          console.log('Fullscreen button clicked - immediate action');
-          setShowFullscreenModal(true);
-        }}
-        className="absolute top-4 right-4 z-[9999] bg-blue-600 hover:bg-blue-700 text-white shadow-2xl border-2 border-white p-2"
-        style={{ 
-          position: 'absolute',
-          top: '16px',
-          right: '16px',
-          zIndex: 9999,
-          display: 'block !important'
-        }}
-      >
-        <Maximize2 className="h-5 w-5" />
-      </Button>
+
 
       {/* Map Controls */}
       {mapLoaded && (
@@ -344,14 +326,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         </div>
       )}
 
-      {/* Fullscreen Map Modal */}
-      <FullscreenMapModal
-        isOpen={showFullscreenModal}
-        onClose={() => setShowFullscreenModal(false)}
-        properties={properties}
-        selectedProperty={selectedProperty}
-        onPropertySelect={onPropertySelect}
-      />
+
     </div>
   );
 }
