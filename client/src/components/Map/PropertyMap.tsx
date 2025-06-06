@@ -6,12 +6,14 @@ import { AddressSearch } from './AddressSearch';
 import { createMapboxTilesetService } from '@/services/mapboxTilesets';
 import { createMapDataSourceManager } from '@/services/mapDataSources';
 import { createMapDrawingService, type DrawnArea } from '@/services/mapDrawing';
+import { initializeMapbox, createMapboxOptions } from '@/config/mapbox';
 import type { Property } from '@/types';
 
-// Используем глобальный объект mapboxgl из CDN
+// Используем глобальные объекты из CDN
 declare global {
   interface Window {
     mapboxgl: any;
+    MapboxDraw: any;
   }
 }
 
@@ -62,13 +64,18 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       return;
     }
 
-    window.mapboxgl.accessToken = mapboxToken;
+    // Инициализация Mapbox с оптимизациями
+    initializeMapbox({ accessToken: mapboxToken });
+
+    // Создание карты с оптимизированными настройками
+    const mapOptions = createMapboxOptions({
+      defaultCenter: [60.6122, 56.8431], // Екатеринбург
+      defaultZoom: 11
+    });
 
     map.current = new window.mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [60.6122, 56.8431], // Екатеринбург
-      zoom: 11,
+      ...mapOptions
     });
 
     map.current.on('load', async () => {

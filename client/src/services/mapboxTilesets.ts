@@ -321,6 +321,38 @@ export class MapboxTilesetService {
   }
 
   /**
+   * Создание оптимизированной карты с CDN
+   */
+  createOptimizedMap(container: HTMLElement, options: any = {}): any {
+    const defaultOptions = {
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [37.6176, 55.7558], // Москва
+      zoom: 10,
+      transformRequest: (url: string, resourceType: string) => {
+        // Оптимизация загрузки через CDN
+        if (resourceType === 'Tile' && url.startsWith('https://api.mapbox.com')) {
+          return {
+            url: url.replace('api.mapbox.com', 'cdn.mapbox.com')
+          };
+        }
+        return { url };
+      }
+    };
+
+    if (!window.mapboxgl) {
+      throw new Error('Mapbox GL JS not loaded');
+    }
+
+    window.mapboxgl.accessToken = this.config.accessToken;
+    
+    return new window.mapboxgl.Map({
+      container,
+      ...defaultOptions,
+      ...options
+    });
+  }
+
+  /**
    * Обновление конфигурации tileset
    */
   updateConfig(newConfig: Partial<MapboxTilesetConfig>): void {

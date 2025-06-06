@@ -31,9 +31,10 @@ export interface AreaSearchParams {
   };
 }
 
-// Declare global types for Mapbox GL Draw
+// Declare global types for Mapbox GL Draw  
 declare global {
   interface Window {
+    mapboxgl: any;
     MapboxDraw: any;
   }
 }
