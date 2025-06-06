@@ -26,7 +26,7 @@ import {
   Palette
 } from 'lucide-react';
 import type { Property, Region } from '@/types';
-import { MapPerformanceIndicator } from './MapPerformanceIndicator';
+
 
 interface MapBounds {
   north: number;
@@ -846,13 +846,7 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
         </Dialog>
       )}
 
-      {/* Performance Indicator */}
-      <MapPerformanceIndicator
-        heatmapPerformance={performanceData.heatmap}
-        infrastructurePerformance={performanceData.infrastructure}
-        propertiesCount={properties.length}
-        isVisible={true}
-      />
+
     </div>
   );
 }
