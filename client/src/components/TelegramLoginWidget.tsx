@@ -55,27 +55,39 @@ export const TelegramLoginWidget = ({
   const initializeTelegramWidget = (username: string) => {
     if (!containerRef.current) return;
 
+    console.log('Initializing Telegram widget with username:', username);
+    console.log('Current domain:', window.location.hostname);
+
     // Проверяем верифицированные домены
-    const isVerifiedDomain = window.location.hostname.includes('sreda.market') || 
-                           window.location.hostname.includes('1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev');
+    const currentDomain = window.location.hostname;
+    const isVerifiedDomain = currentDomain.includes('sreda.market') || 
+                           currentDomain.includes('1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev');
     
+    console.log('Is verified domain:', isVerifiedDomain);
+
     if (!isVerifiedDomain) {
+      console.log('Domain not verified, showing info message');
       containerRef.current.innerHTML = `
-        <div class="bg-gray-100 border border-gray-300 rounded-lg p-4 text-center">
-          <p class="text-sm text-gray-600 mb-2">Telegram вход доступен только на верифицированных доменах</p>
-          <p class="text-xs text-gray-500">Текущий домен: ${window.location.hostname}</p>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+          <div class="flex items-center justify-center mb-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-blue-600 mr-2">
+              <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-.896 6.728-.375 2.655-1.396 3.118-2.286 3.251-.446.066-.8.12-1.061.12-.502 0-.888-.192-1.177-.387-.2-.136-.357-.27-.467-.344l-3.35-2.671-.01-.01c-.436-.346-.618-.859-.618-1.379 0-.52.182-1.033.618-1.379l3.35-2.671c.11-.074.267-.208.467-.344.289-.195.675-.387 1.177-.387.261 0 .615.054 1.061.12.89.133 1.911.596 2.286 3.251 0 0 .727 4.87.896 6.728z"/>
+            </svg>
+            <span class="text-sm font-medium text-blue-700">Telegram вход</span>
+          </div>
+          <p class="text-sm text-blue-600 mb-2">Доступен только на верифицированных доменах</p>
+          <p class="text-xs text-blue-500">Текущий домен: ${currentDomain}</p>
+          <p class="text-xs text-blue-500 mt-1">Для активации требуется настройка с @BotFather</p>
         </div>
       `;
       return;
     }
 
+    console.log('Domain verified, creating Telegram widget');
+
     // Очищаем контейнер
     containerRef.current.innerHTML = '';
 
-    // Создаем div для виджета
-    const widgetContainer = document.createElement('div');
-    widgetContainer.id = 'telegram-login-' + username;
-    
     // Создаем скрипт для Telegram Login Widget
     const script = document.createElement('script');
     script.async = true;
@@ -86,12 +98,24 @@ export const TelegramLoginWidget = ({
     script.setAttribute('data-auth-url', `${window.location.origin}/api/auth/telegram`);
     script.setAttribute('data-request-access', requestAccess);
 
-    // Добавляем элементы в контейнер
-    containerRef.current.appendChild(widgetContainer);
+    console.log('Widget attributes set:', {
+      login: username,
+      size: buttonSize,
+      radius: cornerRadius,
+      authUrl: `${window.location.origin}/api/auth/telegram`
+    });
+
+    // Добавляем скрипт в контейнер
     containerRef.current.appendChild(script);
 
+    // Добавляем обработчик успешной загрузки
+    script.onload = () => {
+      console.log('Telegram widget script loaded successfully');
+    };
+
     // Добавляем обработчик ошибок загрузки
-    script.onerror = () => {
+    script.onerror = (error) => {
+      console.error('Failed to load Telegram widget script:', error);
       if (containerRef.current) {
         containerRef.current.innerHTML = `
           <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
@@ -101,6 +125,25 @@ export const TelegramLoginWidget = ({
         `;
       }
     };
+
+    // Добавляем таймаут для проверки загрузки виджета
+    setTimeout(() => {
+      if (containerRef.current && containerRef.current.children.length === 1) {
+        console.log('Widget may not have loaded properly, checking...');
+        const iframe = containerRef.current.querySelector('iframe');
+        if (!iframe) {
+          console.warn('No iframe found in widget container');
+          containerRef.current.innerHTML = `
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+              <p class="text-sm text-yellow-700">Telegram виджет загружается...</p>
+              <p class="text-xs text-yellow-600 mt-1">Если кнопка не появилась, проверьте настройки домена в @BotFather</p>
+            </div>
+          `;
+        } else {
+          console.log('Telegram widget iframe found successfully');
+        }
+      }
+    }, 3000);
   };
 
   const handleTelegramAuth = async (user: any) => {
