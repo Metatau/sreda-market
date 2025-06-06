@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
-import { PropertyMap } from "@/components/Map/PropertyMap";
+import { AdvancedPropertyMap } from "@/components/Map/AdvancedPropertyMap";
 import { PropertyFilters as PropertyFiltersComponent } from "@/components/Property/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
 import { Footer } from "@/components/Footer";
@@ -24,6 +24,7 @@ export default function MapPage() {
   });
 
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 20);
+  const { data: regionsData } = useRegions();
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
 
