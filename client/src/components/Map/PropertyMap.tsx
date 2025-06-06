@@ -59,7 +59,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || mapId) return;
 
     // Проверяем наличие Mapbox GL JS
     if (!window.mapboxgl) {
