@@ -3,12 +3,12 @@ import { Mail, Phone } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-12 px-4">
+    <footer className="bg-gray-900 text-white py-12 px-4 font-mono">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* О сервисе */}
           <div>
-            <h3 className="text-xl font-bold mb-4 font-mono tracking-wider">SREDA Market</h3>
+            <h3 className="text-xl font-bold mb-4 tracking-wider">SREDA Market</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
               Аналитическая платформа для инвестиций в недвижимость с AI-агентом, 
               инвестиционными рейтингами, прогнозами цен и комплексным анализом рынка.
