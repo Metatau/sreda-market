@@ -3,6 +3,7 @@ import { requireAuth, type AuthenticatedRequest } from '../middleware/unified-au
 import { mapRateLimit } from '../middleware/rateLimiting';
 import { storage } from '../storage';
 import { db } from '../db';
+import { mapPreloadService } from '../services/mapPreloadService';
 
 const router = Router();
 
@@ -33,6 +34,19 @@ router.get('/heatmap',
         minPrice: minPrice ? parseInt(minPrice as string) : undefined,
         maxPrice: maxPrice ? parseInt(maxPrice as string) : undefined
       };
+
+      // Try to get preloaded heatmap data first for better performance
+      const preloadedHeatmap = mapPreloadService.getPreloadedHeatmap(bounds);
+      
+      if (preloadedHeatmap && type === 'properties' && !filters.regionId && !filters.propertyClassId && !filters.minPrice && !filters.maxPrice) {
+        console.log('Using preloaded heatmap data for performance boost');
+        return res.json({
+          success: true,
+          data: preloadedHeatmap,
+          cached: true,
+          source: 'preloaded'
+        });
+      }
 
       const mapData = await storage.getMapData(filters);
 
@@ -71,7 +85,9 @@ router.get('/heatmap',
 
       res.json({
         success: true,
-        data: heatmapData
+        data: heatmapData,
+        cached: false,
+        source: 'database'
       });
     } catch (error) {
       console.error('Error generating heatmap:', error);
@@ -91,6 +107,26 @@ router.get('/infrastructure',
     try {
       const { bounds, types } = req.query;
       
+      const parsedBounds = {
+        north: req.query.north ? parseFloat(req.query.north as string) : 60.0,
+        south: req.query.south ? parseFloat(req.query.south as string) : 55.0,
+        east: req.query.east ? parseFloat(req.query.east as string) : 40.0,
+        west: req.query.west ? parseFloat(req.query.west as string) : 35.0
+      };
+
+      // Try to get preloaded infrastructure data first
+      const preloadedInfrastructure = mapPreloadService.getPreloadedInfrastructure(parsedBounds);
+      
+      if (preloadedInfrastructure) {
+        console.log('Using preloaded infrastructure data for performance boost');
+        return res.json({
+          success: true,
+          data: preloadedInfrastructure,
+          cached: true,
+          source: 'preloaded'
+        });
+      }
+      
       // Return basic infrastructure data structure
       const infrastructureData = {
         transport: [],
@@ -102,7 +138,9 @@ router.get('/infrastructure',
 
       res.json({
         success: true,
-        data: infrastructureData
+        data: infrastructureData,
+        cached: false,
+        source: 'default'
       });
     } catch (error) {
       console.error('Error fetching infrastructure:', error);
