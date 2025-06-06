@@ -14,9 +14,9 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { Suspense, lazy } from "react";
 
 // Lazy load страниц для оптимизации
-const Home = lazy(() => import("@/pages/Home"));
-const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const InvestmentAnalyticsDemo = lazy(() => import("@/pages/InvestmentAnalyticsDemo"));
+const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
 const Favorites = lazy(() => import("@/pages/Favorites").then(module => ({ default: module.Favorites })));
 const Profile = lazy(() => import("@/pages/Profile").then(module => ({ default: module.Profile })));
 const Comparison = lazy(() => import("@/pages/Comparison").then(module => ({ default: module.Comparison })));
@@ -56,16 +56,15 @@ function Router() {
         
         {/* Страница входа */}
         <Route path="/login">
-          {isAuthenticated ? <Home /> : <Login />}
+          {isAuthenticated ? <InvestmentAnalyticsDemo /> : <Login />}
         </Route>
         
         {/* Защищенные маршруты */}
         {isAuthenticated ? (
           <AuthProvider>
             <ErrorBoundary fallback={<ErrorPage title="Ошибка страницы" />}>
-              <Route path="/" component={Home} />
+              <Route path="/" component={InvestmentAnalyticsDemo} />
               <Route path="/insights" component={InsightsPage} />
-              <Route path="/analytics" component={InvestmentAnalyticsDemo} />
               <Route path="/favorites" component={Favorites} />
               <Route path="/profile" component={Profile} />
               <Route path="/comparison" component={Comparison} />
@@ -74,9 +73,7 @@ function Router() {
             </ErrorBoundary>
           </AuthProvider>
         ) : (
-          <Route>
-            <Login />
-          </Route>
+          <Route path="/" component={LandingPage} />
         )}
         
         {/* 404 страница */}

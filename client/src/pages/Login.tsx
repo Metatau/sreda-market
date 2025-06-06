@@ -40,6 +40,8 @@ export default function Login() {
         title: "Успешный вход",
         description: "Добро пожаловать в SREDA Market",
       });
+      // Redirect to main page after successful login
+      window.location.href = '/';
     } catch (error) {
       toast({
         title: "Ошибка входа",
@@ -84,6 +86,9 @@ export default function Login() {
         title: "Регистрация успешна",
         description: "Добро пожаловать в SREDA Market",
       });
+      
+      // Redirect to main page after successful registration
+      window.location.href = '/';
     } catch (error: any) {
       toast({
         title: "Ошибка регистрации",
@@ -125,6 +130,9 @@ export default function Login() {
         title: "Успешный вход",
         description: "Добро пожаловать в SREDA Market",
       });
+      
+      // Redirect to main page after successful login
+      window.location.href = '/';
     } catch (error) {
       toast({
         title: "Ошибка входа",

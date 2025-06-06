@@ -14,20 +14,14 @@ export function Navigation() {
     {
       path: '/',
       label: 'Главная',
-      icon: <Home className="w-4 h-4" />,
-      description: 'Карта и поиск недвижимости'
+      icon: <TrendingUp className="w-4 h-4" />,
+      description: 'Инвестиционная аналитика недвижимости'
     },
     {
       path: '/insights',
       label: 'Инсайты',
       icon: <Brain className="w-4 h-4" />,
       description: 'Аналитические данные и прогнозы'
-    },
-    {
-      path: '/analytics',
-      label: 'Инвестиции',
-      icon: <TrendingUp className="w-4 h-4" />,
-      description: 'Анализ доходности и рисков'
     },
     {
       path: '/favorites',
