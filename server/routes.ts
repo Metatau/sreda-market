@@ -220,6 +220,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Telegram authentication endpoint
+  app.post("/api/auth/telegram", async (req, res) => {
+    try {
+      const telegramData = req.body;
+      console.log('Received Telegram auth data:', telegramData);
+
+      // Проверяем обязательные поля
+      if (!telegramData.id || !telegramData.first_name) {
+        return res.status(400).json({
+          success: false,
+          error: "Недостаточно данных от Telegram"
+        });
+      }
+
+      // Проверяем подлинность данных от Telegram
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      if (botToken) {
+        const crypto = require('crypto');
+        
+        // Извлекаем hash из данных
+        const { hash, ...dataToCheck } = telegramData;
+        
+        // Создаем строку для проверки
+        const dataCheckString = Object.keys(dataToCheck)
+          .sort()
+          .map(key => `${key}=${dataToCheck[key]}`)
+          .join('\n');
+        
+        // Создаем ключ для HMAC
+        const secretKey = crypto.createHash('sha256').update(botToken).digest();
+        
+        // Вычисляем HMAC
+        const hmac = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+        
+        // Проверяем подпись
+        if (hmac !== hash) {
+          return res.status(401).json({
+            success: false,
+            error: "Неверная подпись данных от Telegram"
+          });
+        }
+        
+        console.log('Telegram data signature verified successfully');
+      }
+
+      // Создаем данные пользователя на основе Telegram
+      const telegramId = telegramData.id.toString();
+      const username = telegramData.username || `user_${telegramId}`;
+      const firstName = telegramData.first_name;
+      const lastName = telegramData.last_name || '';
+      const email = `telegram_${telegramId}@sreda.market`;
+
+      // Проверяем, существует ли пользователь с таким Telegram ID
+      let user = await storage.getUserByTelegramId(telegramId);
+      
+      if (!user) {
+        // Создаем нового пользователя
+        user = await storage.createUser({
+          username,
+          email,
+          password: '', // Пустой пароль для Telegram пользователей
+          firstName,
+          lastName,
+          telegramId,
+          role: 'client'
+        });
+      }
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Telegram auth error:', error);
+      res.status(500).json({
+        success: false,
+        error: "Ошибка авторизации через Telegram"
+      });
+    }
+  });
+
   // Region routes with caching
   app.get("/api/regions", cacheControl(600, 'api'), etag, responseCacheMiddleware(600), regionController.getRegions);
   app.get("/api/regions/:id", cacheControl(300, 'api'), etag, responseCacheMiddleware(300), regionController.getRegion);
