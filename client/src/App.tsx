@@ -31,48 +31,39 @@ function Router() {
     );
   }
 
-  // Правовые документы доступны всем без аутентификации
-  const legalPages = [
-    '/politika-konfidencialnosti/',
-    '/politika-obrabotki-personalnyh-dannyh/',
-    '/polzovatelskoe-soglashenie/',
-    '/publichnaya-oferta/',
-    '/soglasie-na-obrabotku-personalnyh-dannyh/'
-  ];
-  
-  const currentPath = window.location.pathname;
-  if (legalPages.includes(currentPath)) {
-    return (
-      <Switch>
-        <Route path="/politika-konfidencialnosti/" component={PrivacyPolicy} />
-        <Route path="/politika-obrabotki-personalnyh-dannyh/" component={PersonalDataPolicy} />
-        <Route path="/polzovatelskoe-soglashenie/" component={UserAgreement} />
-        <Route path="/publichnaya-oferta/" component={PublicOffer} />
-        <Route path="/soglasie-na-obrabotku-personalnyh-dannyh/" component={PersonalDataConsent} />
-        <Route component={NotFound} />
-      </Switch>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Login />;
-  }
-
   return (
-    <AuthProvider>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/map" component={MapPage} />
-        <Route path="/analytics" component={InvestmentAnalyticsDemo} />
-        <Route path="/favorites" component={Favorites} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/comparison" component={Comparison} />
-        <Route path="/admin" component={AdminPanel} />
-        <Route path="/login" component={Login} />
-        <Route component={NotFound} />
-      </Switch>
-      <AIChat />
-    </AuthProvider>
+    <Switch>
+      {/* Правовые документы доступны всем без аутентификации */}
+      <Route path="/politika-konfidencialnosti/" component={PrivacyPolicy} />
+      <Route path="/politika-obrabotki-personalnyh-dannyh/" component={PersonalDataPolicy} />
+      <Route path="/polzovatelskoe-soglashenie/" component={UserAgreement} />
+      <Route path="/publichnaya-oferta/" component={PublicOffer} />
+      <Route path="/soglasie-na-obrabotku-personalnyh-dannyh/" component={PersonalDataConsent} />
+      
+      {/* Основные страницы приложения */}
+      <Route path="/login" component={Login} />
+      
+      {/* Защищенные маршруты */}
+      <Route path="/">
+        {isAuthenticated ? (
+          <AuthProvider>
+            <Switch>
+              <Route path="/" component={Home} />
+              <Route path="/map" component={MapPage} />
+              <Route path="/analytics" component={InvestmentAnalyticsDemo} />
+              <Route path="/favorites" component={Favorites} />
+              <Route path="/profile" component={Profile} />
+              <Route path="/comparison" component={Comparison} />
+              <Route path="/admin" component={AdminPanel} />
+              <Route component={NotFound} />
+            </Switch>
+            <AIChat />
+          </AuthProvider>
+        ) : (
+          <Login />
+        )}
+      </Route>
+    </Switch>
   );
 }
 
