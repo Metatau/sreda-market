@@ -260,18 +260,28 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
   useEffect(() => {
     if (!mapInstance || !selectedRegion) return;
 
-    // Define region coordinates
+    // Define region coordinates for all cities
     const regionCoordinates: Record<number, { lat: number; lng: number; zoom: number }> = {
-      1: { lat: 55.7558, lng: 37.6176, zoom: 11 }, // Moscow
-      2: { lat: 59.9311, lng: 30.3609, zoom: 11 }, // Saint Petersburg
-      3: { lat: 55.0084, lng: 82.9357, zoom: 11 }, // Novosibirsk
-      4: { lat: 56.8431, lng: 60.6454, zoom: 11 }, // Ekaterinburg
-      5: { lat: 55.1644, lng: 61.4368, zoom: 11 }, // Chelyabinsk
-      6: { lat: 53.2001, lng: 50.1500, zoom: 11 }, // Samara
-      7: { lat: 56.3269, lng: 44.0075, zoom: 11 }, // Nizhny Novgorod
-      8: { lat: 51.5336, lng: 46.0340, zoom: 11 }, // Saratov
-      9: { lat: 47.2220, lng: 39.7200, zoom: 11 }, // Rostov-on-Don
-      10: { lat: 45.0401, lng: 38.9760, zoom: 11 } // Krasnodar
+      1: { lat: 55.7558, lng: 37.6176, zoom: 11 }, // Москва
+      2: { lat: 59.9311, lng: 30.3609, zoom: 11 }, // Санкт-Петербург
+      3: { lat: 55.0084, lng: 82.9357, zoom: 11 }, // Новосибирск
+      4: { lat: 56.8431, lng: 60.6454, zoom: 11 }, // Екатеринбург
+      5: { lat: 55.7887, lng: 49.1221, zoom: 11 }, // Казань
+      6: { lat: 53.2001, lng: 50.1500, zoom: 11 }, // Самара
+      7: { lat: 56.3269, lng: 44.0075, zoom: 11 }, // Нижний Новгород
+      8: { lat: 51.5336, lng: 46.0340, zoom: 11 }, // Саратов
+      9: { lat: 47.2220, lng: 39.7200, zoom: 11 }, // Ростов-на-Дону
+      10: { lat: 45.0401, lng: 38.9760, zoom: 11 }, // Краснодар
+      11: { lat: 55.1644, lng: 61.4368, zoom: 11 }, // Челябинск
+      12: { lat: 57.1522, lng: 65.5272, zoom: 11 }, // Тюмень
+      13: { lat: 43.6028, lng: 39.7342, zoom: 11 }, // Сочи
+      14: { lat: 58.0105, lng: 56.2502, zoom: 11 }, // Пермь
+      15: { lat: 56.0184, lng: 92.8672, zoom: 11 }, // Красноярск
+      16: { lat: 54.7104, lng: 20.4522, zoom: 11 }, // Калининград
+      17: { lat: 54.7388, lng: 55.9721, zoom: 11 }, // Уфа
+      35: { lat: 55.7558, lng: 37.6176, zoom: 11 }, // Москва (дублирование ID)
+      36: { lat: 59.9311, lng: 30.3609, zoom: 11 }, // Санкт-Петербург (дублирование ID)  
+      37: { lat: 55.0084, lng: 82.9357, zoom: 11 }  // Новосибирск (дублирование ID)
     };
 
     const coords = regionCoordinates[selectedRegion.id];
