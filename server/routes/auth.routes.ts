@@ -42,22 +42,22 @@ router.get('/telegram/config', handleAsyncError(async (req, res) => {
 }));
 
 /**
- * POST /api/auth/telegram/login - Handle Telegram authentication
+ * POST /api/auth/telegram - Handle Telegram authentication
  */
-router.post('/telegram/login', handleAsyncError(async (req, res) => {
-  const { telegramId, username, firstName, lastName, authDate, hash } = req.body;
+router.post('/telegram', handleAsyncError(async (req, res) => {
+  const { id, username, first_name, last_name, auth_date, hash } = req.body;
 
-  if (!telegramId || !hash) {
+  if (!id || !hash) {
     return ResponseHelper.validationError(res, 'Missing required Telegram authentication data');
   }
 
   try {
     const user = await TelegramAuthService.authenticateUser({
-      telegramId: telegramId.toString(),
+      id: parseInt(id),
       username,
-      firstName,
-      lastName,
-      authDate,
+      first_name,
+      last_name,
+      auth_date: parseInt(auth_date),
       hash
     });
 
