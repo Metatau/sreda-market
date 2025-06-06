@@ -94,22 +94,33 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await apiRequest('POST', '/api/users/register', registerForm);
-      
-      // После регистрации автоматически входим
-      await login(registerForm.email);
-      
-      toast({
-        title: "Регистрация успешна",
-        description: "Добро пожаловать в SREDA Market",
+      const response = await apiRequest('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(registerForm),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-      
-      // Redirect to main page after successful registration
-      window.location.href = '/';
+
+      if (response.success) {
+        toast({
+          title: "Регистрация успешна",
+          description: "Добро пожаловать в SREDA Market",
+        });
+        
+        // Redirect to main page after successful registration
+        window.location.href = '/';
+      } else {
+        toast({
+          title: "Ошибка регистрации",
+          description: response.error || "Произошла ошибка при регистрации",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Ошибка регистрации",
-        description: error.message || "Произошла ошибка при регистрации",
+        description: "Произошла ошибка при регистрации",
         variant: "destructive",
       });
     } finally {
@@ -200,6 +211,17 @@ export default function Login() {
                       required
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">Пароль</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      placeholder="Введите пароль"
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                      required
+                    />
+                  </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     <Mail className="mr-2 h-4 w-4" />
                     Войти
@@ -253,7 +275,17 @@ export default function Login() {
                     />
                   </div>
 
-                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password">Пароль</Label>
+                    <Input
+                      id="register-password"
+                      type="password"
+                      placeholder="Минимум 6 символов"
+                      value={registerForm.password}
+                      onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
+                      required
+                    />
+                  </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="referralCode">Промокод (необязательно)</Label>
