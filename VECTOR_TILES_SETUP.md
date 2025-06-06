@@ -66,7 +66,31 @@ sudo make install
 
 ## Обслуживание тайлов
 
-### Вариант 1: tileserver-gl (рекомендуется)
+### Вариант 1: Mapbox Studio (облачное решение)
+
+#### Установка Mapbox CLI:
+```bash
+npm install -g @mapbox/mapbox-cli
+```
+
+#### Настройка переменных окружения:
+```bash
+export MAPBOX_ACCESS_TOKEN=your_mapbox_token
+export MAPBOX_USERNAME=your_mapbox_username
+```
+
+#### Загрузка тайлов:
+```bash
+./scripts/upload-to-mapbox.sh
+```
+
+Преимущества:
+- Глобальная CDN сеть
+- Автоматическое масштабирование
+- Высокая доступность
+- Интеграция с Mapbox GL JS
+
+### Вариант 2: tileserver-gl (локальное решение)
 
 #### Установка:
 ```bash

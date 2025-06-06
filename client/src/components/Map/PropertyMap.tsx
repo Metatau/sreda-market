@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AddressSearch } from './AddressSearch';
+import { createMapboxTilesetService } from '@/services/mapboxTilesets';
 import type { Property } from '@/types';
 
 // Используем глобальный объект mapboxgl из CDN
@@ -38,6 +39,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
   const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
   const [heatmapIntensity, setHeatmapIntensity] = useState<number>(1);
   const [selectedPropertyState, setSelectedProperty] = useState<Property | null>(null);
+  const [useMapboxTileset, setUseMapboxTileset] = useState(false);
+  
+  // Инициализация Mapbox Tileset Service
+  const mapboxTilesetService = useRef(createMapboxTilesetService());
 
   // Initialize map
   useEffect(() => {
@@ -60,8 +65,21 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       zoom: 11,
     });
 
-    map.current.on('load', () => {
+    map.current.on('load', async () => {
       setMapLoaded(true);
+      
+      // Проверяем доступность Mapbox tileset
+      if (mapboxTilesetService.current) {
+        try {
+          const isReady = await mapboxTilesetService.current.isTilesetReady();
+          if (isReady) {
+            setUseMapboxTileset(true);
+            console.log('Mapbox tileset available, using cloud-hosted tiles');
+          }
+        } catch (error) {
+          console.warn('Mapbox tileset not available, falling back to local data');
+        }
+      }
     });
 
     return () => {
