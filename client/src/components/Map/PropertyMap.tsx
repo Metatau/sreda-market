@@ -75,9 +75,11 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
 
     // Создаем карту с правильным стилем
     const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+    const defaultCenter: [number, number] = [60.6122, 56.8431]; // Екатеринбург
+    const defaultZoom = 11;
     
     if (accessToken) {
-      mapboxgl.accessToken = accessToken;
+      (mapboxgl as any).accessToken = accessToken;
     }
     
     map.current = new mapboxgl.Map({
@@ -98,8 +100,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
           source: 'osm'
         }]
       },
-      center: center,
-      zoom: zoom,
+      center: defaultCenter,
+      zoom: defaultZoom,
       preserveDrawingBuffer: true
     });
 
