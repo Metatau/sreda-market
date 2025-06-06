@@ -55,9 +55,12 @@ export const TelegramLoginWidget = ({
   const initializeTelegramWidget = (username: string) => {
     if (!containerRef.current) return;
 
-    // Проверяем, если это домен sreda.market - используем полноценный виджет
-    // Для других доменов (включая Replit) показываем информационную кнопку
-    if (!window.location.hostname.includes('sreda.market')) {
+    // Проверяем, если это домен sreda.market или верифицированный Replit домен - используем полноценный виджет
+    // Для других доменов показываем информационную кнопку
+    const isVerifiedDomain = window.location.hostname.includes('sreda.market') || 
+                           window.location.hostname.includes('1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev');
+    
+    if (!isVerifiedDomain) {
       containerRef.current.innerHTML = `
         <button 
           onclick="alert('Telegram вход настроен для домена sreda.market.\\n\\nТекущий домен: ${window.location.hostname}\\n\\nДля полной функциональности используйте основной домен.')"
