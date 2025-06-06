@@ -142,8 +142,8 @@ router.get('/tiles/status', async (req: Request, res: Response) => {
     const status = {
       tiles_directory_exists: fs.existsSync(tilesDir),
       export_directory_exists: fs.existsSync(exportDir),
-      available_tilesets: [],
-      available_exports: [],
+      available_tilesets: [] as string[],
+      available_exports: [] as string[],
       tools: {
         ogr2ogr: false,
         tippecanoe: false
