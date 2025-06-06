@@ -124,7 +124,9 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
         east: mapBounds.east.toString(),
         west: mapBounds.west.toString()
       });
-      return fetch(`/api/map/heatmap?${params}`).then(res => res.json());
+      return fetch(`/api/map/heatmap?${params}`, {
+        credentials: 'include'
+      }).then(res => res.json());
     },
     enabled: heatmapType !== 'none'
   });
@@ -138,7 +140,9 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
         east: mapBounds.east.toString(),
         west: mapBounds.west.toString()
       });
-      return fetch(`/api/map/infrastructure?${params}`).then(res => res.json());
+      return fetch(`/api/map/infrastructure?${params}`, {
+        credentials: 'include'
+      }).then(res => res.json());
     },
     enabled: showInfrastructure
   });
@@ -146,14 +150,18 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
   const { data: districtsAnalysis } = useQuery({
     queryKey: ['/api/map/districts/analysis', selectedRegion?.id],
     queryFn: () => selectedRegion ? 
-      fetch(`/api/map/districts/analysis/${selectedRegion.id}`).then(res => res.json()) : 
+      fetch(`/api/map/districts/analysis/${selectedRegion.id}`, {
+        credentials: 'include'
+      }).then(res => res.json()) : 
       null,
     enabled: !!selectedRegion
   });
 
   const { data: userPolygons } = useQuery({
     queryKey: ['/api/map/polygons'],
-    queryFn: () => fetch('/api/map/polygons').then(res => res.json())
+    queryFn: () => fetch('/api/map/polygons', {
+      credentials: 'include'
+    }).then(res => res.json())
   });
 
   const queryClient = useQueryClient();
@@ -167,6 +175,7 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
     }) => fetch('/api/map/polygons', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify(polygonData)
     }).then(res => res.json()),
     onSuccess: () => {
@@ -226,7 +235,24 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
     properties.forEach(property => {
       if (!property.coordinates) return;
 
-      const [lat, lng] = property.coordinates.split(',').map(Number);
+      let lat, lng;
+      try {
+        if (typeof property.coordinates === 'string') {
+          if (property.coordinates.includes(',')) {
+            [lat, lng] = property.coordinates.split(',').map(Number);
+          } else {
+            const coords = JSON.parse(property.coordinates);
+            lat = coords.lat || coords[1];
+            lng = coords.lng || coords[0];
+          }
+        } else {
+          lat = property.coordinates?.lat || property.coordinates?.[1];
+          lng = property.coordinates?.lng || property.coordinates?.[0];
+        }
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+      } catch (e) {
+        return;
+      }
       
       const marker = L.marker([lat, lng])
         .bindPopup(`
