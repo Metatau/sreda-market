@@ -23,6 +23,7 @@ import { responseCacheMiddleware, cacheControl, etag, compression } from "./midd
 import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, chatMessageSchema, investmentAnalysisSchema } from "./validation/schemas";
 import { imageRoutes } from "./routes/imageRoutes";
 import mapRoutes from "./routes/mapRoutes";
+import insightsRoutes from "./routes/insights";
 import { z } from "zod";
 import { AuthService } from "./auth";
 

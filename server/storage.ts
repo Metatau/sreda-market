@@ -100,7 +100,7 @@ export interface PropertyFilters {
 
 export interface Pagination {
   page: number;
-  perPage: number;
+  limit: number;
 }
 
 export interface PropertyWithRelations extends Property {
@@ -587,6 +587,211 @@ export class DatabaseStorage implements IStorage {
         lastAiQueryReset: new Date()
       })
       .where(eq(users.id, userId));
+  }
+
+  // Insights management methods
+  async getInsights(filters?: InsightFilters, pagination?: Pagination): Promise<{ insights: Insight[]; total: number }> {
+    const conditions = [eq(insights.isPublished, true)];
+    
+    if (filters?.dateFrom) {
+      conditions.push(gte(insights.publishDate, filters.dateFrom));
+    }
+    
+    if (filters?.dateTo) {
+      conditions.push(lte(insights.publishDate, filters.dateTo));
+    }
+    
+    if (filters?.search) {
+      conditions.push(
+        sql`(${insights.title} ILIKE ${`%${filters.search}%`} OR ${insights.content} ILIKE ${`%${filters.search}%`})`
+      );
+    }
+    
+    if (filters?.tags && filters.tags.length > 0) {
+      conditions.push(
+        sql`${insights.tags} && ${filters.tags}`
+      );
+    }
+
+    // Get total count
+    const [countResult] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(insights)
+      .where(and(...conditions));
+    
+    const total = countResult?.count || 0;
+
+    // Get insights with pagination
+    const query = db
+      .select()
+      .from(insights)
+      .where(and(...conditions))
+      .orderBy(desc(insights.publishDate));
+
+    if (pagination) {
+      const offset = (pagination.page - 1) * pagination.limit;
+      query.limit(pagination.limit).offset(offset);
+    }
+
+    const insightsList = await query;
+    
+    return {
+      insights: insightsList,
+      total
+    };
+  }
+
+  async getInsight(id: number): Promise<Insight | undefined> {
+    const [insight] = await db
+      .select()
+      .from(insights)
+      .where(and(eq(insights.id, id), eq(insights.isPublished, true)));
+    
+    return insight;
+  }
+
+  async getInsightTags(): Promise<string[]> {
+    const result = await db
+      .select({ tags: insights.tags })
+      .from(insights)
+      .where(eq(insights.isPublished, true));
+    
+    const allTags = new Set<string>();
+    result.forEach(row => {
+      if (row.tags) {
+        row.tags.forEach(tag => allTags.add(tag));
+      }
+    });
+    
+    return Array.from(allTags).sort();
+  }
+
+  async createInsight(insight: InsertInsight): Promise<Insight> {
+    const [newInsight] = await db
+      .insert(insights)
+      .values({
+        ...insight,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    
+    return newInsight;
+  }
+
+  async updateInsight(id: number, updates: Partial<InsertInsight>): Promise<Insight | undefined> {
+    const [updatedInsight] = await db
+      .update(insights)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(insights.id, id))
+      .returning();
+    
+    return updatedInsight;
+  }
+
+  async deleteInsight(id: number): Promise<boolean> {
+    const result = await db
+      .delete(insights)
+      .where(eq(insights.id, id));
+    
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Data sources management methods
+  async getDataSources(filters?: DataSourceFilters): Promise<DataSource[]> {
+    const conditions = [];
+    
+    if (filters?.type) {
+      conditions.push(eq(dataSources.type, filters.type));
+    }
+    
+    if (filters?.isActive !== undefined) {
+      conditions.push(eq(dataSources.isActive, filters.isActive));
+    }
+    
+    if (filters?.tags && filters.tags.length > 0) {
+      conditions.push(
+        sql`${dataSources.tags} && ${filters.tags}`
+      );
+    }
+
+    const query = db
+      .select()
+      .from(dataSources)
+      .orderBy(dataSources.name);
+
+    if (conditions.length > 0) {
+      query.where(and(...conditions));
+    }
+
+    return await query;
+  }
+
+  async getDataSource(id: number): Promise<DataSource | undefined> {
+    const [dataSource] = await db
+      .select()
+      .from(dataSources)
+      .where(eq(dataSources.id, id));
+    
+    return dataSource;
+  }
+
+  async createDataSource(source: InsertDataSource): Promise<DataSource> {
+    const [newSource] = await db
+      .insert(dataSources)
+      .values({
+        ...source,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    
+    return newSource;
+  }
+
+  async updateDataSource(id: number, updates: Partial<InsertDataSource>): Promise<DataSource | undefined> {
+    const [updatedSource] = await db
+      .update(dataSources)
+      .set({
+        ...updates,
+        updatedAt: new Date()
+      })
+      .where(eq(dataSources.id, id))
+      .returning();
+    
+    return updatedSource;
+  }
+
+  async deleteDataSource(id: number): Promise<boolean> {
+    const result = await db
+      .delete(dataSources)
+      .where(eq(dataSources.id, id));
+    
+    return (result.rowCount || 0) > 0;
+  }
+
+  async toggleDataSourceStatus(id: number): Promise<boolean> {
+    const [dataSource] = await db
+      .select({ isActive: dataSources.isActive })
+      .from(dataSources)
+      .where(eq(dataSources.id, id));
+    
+    if (!dataSource) {
+      return false;
+    }
+
+    await db
+      .update(dataSources)
+      .set({
+        isActive: !dataSource.isActive,
+        updatedAt: new Date()
+      })
+      .where(eq(dataSources.id, id));
+    
+    return true;
   }
 }
 
