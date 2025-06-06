@@ -92,6 +92,13 @@ export class AdsApiService {
         url.searchParams.set('token', token);
         url.searchParams.set('format', 'json');
         
+        // Добавляем обязательные параметры для получения объявлений о недвижимости
+        if (endpoint === '/api') {
+          url.searchParams.set('category_id', '1'); // Недвижимость
+          url.searchParams.set('type', 'sell'); // Только продажа
+          url.searchParams.set('object_type', 'apartment'); // Только квартиры
+        }
+        
         // Добавляем дополнительные параметры
         if (params) {
           Object.entries(params).forEach(([key, value]) => {
@@ -283,8 +290,8 @@ export class AdsApiService {
       images.push(...adsProperty.images);
     }
     
-    // Проверяем другие возможные поля с изображениями
-    const imageFields = ['photos', 'photo', 'img', 'picture', 'pictures'];
+    // Проверяем другие возможные поля с изображениями из ADS API
+    const imageFields = ['photos', 'photo', 'img', 'picture', 'pictures', 'image_urls', 'imgs'];
     for (const field of imageFields) {
       const fieldValue = (adsProperty as any)[field];
       if (Array.isArray(fieldValue)) {
@@ -294,7 +301,9 @@ export class AdsApiService {
       }
     }
     
-    // Фильтруем валидные URL изображений
+    // Удаляем placeholder изображения - используем только аутентичные данные
+    
+    // Фильтруем и очищаем URL изображений
     return images
       .filter(img => typeof img === 'string' && img.trim())
       .map(img => img.trim())
@@ -302,7 +311,7 @@ export class AdsApiService {
         img.startsWith('http') && 
         (img.includes('.jpg') || img.includes('.jpeg') || img.includes('.png') || img.includes('.webp'))
       )
-      .slice(0, 10); // Ограничиваем до 10 изображений
+      .slice(0, 5); // Ограничиваем до 5 изображений
   }
 
   private isRentalProperty(adsProperty: AdsApiProperty): boolean {
@@ -686,8 +695,12 @@ export class AdsApiService {
             // АВТОМАТИЧЕСКИ рассчитываем инвестиционный рейтинг для нового объекта
             try {
               console.log(`Calculating investment analytics for new property ${newProperty.id}`);
-              const { schedulerService } = await import('./schedulerService');
-              await schedulerService.calculatePropertyAnalytics(newProperty.id);
+              
+              // Используем прямой импорт schedulerService для расчета аналитики
+              const schedulerModule = await import('./schedulerService');
+              const schedulerInstance = new schedulerModule.SchedulerService();
+              await schedulerInstance.calculatePropertyAnalytics(newProperty.id);
+              
               console.log(`Investment analytics calculated for property ${newProperty.id}`);
             } catch (analyticsError) {
               console.error(`Failed to calculate analytics for property ${newProperty.id}:`, analyticsError);

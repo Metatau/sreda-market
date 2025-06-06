@@ -324,6 +324,23 @@ export class SchedulerService {
   /**
    * Рассчитывает базовую инвестиционную аналитику для объекта
    */
+  async calculatePropertyAnalytics(propertyId: number): Promise<void> {
+    try {
+      // Получаем полную информацию об объекте
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        throw new Error(`Property ${propertyId} not found`);
+      }
+      
+      console.log(`Calculating analytics for property ${propertyId}: ${property.title}`);
+      
+      await this.calculateInvestmentAnalytics(property);
+    } catch (error) {
+      console.error(`Error calculating analytics for property ${propertyId}:`, error);
+      throw error;
+    }
+  }
+
   private async calculateInvestmentAnalytics(property: any): Promise<void> {
     try {
       // Базовые расчёты ROI
