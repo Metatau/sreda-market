@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { AIChat } from "@/components/AIChat";
+import { YandexMetrika } from "@/components/YandexMetrika";
 import Home from "@/pages/Home";
 import MapPage from "@/pages/MapPage";
 import InvestmentAnalyticsDemo from "@/pages/InvestmentAnalyticsDemo";
@@ -71,6 +72,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <UserProvider>
+        <YandexMetrika />
         <Router />
         <Toaster />
       </UserProvider>
