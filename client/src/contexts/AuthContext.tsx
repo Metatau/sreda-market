@@ -30,16 +30,11 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>({
-    id: "demo-user",
-    name: "Demo User",
-    roles: "admin"
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Автоматически авторизуем пользователя для полного доступа
-    setLoading(false);
+    checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
