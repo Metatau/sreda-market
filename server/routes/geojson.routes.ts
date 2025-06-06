@@ -36,7 +36,8 @@ router.get('/properties/geojson', async (req: Request, res: Response) => {
     };
 
     // Получение данных с большим лимитом для GeoJSON
-    const { properties } = await storage.getProperties(filters, { page: 1, perPage: 10000 });
+    const result = await storage.getProperties(filters, { page: 1, perPage: 10000 });
+    const properties = result?.properties || [];
 
     // Преобразование в GeoJSON
     const geojson = {
