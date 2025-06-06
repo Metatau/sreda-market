@@ -4,6 +4,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Footer } from '@/components/Footer';
 import { 
   Building2, 
   TrendingUp, 
@@ -270,48 +271,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Building2 className="h-6 w-6" />
-                <span className="text-lg font-bold">SREDA Market</span>
-              </div>
-              <p className="text-gray-400">
-                Умная платформа для инвестиций в недвижимость
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Продукт</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>Возможности</li>
-                <li>Тарифы</li>
-                <li>API</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Поддержка</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>Справка</li>
-                <li>Контакты</li>
-                <li>Обратная связь</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Компания</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>О нас</li>
-                <li>Блог</li>
-                <li>Карьера</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 SREDA Market. Все права защищены.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
