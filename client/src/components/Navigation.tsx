@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Home, TrendingUp, Map, Heart, Scale, User, Building, LogOut } from 'lucide-react';
+import { Home, TrendingUp, Brain, Heart, Scale, User, Building, LogOut } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { LoginButton } from "@/components/Auth/LoginButton";
 import { UserProfile } from "@/components/Auth/UserProfile";
@@ -18,10 +18,10 @@ export function Navigation() {
       description: 'Карта и поиск недвижимости'
     },
     {
-      path: '/map',
-      label: 'Карта',
-      icon: <Map className="w-4 h-4" />,
-      description: 'Интерактивная карта недвижимости'
+      path: '/insights',
+      label: 'Инсайты',
+      icon: <Brain className="w-4 h-4" />,
+      description: 'Аналитические данные и прогнозы'
     },
     {
       path: '/analytics',

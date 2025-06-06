@@ -15,7 +15,7 @@ import { Suspense, lazy } from "react";
 
 // Lazy load страниц для оптимизации
 const Home = lazy(() => import("@/pages/Home"));
-const MapPage = lazy(() => import("@/pages/MapPage"));
+const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
 const InvestmentAnalyticsDemo = lazy(() => import("@/pages/InvestmentAnalyticsDemo"));
 const Favorites = lazy(() => import("@/pages/Favorites").then(module => ({ default: module.Favorites })));
 const Profile = lazy(() => import("@/pages/Profile").then(module => ({ default: module.Profile })));
@@ -64,7 +64,7 @@ function Router() {
           <AuthProvider>
             <ErrorBoundary fallback={<ErrorPage title="Ошибка страницы" />}>
               <Route path="/" component={Home} />
-              <Route path="/map" component={MapPage} />
+              <Route path="/insights" component={InsightsPage} />
               <Route path="/analytics" component={InvestmentAnalyticsDemo} />
               <Route path="/favorites" component={Favorites} />
               <Route path="/profile" component={Profile} />
