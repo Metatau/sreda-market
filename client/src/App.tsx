@@ -43,29 +43,31 @@ function Router() {
       <Route path="/publichnaya-oferta/" component={PublicOffer} />
       <Route path="/soglasie-na-obrabotku-personalnyh-dannyh/" component={PersonalDataConsent} />
       
-      {/* Основные страницы приложения */}
-      <Route path="/login" component={Login} />
+      {/* Страница входа */}
+      <Route path="/login">
+        {isAuthenticated ? <Home /> : <Login />}
+      </Route>
       
       {/* Защищенные маршруты */}
-      <Route path="/">
-        {isAuthenticated ? (
-          <AuthProvider>
-            <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/map" component={MapPage} />
-              <Route path="/analytics" component={InvestmentAnalyticsDemo} />
-              <Route path="/favorites" component={Favorites} />
-              <Route path="/profile" component={Profile} />
-              <Route path="/comparison" component={Comparison} />
-              <Route path="/admin" component={AdminPanel} />
-              <Route component={NotFound} />
-            </Switch>
-            <AIChat />
-          </AuthProvider>
-        ) : (
+      {isAuthenticated ? (
+        <AuthProvider>
+          <Route path="/" component={Home} />
+          <Route path="/map" component={MapPage} />
+          <Route path="/analytics" component={InvestmentAnalyticsDemo} />
+          <Route path="/favorites" component={Favorites} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/comparison" component={Comparison} />
+          <Route path="/admin" component={AdminPanel} />
+          <AIChat />
+        </AuthProvider>
+      ) : (
+        <Route>
           <Login />
-        )}
-      </Route>
+        </Route>
+      )}
+      
+      {/* 404 страница */}
+      <Route component={NotFound} />
     </Switch>
   );
 }
