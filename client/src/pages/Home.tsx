@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
+import { Footer } from "@/components/Footer";
 
 import { InvestmentAnalyticsModal } from "@/components/InvestmentAnalyticsModal";
 import { Button } from "@/components/ui/button";
@@ -245,6 +246,8 @@ export default function Home() {
           analytics={analyticsData || {}}
         />
       )}
+
+      <Footer />
     </div>
   );
 }

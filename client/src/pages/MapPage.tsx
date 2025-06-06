@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { PropertyMap } from "@/components/Map/PropertyMap";
 import { PropertyFilters } from "@/components/Property/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -287,6 +288,7 @@ export default function MapPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
