@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { AIChat } from "@/components/AIChat";
 import { YandexMetrika } from "@/components/YandexMetrika";
+import { CookieConsent } from "@/components/CookieConsent";
 import Home from "@/pages/Home";
 import MapPage from "@/pages/MapPage";
 import InvestmentAnalyticsDemo from "@/pages/InvestmentAnalyticsDemo";
@@ -74,6 +75,7 @@ function App() {
       <UserProvider>
         <YandexMetrika />
         <Router />
+        <CookieConsent />
         <Toaster />
       </UserProvider>
     </QueryClientProvider>
