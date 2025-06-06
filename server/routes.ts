@@ -99,8 +99,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Import and use modular auth routes
-  const authRoutes = await import('./routes/auth');
+  // Import and use fixed modular auth routes
+  const authRoutes = await import('./routes/authFixed');
   app.use('/api/auth', authRoutes.default);
 
   // All authentication routes are now handled by modular auth routes
