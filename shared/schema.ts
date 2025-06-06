@@ -213,6 +213,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 100 }).notNull().unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }),
   role: userRoleEnum("role").default('client').notNull(),
   telegramId: varchar("telegram_id", { length: 50 }).unique(),
   telegramHandle: varchar("telegram_handle", { length: 100 }),
@@ -384,6 +385,15 @@ export const selectInfrastructureProjectsSchema = createSelectSchema(infrastruct
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages);
 export const selectChatMessageSchema = createSelectSchema(chatMessages);
+
+export const insertUserSchema = createInsertSchema(users);
+export const selectUserSchema = createSelectSchema(users);
+
+export const insertReferralEarningSchema = createInsertSchema(referralEarnings);
+export const selectReferralEarningSchema = createSelectSchema(referralEarnings);
+
+export const insertBonusTransactionSchema = createInsertSchema(bonusTransactions);
+export const selectBonusTransactionSchema = createSelectSchema(bonusTransactions);
 
 // Types
 export type Region = typeof regions.$inferSelect;
