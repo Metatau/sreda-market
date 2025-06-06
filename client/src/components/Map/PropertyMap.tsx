@@ -8,6 +8,13 @@ import { createMapDataSourceManager } from '@/services/mapDataSources';
 import { createMapDrawingService, type DrawnArea } from '@/services/mapDrawing';
 import { initializeMapbox, createOptimizedMapInstance, preloadCityTiles } from '@/config/mapbox';
 import { createPerformanceMonitor, mapOptimizations } from '@/utils/mapPerformance';
+import { 
+  trackMapEvent, 
+  trackPropertyClick, 
+  trackHeatmapMode, 
+  trackAreaDrawing,
+  trackPerformance 
+} from '@/lib/yandexMetrika';
 import type { Property } from '@/types';
 
 // Используем глобальные объекты из CDN
@@ -80,7 +87,14 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     );
 
     map.current.on('load', async () => {
+      const loadStartTime = performance.now();
       setMapLoaded(true);
+      
+      // Отслеживаем загрузку карты
+      trackMapEvent('load', { 
+        center: map.current.getCenter(),
+        zoom: map.current.getZoom() 
+      });
       
       // Инициализируем гибридную систему источников данных
       try {
@@ -89,8 +103,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         
         if (status.activeSource === 'vector') {
           setUseMapboxTileset(true);
+          trackMapEvent('data_source_initialized', { source: 'vector_tiles' });
           console.log('Using vector tiles source');
         } else if (status.activeSource === 'geojson') {
+          trackMapEvent('data_source_initialized', { source: 'geojson_api' });
           console.log('Using GeoJSON API source');
         } else {
           console.warn('No data sources available');
@@ -103,12 +119,22 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       drawingService.current.initialize(map.current, (area: DrawnArea) => {
         setDrawnArea(area);
         if (area) {
+          // Отслеживаем рисование областей
+          trackAreaDrawing({
+            area: area.area,
+            type: area.type
+          });
+          
           console.log('Area drawn:', {
             area: (area.area / 1000000).toFixed(2) + ' км²',
             coordinates: area.coordinates
           });
         }
       });
+
+      // Отслеживаем время загрузки карты
+      const loadTime = performance.now() - loadStartTime;
+      trackPerformance('map_load_time', loadTime);
     });
 
     return () => {
@@ -425,7 +451,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                   variant={heatmapMode === 'none' ? "default" : "outline"}
                   size="sm"
                   className="text-xs h-7 flex-1"
-                  onClick={() => setHeatmapMode('none')}
+                  onClick={() => {
+                    setHeatmapMode('none');
+                    trackHeatmapMode('none');
+                  }}
                 >
                   Объекты
                 </Button>
@@ -433,7 +462,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                   variant={heatmapMode === 'density' ? "default" : "outline"}
                   size="sm"
                   className="text-xs h-7 flex-1"
-                  onClick={() => setHeatmapMode('density')}
+                  onClick={() => {
+                    setHeatmapMode('density');
+                    trackHeatmapMode('density');
+                  }}
                 >
                   Плотность
                 </Button>
@@ -441,7 +473,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                   variant={heatmapMode === 'price' ? "default" : "outline"}
                   size="sm"
                   className="text-xs h-7 flex-1"
-                  onClick={() => setHeatmapMode('price')}
+                  onClick={() => {
+                    setHeatmapMode('price');
+                    trackHeatmapMode('price');
+                  }}
                 >
                   Цены
                 </Button>
@@ -449,7 +484,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                   variant={heatmapMode === 'investment' ? "default" : "outline"}
                   size="sm"
                   className="text-xs h-7 flex-1"
-                  onClick={() => setHeatmapMode('investment')}
+                  onClick={() => {
+                    setHeatmapMode('investment');
+                    trackHeatmapMode('investment');
+                  }}
                 >
                   Инвестиции
                 </Button>
