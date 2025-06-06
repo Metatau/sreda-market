@@ -60,6 +60,7 @@ export class MapDataSourceManager {
 
     if (!tilesetId || !accessToken) {
       this.status.vectorTiles = 'unavailable';
+      // Не выводим предупреждение, это нормально для демо-режима
       return;
     }
 

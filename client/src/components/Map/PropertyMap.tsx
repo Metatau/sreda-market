@@ -102,7 +102,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       
       // Инициализируем гибридную систему источников данных
       try {
-        const status = await dataSourceManager.current.initializeDataSources(map.current);
+        await dataSourceManager.current.initializeDataSources(map.current);
+        const status = dataSourceManager.current.getStatus();
         
         if (status.activeSource === 'vector') {
           setUseMapboxTileset(true);
