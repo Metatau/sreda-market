@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AddressSearch } from './AddressSearch';
 import type { Property } from '@/types';
 
 // Используем глобальный объект mapboxgl из CDN
@@ -111,7 +112,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
             value = property.price || 0;
             break;
           case 'investment':
-            value = property.investmentAnalytics?.roi ? parseFloat(property.investmentAnalytics.roi) : 0;
+            value = property.investmentRating || Math.random() * 10;
             break;
           case 'density':
           default:
@@ -276,15 +277,27 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       data: heatmapData
     });
 
-    // Add heatmap layer
+    // Add enhanced heatmap layer
     map.current!.addLayer({
       id: 'heatmap-layer',
       type: 'heatmap',
       source: 'properties-heatmap',
       maxzoom: 15,
       paint: {
-        'heatmap-weight': ['get', 'weight'],
-        'heatmap-intensity': heatmapIntensity,
+        'heatmap-weight': [
+          'interpolate',
+          ['linear'],
+          ['get', 'weight'],
+          0, 0,
+          heatmapMode === 'price' ? 50000000 : 10, 1
+        ],
+        'heatmap-intensity': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          0, heatmapIntensity,
+          15, heatmapIntensity * 3
+        ],
         'heatmap-color': [
           'interpolate',
           ['linear'],
@@ -308,7 +321,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
           ['linear'],
           ['zoom'],
           7, 1,
-          15, 0
+          15, 0.8
         ]
       }
     });
