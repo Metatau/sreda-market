@@ -128,7 +128,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                     <p style="margin: 0 0 4px 0;">Цена: ${property.price?.toLocaleString()} ₽</p>
                     ${property.pricePerSqm ? `<p style="margin: 0 0 4px 0;">За м²: ${property.pricePerSqm.toLocaleString()} ₽</p>` : ''}
                     ${property.rooms ? `<p style="margin: 0 0 4px 0;">Комнат: ${property.rooms}</p>` : ''}
-                    ${property.propertyClass ? `<p style="margin: 0;"><span style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${property.propertyClass.name}</span></p>` : ''}
+                    ${property.propertyClassId ? `<p style="margin: 0;"><span style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Класс ${property.propertyClassId}</span></p>` : ''}
                   </div>
                 `,
                 clickable: true
