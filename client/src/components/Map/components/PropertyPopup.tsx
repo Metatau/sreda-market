@@ -30,9 +30,9 @@ export function PropertyPopup({ property, onSelect }: PropertyPopupProps) {
     <Card className="w-80 max-w-sm">
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
-          {property.propertyClass && (
-            <Badge className={getPropertyClassColor(property.propertyClass.name)}>
-              {property.propertyClass.name}
+          {property.propertyClassId && (
+            <Badge className="bg-blue-100 text-blue-800">
+              Класс {property.propertyClassId}
             </Badge>
           )}
         </div>

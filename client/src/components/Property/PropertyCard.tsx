@@ -79,9 +79,9 @@ export function PropertyCard({ property, onSelect, onFavorite, isFavorite = fals
 
       <CardContent className="p-5">
         <div className="flex items-start justify-between mb-3">
-          {property.propertyClass && (
-            <Badge className={getPropertyClassColor(property.propertyClass.name)}>
-              {property.propertyClass.name}
+          {property.propertyClassId && (
+            <Badge className="bg-blue-100 text-blue-800">
+              Класс {property.propertyClassId}
             </Badge>
           )}
         </div>

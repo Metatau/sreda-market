@@ -299,12 +299,12 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                   {selectedPropertyState.rooms && (
                     <div>Комнат: {selectedPropertyState.rooms}</div>
                   )}
-                  {selectedPropertyState.propertyClass && (
+                  {selectedPropertyState.propertyClassId && (
                     <Badge 
                       variant="secondary" 
-                      className={`text-xs ${getPropertyClassColor(selectedPropertyState.propertyClass.name)}`}
+                      className="text-xs bg-blue-100 text-blue-800"
                     >
-                      {selectedPropertyState.propertyClass.name}
+                      Класс {selectedPropertyState.propertyClassId}
                     </Badge>
                   )}
                 </div>
