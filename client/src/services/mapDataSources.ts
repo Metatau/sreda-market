@@ -65,7 +65,6 @@ export class MapDataSourceManager {
 
     if (!tilesetId || !accessToken) {
       this.status.vectorTiles = 'unavailable';
-      console.log('Vector tiles not configured, using API fallback');
       return;
     }
 

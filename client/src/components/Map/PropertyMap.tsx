@@ -65,26 +65,20 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-    
-    if (!mapboxToken || !window.mapboxgl) {
-      console.warn('Mapbox access token not configured or Mapbox GL JS not loaded');
+    // Проверяем наличие Mapbox GL JS
+    if (!window.mapboxgl) {
+      console.warn('Mapbox GL JS not loaded');
       setMapLoaded(true);
       return;
     }
 
-    // Создаем карту с правильным стилем
-    const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+    // Создаем карту с OpenStreetMap (стабильно работает без токенов)
     const defaultCenter: [number, number] = [60.6122, 56.8431]; // Екатеринбург
     const defaultZoom = 11;
     
-    if (accessToken) {
-      (mapboxgl as any).accessToken = accessToken;
-    }
-    
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: accessToken ? 'mapbox://styles/mapbox/light-v11' : {
+      style: {
         version: 8 as const,
         sources: {
           'osm': {

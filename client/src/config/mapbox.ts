@@ -70,7 +70,6 @@ export function initializeMapbox(config: Partial<MapboxConfig> = {}): void {
   const finalConfig = { ...mapboxConfig, ...config };
 
   if (!finalConfig.accessToken) {
-    console.log('Mapbox initialized without access token');
     return;
   }
 
