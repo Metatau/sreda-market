@@ -40,7 +40,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
     
     if (!mapboxToken) {
-      console.error('Mapbox access token is required');
+      console.warn('Mapbox access token not configured');
       // Показываем fallback UI вместо карты
       setMapLoaded(true);
       return;
