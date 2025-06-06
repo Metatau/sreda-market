@@ -121,7 +121,7 @@ router.post('/polygons',
   async (req: AuthenticatedRequest, res) => {
     try {
       const { name, coordinates, color, description } = req.body;
-      const userId = parseInt(req.user!.id);
+      const userId = String(req.user!.id);
 
       const polygon = {
         id: Date.now(),
@@ -157,7 +157,7 @@ router.get('/polygons',
   requireAuth,
   async (req: AuthenticatedRequest, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = String(req.user!.id);
       const polygons: any[] = [];
 
       res.json({
@@ -181,7 +181,7 @@ router.post('/polygons/:polygonId/analyze',
   async (req: AuthenticatedRequest, res) => {
     try {
       const polygonId = parseInt(req.params.polygonId);
-      const userId = parseInt(req.user!.id);
+      const userId = String(req.user!.id);
       
       if (isNaN(polygonId)) {
         return res.status(400).json({
@@ -219,7 +219,7 @@ router.delete('/polygons/:polygonId',
   async (req: AuthenticatedRequest, res) => {
     try {
       const polygonId = parseInt(req.params.polygonId);
-      const userId = req.user!.id;
+      const userId = String(req.user!.id);
       
       if (isNaN(polygonId)) {
         return res.status(400).json({
