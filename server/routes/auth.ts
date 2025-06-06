@@ -102,7 +102,7 @@ router.post('/login', async (req: RequestWithSession, res) => {
 });
 
 // Register endpoint
-router.post('/register', async (req, res) => {
+router.post('/register', async (req: RequestWithSession, res) => {
   try {
     const data = registerSchema.parse(req.body);
     
@@ -118,7 +118,7 @@ router.post('/register', async (req, res) => {
     const user = await AuthService.register(data);
     
     // Set session
-    (req.session as any).userId = user.id;
+    req.session.userId = user.id;
     
     res.status(201).json({
       success: true,
@@ -147,7 +147,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Telegram authentication endpoint
-router.post('/telegram', async (req, res) => {
+router.post('/telegram', async (req: RequestWithSession, res) => {
   try {
     const { initDataRaw, hash } = telegramAuthSchema.parse(req.body);
     
@@ -194,7 +194,7 @@ router.post('/telegram', async (req, res) => {
     }
 
     // Set session
-    (req.session as any).userId = user.id;
+    req.session.userId = user.id;
 
     res.json({
       success: true,
@@ -223,8 +223,8 @@ router.post('/telegram', async (req, res) => {
 });
 
 // Logout endpoint
-router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
+router.post('/logout', (req: RequestWithSession, res) => {
+  req.session.destroy((err: any) => {
     if (err) {
       console.error('Logout error:', err);
       return res.status(500).json({ 
@@ -238,8 +238,8 @@ router.post('/logout', (req, res) => {
 });
 
 // Status endpoint
-router.get('/status', async (req, res) => {
-  const userId = (req.session as any)?.userId;
+router.get('/status', async (req: RequestWithSession, res) => {
+  const userId = req.session?.userId;
   
   if (!userId) {
     return res.json({ authenticated: false });
