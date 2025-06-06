@@ -26,6 +26,7 @@ import {
   Palette
 } from 'lucide-react';
 import type { Property, Region } from '@/types';
+import { MapPerformanceIndicator } from './MapPerformanceIndicator';
 
 interface MapBounds {
   north: number;
@@ -111,6 +112,12 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
   const [isDrawingPolygon, setIsDrawingPolygon] = useState(false);
   const [polygonPoints, setPolygonPoints] = useState<Array<{ lat: number; lng: number }>>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  
+  // Performance tracking
+  const [performanceData, setPerformanceData] = useState<{
+    heatmap?: { cached: boolean; source: string };
+    infrastructure?: { cached: boolean; source: string };
+  }>({});
 
   // API queries
   const { data: heatmapData } = useQuery({
@@ -126,7 +133,19 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
       });
       return fetch(`/api/map/heatmap?${params}`, {
         credentials: 'include'
-      }).then(res => res.json());
+      }).then(res => res.json()).then(data => {
+        // Track performance data
+        if (data.success) {
+          setPerformanceData(prev => ({
+            ...prev,
+            heatmap: {
+              cached: data.cached || false,
+              source: data.source || 'unknown'
+            }
+          }));
+        }
+        return data;
+      });
     },
     enabled: heatmapType !== 'none'
   });
@@ -142,7 +161,19 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
       });
       return fetch(`/api/map/infrastructure?${params}`, {
         credentials: 'include'
-      }).then(res => res.json());
+      }).then(res => res.json()).then(data => {
+        // Track performance data
+        if (data.success) {
+          setPerformanceData(prev => ({
+            ...prev,
+            infrastructure: {
+              cached: data.cached || false,
+              source: data.source || 'unknown'
+            }
+          }));
+        }
+        return data;
+      });
     },
     enabled: showInfrastructure
   });
@@ -650,6 +681,14 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Performance Indicator */}
+      <MapPerformanceIndicator
+        heatmapPerformance={performanceData.heatmap}
+        infrastructurePerformance={performanceData.infrastructure}
+        propertiesCount={properties.length}
+        isVisible={true}
+      />
     </div>
   );
 }

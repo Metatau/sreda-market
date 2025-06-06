@@ -357,4 +357,53 @@ router.get('/transport-accessibility',
   }
 );
 
+// Get preload status (admin only)
+router.get('/preload-status',
+  mapRateLimit,
+  requireAuth,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const status = mapPreloadService.getPreloadStatus();
+      
+      res.json({
+        success: true,
+        data: status
+      });
+    } catch (error) {
+      console.error('Error fetching preload status:', error);
+      res.status(500).json({
+        success: false,
+        error: { message: 'Failed to fetch preload status' }
+      });
+    }
+  }
+);
+
+// Force preload refresh (admin only)
+router.post('/force-preload',
+  mapRateLimit,
+  requireAuth,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      console.log('Manual preload triggered by user:', req.user?.email);
+      
+      // Start preload in background
+      mapPreloadService.forcePreload().catch(err => {
+        console.error('Force preload error:', err);
+      });
+      
+      res.json({
+        success: true,
+        message: 'Preload refresh started in background'
+      });
+    } catch (error) {
+      console.error('Error triggering force preload:', error);
+      res.status(500).json({
+        success: false,
+        error: { message: 'Failed to trigger preload refresh' }
+      });
+    }
+  }
+);
+
 export default router;
