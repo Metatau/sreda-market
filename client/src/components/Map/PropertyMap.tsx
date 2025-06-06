@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AddressSearch } from './AddressSearch';
 import { createMapboxTilesetService } from '@/services/mapboxTilesets';
+import { createMapDataSourceManager } from '@/services/mapDataSources';
 import type { Property } from '@/types';
 
 // Используем глобальный объект mapboxgl из CDN
@@ -41,8 +42,9 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
   const [selectedPropertyState, setSelectedProperty] = useState<Property | null>(null);
   const [useMapboxTileset, setUseMapboxTileset] = useState(false);
   
-  // Инициализация Mapbox Tileset Service
+  // Инициализация сервисов
   const mapboxTilesetService = useRef(createMapboxTilesetService());
+  const dataSourceManager = useRef(createMapDataSourceManager());
 
   // Initialize map
   useEffect(() => {
@@ -68,17 +70,21 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     map.current.on('load', async () => {
       setMapLoaded(true);
       
-      // Проверяем доступность Mapbox tileset
-      if (mapboxTilesetService.current) {
-        try {
-          const isReady = await mapboxTilesetService.current.isTilesetReady();
-          if (isReady) {
-            setUseMapboxTileset(true);
-            console.log('Mapbox tileset available, using cloud-hosted tiles');
-          }
-        } catch (error) {
-          console.warn('Mapbox tileset not available, falling back to local data');
+      // Инициализируем гибридную систему источников данных
+      try {
+        await dataSourceManager.current.initializeDataSources(map.current);
+        const status = dataSourceManager.current.getStatus();
+        
+        if (status.activeSource === 'vector') {
+          setUseMapboxTileset(true);
+          console.log('Using vector tiles source');
+        } else if (status.activeSource === 'geojson') {
+          console.log('Using GeoJSON API source');
+        } else {
+          console.warn('No data sources available');
         }
+      } catch (error) {
+        console.error('Failed to initialize data sources:', error);
       }
     });
 
