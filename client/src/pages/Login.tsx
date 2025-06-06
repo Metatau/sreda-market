@@ -37,13 +37,8 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(loginForm),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const res = await apiRequest('POST', '/api/auth/login', loginForm);
+      const response = await res.json();
 
       if (response.success) {
         toast({
@@ -94,13 +89,8 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(registerForm),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const res = await apiRequest('POST', '/api/auth/register', registerForm);
+      const response = await res.json();
 
       if (response.success) {
         toast({
