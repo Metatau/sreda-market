@@ -55,28 +55,26 @@ export const TelegramLoginWidget = ({
   const initializeTelegramWidget = (username: string) => {
     if (!containerRef.current) return;
 
-    // Проверяем, если это домен sreda.market или верифицированный Replit домен - используем полноценный виджет
-    // Для других доменов показываем информационную кнопку
+    // Проверяем верифицированные домены
     const isVerifiedDomain = window.location.hostname.includes('sreda.market') || 
                            window.location.hostname.includes('1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev');
     
     if (!isVerifiedDomain) {
       containerRef.current.innerHTML = `
-        <button 
-          onclick="alert('Telegram вход настроен для домена sreda.market.\\n\\nТекущий домен: ${window.location.hostname}\\n\\nДля полной функциональности используйте основной домен.')"
-          class="bg-[#0088cc] hover:bg-[#006699] text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 6.728-.896 6.728-.375 2.655-1.396 3.118-2.286 3.251-.446.066-.8.12-1.061.12-.502 0-.888-.192-1.177-.387-.2-.136-.357-.27-.467-.344l-3.35-2.671-.01-.01c-.436-.346-.618-.859-.618-1.379 0-.52.182-1.033.618-1.379l3.35-2.671c.11-.074.267-.208.467-.344.289-.195.675-.387 1.177-.387.261 0 .615.054 1.061.12.89.133 1.911.596 2.286 3.251 0 0 .727 4.87.896 6.728z"/>
-          </svg>
-          Войти через Telegram
-        </button>
+        <div class="bg-gray-100 border border-gray-300 rounded-lg p-4 text-center">
+          <p class="text-sm text-gray-600 mb-2">Telegram вход доступен только на верифицированных доменах</p>
+          <p class="text-xs text-gray-500">Текущий домен: ${window.location.hostname}</p>
+        </div>
       `;
       return;
     }
 
-    // Согласно документации Telegram, используем auth_url для callback
-    const authUrl = `${window.location.origin}/api/auth/telegram`;
+    // Очищаем контейнер
+    containerRef.current.innerHTML = '';
+
+    // Создаем div для виджета
+    const widgetContainer = document.createElement('div');
+    widgetContainer.id = 'telegram-login-' + username;
     
     // Создаем скрипт для Telegram Login Widget
     const script = document.createElement('script');
@@ -85,12 +83,24 @@ export const TelegramLoginWidget = ({
     script.setAttribute('data-telegram-login', username);
     script.setAttribute('data-size', buttonSize);
     script.setAttribute('data-radius', cornerRadius.toString());
-    script.setAttribute('data-auth-url', authUrl);
+    script.setAttribute('data-auth-url', `${window.location.origin}/api/auth/telegram`);
     script.setAttribute('data-request-access', requestAccess);
 
-    // Очищаем контейнер и добавляем скрипт
-    containerRef.current.innerHTML = '';
+    // Добавляем элементы в контейнер
+    containerRef.current.appendChild(widgetContainer);
     containerRef.current.appendChild(script);
+
+    // Добавляем обработчик ошибок загрузки
+    script.onerror = () => {
+      if (containerRef.current) {
+        containerRef.current.innerHTML = `
+          <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
+            <p class="text-sm text-red-600">Ошибка загрузки Telegram виджета</p>
+            <p class="text-xs text-red-500 mt-1">Проверьте подключение к интернету</p>
+          </div>
+        `;
+      }
+    };
   };
 
   const handleTelegramAuth = async (user: any) => {
