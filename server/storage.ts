@@ -219,7 +219,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(properties.createdAt));
 
     const queryResults = pagination 
-      ? await baseQuery.limit(pagination.perPage).offset((pagination.page - 1) * pagination.perPage)
+      ? await baseQuery.limit(pagination.limit).offset((pagination.page - 1) * pagination.limit)
       : await baseQuery.limit(100);
 
     const propertiesWithRelations: PropertyWithRelations[] = queryResults.map(result => ({

@@ -910,7 +910,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // 1. Получение существующих объектов
       console.log('Этап 1: Получение существующих объектов...');
-      const { properties: existingProperties } = await storage.getProperties({}, { page: 1, perPage: 10 });
+      const { properties: existingProperties } = await storage.getProperties({}, { page: 1, limit: 10 });
       console.log(`Найдено объектов в базе: ${existingProperties.length}`);
       
       // 2. Валидация объектов (проверка обязательных полей и качества данных)
@@ -1060,6 +1060,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Mount insights routes
+  app.use("/api/insights", insightsRoutes);
 
   // Global error handler
   app.use(globalErrorHandler);
