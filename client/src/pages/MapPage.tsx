@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { PropertyMap } from "@/components/Map/PropertyMap";
-import { PropertyFilters } from "@/components/Property/PropertyFilters";
+import { PropertyFilters as PropertyFiltersComponent } from "@/components/Property/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useProperties, useRegions } from "@/hooks/useProperties";
-import type { Property, PropertyFilters as PropertyFiltersType } from "@/types";
+import type { Property, SearchFilters } from "@/types";
 
 export default function MapPage() {
-  const [filters, setFilters] = useState<PropertyFiltersType>({});
+  const [filters, setFilters] = useState<SearchFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [mapLayers, setMapLayers] = useState({
@@ -24,8 +24,8 @@ export default function MapPage() {
   });
 
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 20);
-  const properties = propertiesData?.data?.properties || [];
-  const pagination = propertiesData?.data?.pagination;
+  const properties = propertiesData?.properties || [];
+  const pagination = propertiesData?.pagination;
 
   const handlePropertyClick = (property: Property) => {
     setSelectedProperty(property);
@@ -49,7 +49,7 @@ export default function MapPage() {
           {/* Filters Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Main Filters */}
-            <PropertyFilters
+            <PropertyFiltersComponent
               filters={filters}
               onFiltersChange={setFilters}
             />
@@ -208,7 +208,7 @@ export default function MapPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {properties.map((property) => (
+                    {properties.map((property: Property) => (
                       <div key={property.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
