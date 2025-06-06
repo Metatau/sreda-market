@@ -21,7 +21,7 @@ import { corsMiddleware } from "./middleware/cors";
 import { generalRateLimit, authRateLimit, aiRateLimit, apiRateLimit } from "./middleware/rateLimiting";
 import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, chatMessageSchema, investmentAnalysisSchema } from "./validation/schemas";
 import { imageRoutes } from "./routes/imageRoutes";
-import { mapRoutes } from "./routes/mapRoutes";
+import mapRoutes from "./routes/mapRoutes";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
