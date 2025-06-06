@@ -14,7 +14,7 @@ import { CookieConsent } from "@/components/CookieConsent";
 import { Suspense, lazy } from "react";
 
 // Lazy load страниц для оптимизации
-const LandingPage = lazy(() => import("@/pages/LandingPage"));
+const Landing = lazy(() => import("@/pages/Landing"));
 const InvestmentAnalyticsDemo = lazy(() => import("@/pages/InvestmentAnalyticsDemo"));
 const InsightsPage = lazy(() => import("@/pages/InsightsPage"));
 const Favorites = lazy(() => import("@/pages/Favorites").then(module => ({ default: module.Favorites })));
@@ -73,7 +73,7 @@ function Router() {
             </ErrorBoundary>
           </AuthProvider>
         ) : (
-          <Route path="/" component={LandingPage} />
+          <Route path="/" component={Landing} />
         )}
         
         {/* 404 страница */}

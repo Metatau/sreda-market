@@ -284,7 +284,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName,
           lastName,
           telegramId,
-          role: 'client'
+          role: 'client',
+          referralCode: ''
         });
       }
 

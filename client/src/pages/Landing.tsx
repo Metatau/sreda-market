@@ -1,0 +1,369 @@
+import { useState } from 'react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield } from 'lucide-react';
+
+export default function Landing() {
+  const [email, setEmail] = useState('');
+  const [timeLeft, setTimeLeft] = useState('07:59:32');
+
+  // Таймер обратного отсчета
+  useState(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const endTime = now + (7 * 60 + 59) * 1000; // 7:59
+      const distance = endTime - now;
+      
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      
+      setTimeLeft(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  });
+
+  const features = [
+    {
+      icon: <MapPin className="h-8 w-8 text-blue-600" />,
+      title: "Поиск объектов",
+      description: "Фильтры по 25+ параметрам для точного поиска недвижимости",
+      details: "Площадь, район, цена, доходность, ликвидность и многое другое"
+    },
+    {
+      icon: <TrendingUp className="h-8 w-8 text-green-600" />,
+      title: "ROI калькулятор", 
+      description: "Динамический расчёт доходности в реальном времени",
+      details: "Учет всех расходов, налогов и прогноз на 3 года"
+    },
+    {
+      icon: <Bot className="h-8 w-8 text-purple-600" />,
+      title: "AI-советник",
+      description: "Персональные рекомендации на базе ChatGPT",
+      details: "Анализ рынка, оценка рисков и инвестиционные стратегии"
+    },
+    {
+      icon: <Map className="h-8 w-8 text-orange-600" />,
+      title: "Геоаналитика",
+      description: "Анализ инфраструктуры и потенциала развития",
+      details: "Транспорт, школы, больницы, планы застройки"
+    }
+  ];
+
+  const plans = [
+    {
+      name: "Базовый",
+      price: "₽2,990",
+      period: "/месяц",
+      features: [
+        { name: "AI-запросов/день", basic: "10", premium: false },
+        { name: "Глубина анализа", basic: "1 год", premium: false },
+        { name: "Экспорт в Excel", basic: false, premium: false },
+        { name: "API доступ", basic: false, premium: false },
+        { name: "Поддержка 24/7", basic: true, premium: false },
+        { name: "Мобильное приложение", basic: true, premium: false }
+      ]
+    },
+    {
+      name: "Премиум",
+      price: "₽7,990",
+      period: "/месяц",
+      popular: true,
+      features: [
+        { name: "AI-запросов/день", basic: "10", premium: "∞" },
+        { name: "Глубина анализа", basic: "1 год", premium: "3 года" },
+        { name: "Экспорт в Excel", basic: false, premium: true },
+        { name: "API доступ", basic: false, premium: true },
+        { name: "Поддержка 24/7", basic: true, premium: true },
+        { name: "Мобильное приложение", basic: true, premium: true }
+      ]
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      {/* Навигация */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">S</span>
+              </div>
+              <span className="text-xl font-bold text-gray-900">SREDA MARKET</span>
+            </div>
+            
+            <nav className="hidden md:flex space-x-8">
+              <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">
+                Возможности
+              </a>
+              <a href="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">
+                Тарифы
+              </a>
+            </nav>
+
+            <Link href="/login">
+              <Button variant="outline" className="hover:bg-blue-50">
+                Вход / Регистрация
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero секция */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            AI платформа для поиска{' '}
+            <span className="text-blue-600">инвестиционной недвижимости</span>
+          </h1>
+          
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            AI-анализ 15,000+ объектов в реальном времени. 
+            Находите выгодные инвестиции за минуты, а не месяцы.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
+              Начать поиск
+            </Button>
+            <Button variant="outline" size="lg" className="text-lg px-8 py-3">
+              Смотреть демо
+            </Button>
+          </div>
+
+          {/* 3D визуализация тепловой карты */}
+          <div className="relative max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 rounded-2xl p-8 shadow-2xl">
+              <div className="grid grid-cols-6 gap-2 h-64">
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-lg opacity-80 hover:opacity-100 transition-all cursor-pointer transform hover:scale-105 ${
+                      i % 4 === 0 ? 'bg-red-400' :
+                      i % 4 === 1 ? 'bg-yellow-400' :
+                      i % 4 === 2 ? 'bg-green-400' : 'bg-blue-400'
+                    }`}
+                    style={{
+                      height: `${Math.random() * 60 + 40}%`,
+                      marginTop: `${Math.random() * 20}%`
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="mt-4 text-sm text-gray-600">
+                Интерактивная тепловая карта цен по районам Москвы
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Возможности платформы */}
+      <section id="features" className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Возможности платформы
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Полный набор инструментов для профессионального анализа недвижимости
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
+                <CardHeader className="text-center">
+                  <div className="mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-gray-600 mb-3">{feature.description}</p>
+                  <p className="text-sm text-gray-500">{feature.details}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Тарифные планы */}
+      <section id="pricing" className="py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Тарифные планы
+            </h2>
+            <p className="text-xl text-gray-600">
+              Выберите подходящий план для ваших инвестиций
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {plans.map((plan, index) => (
+              <Card key={index} className={`relative ${plan.popular ? 'ring-2 ring-blue-600 shadow-xl' : 'shadow-lg'}`}>
+                {plan.popular && (
+                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600">
+                    Популярный
+                  </Badge>
+                )}
+                
+                <CardHeader className="text-center pb-8">
+                  <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
+                  <div className="text-4xl font-bold text-blue-600">
+                    {plan.price}
+                    <span className="text-lg text-gray-600 font-normal">{plan.period}</span>
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="space-y-4 mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <div key={featureIndex} className="flex items-center justify-between">
+                        <span className="text-gray-700">{feature.name}</span>
+                        <div className="flex items-center">
+                          {index === 0 ? (
+                            typeof feature.basic === 'boolean' ? (
+                              feature.basic ? (
+                                <Check className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <X className="h-5 w-5 text-gray-400" />
+                              )
+                            ) : (
+                              <span className="text-sm text-gray-600">{feature.basic}</span>
+                            )
+                          ) : (
+                            typeof feature.premium === 'boolean' ? (
+                              feature.premium ? (
+                                <Check className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <X className="h-5 w-5 text-gray-400" />
+                              )
+                            ) : (
+                              <span className="text-sm text-blue-600 font-semibold">{feature.premium}</span>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button 
+                    className={`w-full ${
+                      plan.popular 
+                        ? 'bg-blue-600 hover:bg-blue-700' 
+                        : 'bg-gray-800 hover:bg-gray-900'
+                    }`}
+                    size="lg"
+                  >
+                    Выбрать план
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Финальный CTA */}
+      <section className="py-20 bg-blue-600 text-white">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold mb-4">
+            Получите персональный отчёт
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Анализ лучших инвестиционных объектов в вашем регионе
+          </p>
+
+          {/* Таймер */}
+          <div className="bg-white/10 rounded-lg p-6 mb-8 max-w-md mx-auto">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <Clock className="h-5 w-5" />
+              <span className="text-sm">Предложение действует</span>
+            </div>
+            <div className="text-3xl font-bold font-mono">{timeLeft}</div>
+          </div>
+
+          {/* Форма */}
+          <div className="max-w-md mx-auto">
+            <div className="flex gap-2 mb-4">
+              <Input
+                type="email"
+                placeholder="Ваш email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-white text-gray-900"
+              />
+              <Button variant="secondary" size="lg" className="px-8">
+                Получить
+              </Button>
+            </div>
+            
+            <div className="flex items-center justify-center space-x-2 text-sm text-blue-100">
+              <Shield className="h-4 w-4" />
+              <span>30 дней возврата средств</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">S</span>
+                </div>
+                <span className="text-xl font-bold">SREDA MARKET</span>
+              </div>
+              <p className="text-gray-400">
+                AI платформа для поиска инвестиционной недвижимости
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Продукт</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white">Возможности</a></li>
+                <li><a href="#" className="hover:text-white">Тарифы</a></li>
+                <li><a href="#" className="hover:text-white">API</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4">Поддержка</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white">Документация</a></li>
+                <li><a href="#" className="hover:text-white">Контакты</a></li>
+                <li><a href="#" className="hover:text-white">FAQ</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4">Компания</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white">О нас</a></li>
+                <li><a href="#" className="hover:text-white">Блог</a></li>
+                <li><a href="#" className="hover:text-white">Карьера</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2025 SREDA MARKET. Все права защищены.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
