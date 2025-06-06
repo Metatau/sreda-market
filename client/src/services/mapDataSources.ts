@@ -32,22 +32,27 @@ export class MapDataSourceManager {
    * Инициализация источников данных на карте
    */
   async initializeDataSources(map: any): Promise<void> {
-    this.map = map;
+    try {
+      this.map = map;
 
-    // Проверяем доступность векторных тайлов
-    if (this.config.preferVectorTiles) {
-      await this.checkVectorTilesAvailability();
-    }
+      // Проверяем доступность векторных тайлов
+      if (this.config.preferVectorTiles) {
+        await this.checkVectorTilesAvailability();
+      }
 
-    // Настраиваем GeoJSON источник
-    await this.setupGeoJSONSource();
+      // Настраиваем GeoJSON источник
+      await this.setupGeoJSONSource();
 
-    // Выбираем оптимальный источник
-    this.selectActiveSource();
+      // Выбираем оптимальный источник
+      this.selectActiveSource();
 
-    // Настраиваем автообновление для GeoJSON
-    if (this.config.updateInterval && this.status.activeSource === 'geojson') {
-      this.startAutoUpdate();
+      // Настраиваем автообновление для GeoJSON
+      if (this.config.updateInterval && this.status.activeSource === 'geojson') {
+        this.startAutoUpdate();
+      }
+    } catch (error) {
+      console.warn('Data source initialization failed, using fallback mode');
+      this.status.activeSource = 'none';
     }
   }
 

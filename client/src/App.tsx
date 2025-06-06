@@ -7,6 +7,8 @@ import { UserProvider, useUser } from "@/contexts/UserContext";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { AIChat } from "@/components/AIChat";
 import { YandexMetrika } from "@/components/YandexMetrika";
+import { setupGlobalErrorHandling } from "@/lib/errorHandling";
+import React from "react";
 import { CookieConsent } from "@/components/CookieConsent";
 import Home from "@/pages/Home";
 import MapPage from "@/pages/MapPage";
@@ -73,6 +75,11 @@ function Router() {
 }
 
 function App() {
+  // Инициализация глобальной обработки ошибок
+  React.useEffect(() => {
+    setupGlobalErrorHandling();
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>

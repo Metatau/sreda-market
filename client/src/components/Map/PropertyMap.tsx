@@ -6,7 +6,7 @@ import { AddressSearch } from './AddressSearch';
 import { createMapboxTilesetService } from '@/services/mapboxTilesets';
 import { createMapDataSourceManager } from '@/services/mapDataSources';
 import { createMapDrawingService, type DrawnArea } from '@/services/mapDrawing';
-import { initializeMapbox, createOptimizedMapInstance, preloadCityTiles } from '@/config/mapbox';
+import { safePromise } from '@/lib/errorHandling';
 import { createPerformanceMonitor, mapOptimizations } from '@/utils/mapPerformance';
 import { 
   trackMapEvent, 
@@ -100,31 +100,24 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         console.warn('Failed to track map load event:', error);
       }
       
-      // Инициализируем гибридную систему источников данных
-      try {
-        await dataSourceManager.current.initializeDataSources(map.current);
+      // Инициализируем гибридную систему источников данных безопасно
+      const initResult = await safePromise(
+        dataSourceManager.current.initializeDataSources(map.current)
+      );
+      
+      if (initResult) {
         const status = dataSourceManager.current.getStatus();
         
         if (status.activeSource === 'vector') {
           setUseMapboxTileset(true);
-          try {
-            trackMapEvent('data_source_initialized', { source: 'vector_tiles' });
-          } catch (error) {
-            console.warn('Failed to track data source event:', error);
-          }
+          await safePromise(trackMapEvent('data_source_initialized', { source: 'vector_tiles' }));
           console.log('Using vector tiles source');
         } else if (status.activeSource === 'geojson') {
-          try {
-            trackMapEvent('data_source_initialized', { source: 'geojson_api' });
-          } catch (error) {
-            console.warn('Failed to track data source event:', error);
-          }
+          await safePromise(trackMapEvent('data_source_initialized', { source: 'geojson_api' }));
           console.log('Using GeoJSON API source');
         } else {
-          console.warn('No data sources available');
+          console.log('Using fallback data display');
         }
-      } catch (error) {
-        console.error('Failed to initialize data sources:', error);
       }
 
       // Инициализируем инструменты рисования
