@@ -315,6 +315,7 @@ export class AdsApiService {
   }
 
   private isRentalProperty(adsProperty: AdsApiProperty): boolean {
+    // РАСШИРЕННЫЙ список ключевых слов для блокировки аренды
     const rentalKeywords = [
       'аренда', 'сдам', 'сдается', 'сдаю', 'снять', 'сниму', 'снимем',
       'арендовать', 'арендую', 'в аренду', 'долгосрочная аренда',
@@ -323,24 +324,39 @@ export class AdsApiService {
       'в месяц', '/мес', 'помесячно', 'ежемесячно', 'за месяц',
       'руб/мес', 'руб./мес', 'р/мес', 'р./мес', '₽/мес', '₽./мес',
       'тыс.руб/мес', 'тысяч в месяц', 'тыс/мес', 'тыс в месяц',
-      'сдаётся', 'сдается в аренду', 'для аренды', 'под аренду'
+      'сдаётся', 'сдается в аренду', 'для аренды', 'под аренду',
+      'квартиросъемщик', 'квартиросъёмщик', 'снимаю', 'ищу квартиру',
+      'на длительный период', 'долгосрочно', 'семейная пара снимет',
+      'сдается комната', 'сдаю комнату', 'комната в аренду',
+      '₽ в месяц', 'рублей в месяц', 'тысяч рублей в месяц'
     ];
 
     const title = (adsProperty.title || '').toLowerCase();
     const description = (adsProperty.description || '').toLowerCase();
     const url = (adsProperty.url || '').toLowerCase();
-    const fullText = `${title} ${description} ${url}`;
+    const category = (adsProperty.category || '').toLowerCase();
+    const fullText = `${title} ${description} ${url} ${category}`;
 
-    // Проверяем наличие слов указывающих на аренду
+    // СТРОГАЯ проверка на наличие слов указывающих на аренду
     const hasRentalKeywords = rentalKeywords.some(keyword => 
       fullText.includes(keyword.toLowerCase())
     );
 
-    // Проверяем цену - аренда обычно дешевле продажи
-    const price = adsProperty.price || 0;
-    const suspiciouslyLowPrice = price < 500000; // Меньше 500k руб. может быть аренда
+    // Проверяем категорию в данных API
+    if (category.includes('аренда') || category.includes('rent') || category.includes('сдам')) {
+      return true;
+    }
 
-    return hasRentalKeywords || (suspiciouslyLowPrice && !fullText.includes('продажа') && !fullText.includes('продам'));
+    // Проверяем подозрительно низкую цену (менее 800,000 руб. для квартир)
+    const price = adsProperty.price || 0;
+    const suspiciouslyLowPrice = price < 800000;
+
+    // Ключевые слова продажи для исключения
+    const saleKeywords = ['продам', 'продается', 'продажа', 'купить', 'приобрести', 'собственность'];
+    const hasSaleKeywords = saleKeywords.some(keyword => fullText.includes(keyword));
+
+    // Если есть признаки аренды ИЛИ подозрительно низкая цена без явных признаков продажи
+    return hasRentalKeywords || (suspiciouslyLowPrice && !hasSaleKeywords);
   }
 
   determineMarketType(adsProperty: AdsApiProperty): 'secondary' | 'new_construction' {
@@ -671,6 +687,13 @@ export class AdsApiService {
           const isRental = this.isRentalProperty(adsProperty);
           if (isRental) {
             console.log(`Skipping property ${adsProperty.id}: detected as rental property`);
+            continue;
+          }
+
+          // ОБЯЗАТЕЛЬНАЯ ПРОВЕРКА: наличие изображений
+          const hasValidImages = this.extractValidImages(adsProperty).length > 0;
+          if (!hasValidImages) {
+            console.log(`Skipping property ${adsProperty.id}: no valid images found`);
             continue;
           }
 

@@ -17,8 +17,8 @@ export class MockDataService {
       totalFloors: 8,
       address: "г. Москва, ул. Тверская, д. 15",
       coordinates: "POINT(37.6156 55.7558)",
-      imageUrl: "https://via.placeholder.com/800x600/4285f4/ffffff?text=Квартира+в+Москве",
-      images: ["https://via.placeholder.com/800x600/4285f4/ffffff?text=Гостиная", "https://via.placeholder.com/800x600/34a853/ffffff?text=Кухня"],
+      imageUrl: null,
+      images: [],
       propertyType: "квартира",
       marketType: "secondary",
       source: "demo-data",
@@ -38,8 +38,8 @@ export class MockDataService {
       totalFloors: 10,
       address: "г. Санкт-Петербург, Невский проспект, д. 42",
       coordinates: "POINT(30.3141 59.9311)",
-      imageUrl: "https://via.placeholder.com/800x600/ea4335/ffffff?text=СПб+Квартира",
-      images: ["https://via.placeholder.com/800x600/ea4335/ffffff?text=Зал", "https://via.placeholder.com/800x600/fbbc04/ffffff?text=Спальня"],
+      imageUrl: null,
+      images: [],
       propertyType: "квартира",
       marketType: "secondary",
       source: "demo-data",
@@ -59,8 +59,8 @@ export class MockDataService {
       totalFloors: 20,
       address: "г. Екатеринбург, ул. Ленина, д. 8",
       coordinates: "POINT(60.6057 56.8431)",
-      imageUrl: "https://via.placeholder.com/800x600/9c27b0/ffffff?text=Екб+Студия",
-      images: ["https://via.placeholder.com/800x600/9c27b0/ffffff?text=Комната", "https://via.placeholder.com/800x600/ff9800/ffffff?text=Кухня"],
+      imageUrl: null,
+      images: [],
       propertyType: "квартира",
       marketType: "new_construction",
       source: "demo-data",
@@ -112,8 +112,9 @@ export class MockDataService {
             
             // Автоматически рассчитываем инвестиционный рейтинг
             try {
-              const { schedulerService } = await import('./schedulerService');
-              await schedulerService.calculatePropertyAnalytics(newProperty.id);
+              const schedulerModule = await import('./schedulerService');
+              const schedulerInstance = new schedulerModule.SchedulerService();
+              await schedulerInstance.calculatePropertyAnalytics(newProperty.id);
               console.log(`Investment analytics calculated for demo property ${newProperty.id}`);
             } catch (analyticsError) {
               console.error(`Failed to calculate analytics for demo property ${newProperty.id}:`, analyticsError);
