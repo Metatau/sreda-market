@@ -4,8 +4,8 @@ import mapboxgl from 'mapbox-gl';
 /**
  * Создание базового стиля карты без Mapbox токена
  */
-export const createBasicMapStyle = () => ({
-  version: 8,
+export const createBasicMapStyle = (): any => ({
+  version: 8 as const,
   sources: {
     'raster-tiles': {
       type: 'raster',
@@ -48,12 +48,12 @@ export const safeMapboxInit = (
 ): mapboxgl.Map => {
   const { center, zoom, accessToken } = options;
   
-  // Если токен есть, используем стандартный стиль Mapbox
+  // Если токен есть, используем кастомный стиль SREDA Market
   if (accessToken) {
     mapboxgl.accessToken = accessToken;
     return new mapboxgl.Map({
       container,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: 'mapbox://styles/metatau/cmbkg51ya00op01s57nc41f8q',
       center,
       zoom,
       preserveDrawingBuffer: true

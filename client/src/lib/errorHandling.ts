@@ -40,7 +40,7 @@ export class GlobalErrorHandler {
     console.log('Global error handling initialized');
   }
 
-  private handleError(error: Error, context: Record<string, any> = {}): void {
+  public handleError(error: Error, context: Record<string, any> = {}): void {
     // Фильтруем известные безопасные ошибки
     if (this.isSafeError(error)) {
       return;

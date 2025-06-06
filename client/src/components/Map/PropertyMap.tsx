@@ -73,18 +73,35 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       return;
     }
 
-    // Инициализация Mapbox с оптимизациями
-    initializeMapbox({ accessToken: mapboxToken });
-
-    // Создание оптимизированной карты с предзагрузкой тайлов
-    map.current = createOptimizedMapInstance(
-      mapContainer.current,
-      {
-        defaultCenter: [60.6122, 56.8431], // Екатеринбург
-        defaultZoom: 11
+    // Создаем карту с правильным стилем
+    const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+    
+    if (accessToken) {
+      mapboxgl.accessToken = accessToken;
+    }
+    
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: accessToken ? 'mapbox://styles/metatau/cmbkg51ya00op01s57nc41f8q' : {
+        version: 8 as const,
+        sources: {
+          'osm': {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '© OpenStreetMap contributors'
+          }
+        },
+        layers: [{
+          id: 'osm',
+          type: 'raster',
+          source: 'osm'
+        }]
       },
-      true // Включить предзагрузку тайлов
-    );
+      center: center,
+      zoom: zoom,
+      preserveDrawingBuffer: true
+    });
 
     map.current.on('load', async () => {
       const loadStartTime = performance.now();
@@ -110,10 +127,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         
         if (status.activeSource === 'vector') {
           setUseMapboxTileset(true);
-          await safePromise(trackMapEvent('data_source_initialized', { source: 'vector_tiles' }));
+          safePromise(Promise.resolve(trackMapEvent('data_source_initialized', { source: 'vector_tiles' })));
           console.log('Using vector tiles source');
         } else if (status.activeSource === 'geojson') {
-          await safePromise(trackMapEvent('data_source_initialized', { source: 'geojson_api' }));
+          safePromise(Promise.resolve(trackMapEvent('data_source_initialized', { source: 'geojson_api' })));
           console.log('Using GeoJSON API source');
         } else {
           console.log('Using fallback data display');
