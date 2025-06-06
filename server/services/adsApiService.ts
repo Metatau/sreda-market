@@ -48,7 +48,7 @@ export class AdsApiService {
   constructor() {
     this.baseUrl = 'https://ads-api.ru/main';
     this.apiKey = process.env.ADS_API_KEY || '1699b3bd91f1529aaeb9797a951cde4b';
-    this.userEmail = process.env.ADS_API_LOGIN || '';
+    this.userEmail = process.env.ADS_API_EMAIL || '';
 
     console.log('ADS API Configuration:');
     console.log('Base URL:', this.baseUrl);
