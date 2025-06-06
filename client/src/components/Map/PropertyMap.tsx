@@ -6,7 +6,8 @@ import { AddressSearch } from './AddressSearch';
 import { createMapboxTilesetService } from '@/services/mapboxTilesets';
 import { createMapDataSourceManager } from '@/services/mapDataSources';
 import { createMapDrawingService, type DrawnArea } from '@/services/mapDrawing';
-import { initializeMapbox, createMapboxOptions } from '@/config/mapbox';
+import { initializeMapbox, createOptimizedMapInstance, preloadCityTiles } from '@/config/mapbox';
+import { createPerformanceMonitor, mapOptimizations } from '@/utils/mapPerformance';
 import type { Property } from '@/types';
 
 // Используем глобальные объекты из CDN
@@ -51,6 +52,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
   const mapboxTilesetService = useRef(createMapboxTilesetService());
   const dataSourceManager = useRef(createMapDataSourceManager());
   const drawingService = useRef(createMapDrawingService());
+  const performanceMonitor = useRef<any>(null);
 
   // Initialize map
   useEffect(() => {
@@ -67,16 +69,15 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     // Инициализация Mapbox с оптимизациями
     initializeMapbox({ accessToken: mapboxToken });
 
-    // Создание карты с оптимизированными настройками
-    const mapOptions = createMapboxOptions({
-      defaultCenter: [60.6122, 56.8431], // Екатеринбург
-      defaultZoom: 11
-    });
-
-    map.current = new window.mapboxgl.Map({
-      container: mapContainer.current,
-      ...mapOptions
-    });
+    // Создание оптимизированной карты с предзагрузкой тайлов
+    map.current = createOptimizedMapInstance(
+      mapContainer.current,
+      {
+        defaultCenter: [60.6122, 56.8431], // Екатеринбург
+        defaultZoom: 11
+      },
+      true // Включить предзагрузку тайлов
+    );
 
     map.current.on('load', async () => {
       setMapLoaded(true);

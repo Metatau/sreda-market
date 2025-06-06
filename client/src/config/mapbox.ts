@@ -168,3 +168,81 @@ export const russianCities = {
   omsk: [73.3686, 54.9893],
   rostovOnDon: [39.7015, 47.2357]
 } as const;
+
+/**
+ * Границы крупных городов для предзагрузки тайлов
+ */
+export const cityBounds = {
+  moscow: [[37.3, 55.5], [37.9, 55.9]] as [[number, number], [number, number]],
+  spb: [[30.1, 59.8], [30.6, 60.1]] as [[number, number], [number, number]],
+  ekaterinburg: [[60.4, 56.7], [60.9, 57.0]] as [[number, number], [number, number]],
+  novosibirsk: [[82.7, 54.9], [83.2, 55.2]] as [[number, number], [number, number]],
+  kazan: [[49.0, 55.7], [49.3, 55.9]] as [[number, number], [number, number]]
+} as const;
+
+/**
+ * Предзагрузка тайлов для основных городов
+ */
+export function preloadCityTiles(map: any, cities: Array<keyof typeof cityBounds> = ['moscow', 'spb']): void {
+  if (!map || typeof map.fitBounds !== 'function') {
+    console.warn('Invalid map instance for tile preloading');
+    return;
+  }
+
+  let currentIndex = 0;
+  
+  const preloadNext = () => {
+    if (currentIndex >= cities.length) {
+      console.log('Tile preloading completed for all cities');
+      return;
+    }
+
+    const cityName = cities[currentIndex];
+    const bounds = cityBounds[cityName];
+    
+    if (bounds) {
+      console.log(`Preloading tiles for ${cityName}`);
+      map.fitBounds(bounds, { 
+        duration: 0, // Мгновенный переход для предзагрузки
+        padding: 50
+      });
+      
+      currentIndex++;
+      
+      // Небольшая задержка между предзагрузками
+      setTimeout(preloadNext, 500);
+    }
+  };
+
+  // Начинаем предзагрузку через небольшую задержку после загрузки карты
+  setTimeout(preloadNext, 1000);
+}
+
+/**
+ * Оптимизированная инициализация карты с предзагрузкой
+ */
+export function createOptimizedMapInstance(
+  container: HTMLElement, 
+  options: any = {},
+  enablePreloading: boolean = true
+): any {
+  const mapOptions = createMapboxOptions(options);
+  
+  if (!window.mapboxgl) {
+    throw new Error('Mapbox GL JS not loaded');
+  }
+
+  const map = new window.mapboxgl.Map({
+    container,
+    ...mapOptions
+  });
+
+  if (enablePreloading) {
+    map.on('load', () => {
+      // Предзагружаем тайлы для Москвы и СПб
+      preloadCityTiles(map, ['moscow', 'spb']);
+    });
+  }
+
+  return map;
+}
