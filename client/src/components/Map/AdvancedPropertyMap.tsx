@@ -112,6 +112,7 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
   const [isDrawingPolygon, setIsDrawingPolygon] = useState(false);
   const [polygonPoints, setPolygonPoints] = useState<Array<{ lat: number; lng: number }>>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [mapStyle, setMapStyle] = useState<'standard' | 'satellite' | 'dark' | 'light' | 'terrain'>('standard');
   
   // Performance tracking
   const [performanceData, setPerformanceData] = useState<{
@@ -226,9 +227,40 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
 
     const map = L.map(mapRef.current).setView([55.7558, 37.6176], 11);
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+    // Add initial tile layer
+    const getMapTiles = (style: string) => {
+      const tileConfigs = {
+        standard: {
+          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          attribution: '© OpenStreetMap contributors'
+        },
+        satellite: {
+          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          attribution: '© Esri, DigitalGlobe, GeoEye, Earthstar Geographics'
+        },
+        dark: {
+          url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+          attribution: '© Stadia Maps, © OpenMapTiles, © OpenStreetMap contributors'
+        },
+        light: {
+          url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+          attribution: '© Stadia Maps, © OpenMapTiles, © OpenStreetMap contributors'
+        },
+        terrain: {
+          url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+          attribution: '© OpenTopoMap (CC-BY-SA)'
+        }
+      };
+      return tileConfigs[style as keyof typeof tileConfigs] || tileConfigs.standard;
+    };
+
+    const tileConfig = getMapTiles(mapStyle);
+    const tileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution
     }).addTo(map);
+    
+    // Store tile layer reference for style changes
+    (map as any)._currentTileLayer = tileLayer;
 
     // Update bounds when map moves
     map.on('moveend', () => {
@@ -255,6 +287,54 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
       map.remove();
     };
   }, [mapRef, isDrawingPolygon]);
+
+  // Update map style when changed
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    const L = (window as any).L;
+    
+    const getMapTiles = (style: string) => {
+      const tileConfigs = {
+        standard: {
+          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          attribution: '© OpenStreetMap contributors'
+        },
+        satellite: {
+          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          attribution: '© Esri, DigitalGlobe, GeoEye, Earthstar Geographics'
+        },
+        dark: {
+          url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+          attribution: '© Stadia Maps, © OpenMapTiles, © OpenStreetMap contributors'
+        },
+        light: {
+          url: 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png',
+          attribution: '© Stadia Maps, © OpenMapTiles, © OpenStreetMap contributors'
+        },
+        terrain: {
+          url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+          attribution: '© OpenTopoMap (CC-BY-SA)'
+        }
+      };
+      return tileConfigs[style as keyof typeof tileConfigs] || tileConfigs.standard;
+    };
+
+    // Remove current tile layer
+    if ((mapInstance as any)._currentTileLayer) {
+      mapInstance.removeLayer((mapInstance as any)._currentTileLayer);
+    }
+
+    // Add new tile layer
+    const tileConfig = getMapTiles(mapStyle);
+    const newTileLayer = L.tileLayer(tileConfig.url, {
+      attribution: tileConfig.attribution
+    }).addTo(mapInstance);
+    
+    (mapInstance as any)._currentTileLayer = newTileLayer;
+    
+    console.log(`Map style changed to: ${mapStyle}`);
+  }, [mapInstance, mapStyle]);
 
   // Update map view when region changes
   useEffect(() => {
@@ -470,7 +550,10 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
       {/* Control Panel */}
       <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 max-w-sm">
         <Tabs defaultValue="heatmap" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="style">
+              <Palette className="w-4 h-4" />
+            </TabsTrigger>
             <TabsTrigger value="heatmap">
               <Layers className="w-4 h-4" />
             </TabsTrigger>
@@ -484,6 +567,47 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
               <BarChart3 className="w-4 h-4" />
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="style" className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Стиль карты</label>
+              <Select value={mapStyle} onValueChange={(value: any) => setMapStyle(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="standard">Стандартная</SelectItem>
+                  <SelectItem value="satellite">Спутниковая</SelectItem>
+                  <SelectItem value="dark">Тёмная</SelectItem>
+                  <SelectItem value="light">Светлая</SelectItem>
+                  <SelectItem value="terrain">Топографическая</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { key: 'standard', name: 'Стандартная', preview: 'bg-blue-100' },
+                { key: 'satellite', name: 'Спутниковая', preview: 'bg-green-800' },
+                { key: 'dark', name: 'Тёмная', preview: 'bg-gray-900' },
+                { key: 'light', name: 'Светлая', preview: 'bg-gray-50' },
+                { key: 'terrain', name: 'Рельеф', preview: 'bg-amber-100' }
+              ].map((style) => (
+                <button
+                  key={style.key}
+                  onClick={() => setMapStyle(style.key as any)}
+                  className={`p-2 rounded border text-xs text-center transition-all ${
+                    mapStyle === style.key 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className={`w-full h-8 ${style.preview} rounded mb-1`} />
+                  {style.name}
+                </button>
+              ))}
+            </div>
+          </TabsContent>
 
           <TabsContent value="heatmap" className="space-y-4">
             <div>
