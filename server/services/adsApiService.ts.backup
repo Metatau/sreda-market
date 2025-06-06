@@ -149,7 +149,7 @@ export class AdsApiService {
         console.error(`Attempt ${attempt}/${maxRetries} failed:`, lastError.message);
         
         if (attempt < maxRetries && lastError.message.includes('Rate limit exceeded')) {
-          continue;
+          continue; // Повторяем для rate limit ошибок
         }
         
         if (attempt >= maxRetries) {
@@ -723,25 +723,10 @@ export class AdsApiService {
 
   async isServiceAvailable(): Promise<boolean> {
     try {
-      if (!this.apiKey || !this.userEmail) {
-        console.log('ADS API credentials missing');
-        return false;
-      }
-      
-      // Тестируем основной API endpoint с минимальными параметрами
-      console.log('Testing ADS API availability...');
-      const response = await this.makeRequest<any>('/api', { limit: 1 });
-      
-      // Проверяем что ответ содержит ожидаемую структуру
-      const isValid = response && (
-        Array.isArray(response) || 
-        (typeof response === 'object' && response.data)
-      );
-      
-      console.log(`ADS API availability test: ${isValid ? 'SUCCESS' : 'FAILED'}`);
-      return isValid;
-    } catch (error) {
-      console.error('ADS API availability test failed:', error instanceof Error ? error.message : String(error));
+      if (!this.apiKey) return false;
+      await this.makeRequest('/health');
+      return true;
+    } catch {
       return false;
     }
   }
