@@ -18,12 +18,14 @@ export default function Login() {
   // Форма входа
   const [loginForm, setLoginForm] = useState({
     email: '',
+    password: '',
   });
 
   // Форма регистрации
   const [registerForm, setRegisterForm] = useState({
     username: '',
     email: '',
+    password: '',
     firstName: '',
     lastName: '',
     telegramHandle: '',
@@ -35,17 +37,32 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await login(loginForm.email);
-      toast({
-        title: "Успешный вход",
-        description: "Добро пожаловать в SREDA Market",
+      const response = await apiRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(loginForm),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-      // Redirect to main page after successful login
-      window.location.href = '/';
+
+      if (response.success) {
+        toast({
+          title: "Успешный вход",
+          description: "Добро пожаловать в SREDA Market",
+        });
+        // Redirect to main page after successful login
+        window.location.href = '/';
+      } else {
+        toast({
+          title: "Ошибка входа",
+          description: response.error || "Неверный email или пароль",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Ошибка входа",
-        description: "Пользователь не найден или произошла ошибка",
+        description: "Произошла ошибка при входе в систему",
         variant: "destructive",
       });
     } finally {

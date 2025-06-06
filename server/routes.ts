@@ -24,6 +24,7 @@ import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, ch
 import { imageRoutes } from "./routes/imageRoutes";
 import mapRoutes from "./routes/mapRoutes";
 import { z } from "zod";
+import { AuthService } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Global middleware
@@ -118,6 +119,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/logout", (req, res) => {
     res.json({ success: true });
+  });
+
+  // Password-based authentication routes
+  app.post("/api/auth/login", authRateLimit, async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          error: "Email и пароль обязательны"
+        });
+      }
+
+      const user = await AuthService.login({ email, password });
+      
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: "Неверный email или пароль"
+        });
+      }
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({
+        success: false,
+        error: "Ошибка входа в систему"
+      });
+    }
+  });
+
+  app.post("/api/auth/register", authRateLimit, async (req, res) => {
+    try {
+      const { username, email, password, firstName, lastName, telegramHandle, referralCode } = req.body;
+
+      if (!username || !email || !password) {
+        return res.status(400).json({
+          success: false,
+          error: "Имя пользователя, email и пароль обязательны"
+        });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          error: "Пароль должен содержать минимум 6 символов"
+        });
+      }
+
+      const user = await AuthService.register({
+        username,
+        email,
+        password,
+        firstName,
+        lastName,
+        telegramHandle,
+        referralCode
+      });
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      
+      if (error instanceof Error) {
+        if (error.message.includes('уже существует')) {
+          return res.status(409).json({
+            success: false,
+            error: error.message
+          });
+        }
+      }
+
+      res.status(500).json({
+        success: false,
+        error: "Ошибка регистрации"
+      });
+    }
   });
 
   // Region routes with caching
