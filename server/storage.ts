@@ -82,10 +82,10 @@ export interface Pagination {
 }
 
 export interface PropertyWithRelations extends Property {
-  region?: Region;
-  propertyClass?: PropertyClass;
-  analytics?: PropertyAnalytics;
-  investmentAnalytics?: InvestmentAnalytics;
+  region?: Region | null;
+  propertyClass?: PropertyClass | null;
+  analytics?: PropertyAnalytics | null;
+  investmentAnalytics?: InvestmentAnalytics | null;
 }
 
 export interface MapDataPoint {

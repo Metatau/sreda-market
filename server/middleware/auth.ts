@@ -1,48 +1,77 @@
-
 import { Request, Response, NextFunction } from 'express';
+import { storage } from '../storage';
+
+// Extend Express Request type for session
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
 
 export interface AuthenticatedRequest extends Request {
   user?: {
-    id: string;
-    name: string;
-    roles?: string;
+    id: number;
+    username: string;
+    email: string;
+    role: 'administrator' | 'client';
+    firstName?: string | null;
+    lastName?: string | null;
   };
 }
 
-export const requireAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const userId = req.headers['x-replit-user-id'] as string;
-  const userName = req.headers['x-replit-user-name'] as string;
-  const userRoles = req.headers['x-replit-user-roles'] as string;
+// Authentication middleware
+export const requireAuth = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.session?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Требуется авторизация'
+      });
+    }
 
-  if (!userId || !userName) {
-    return res.status(401).json({ 
-      error: 'Authentication required',
-      message: 'Please log in to access this resource'
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Пользователь не найден'
+      });
+    }
+
+    req.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role as 'administrator' | 'client',
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+
+    next();
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка авторизации'
     });
   }
-
-  // Add user info to request object
-  req.user = {
-    id: userId,
-    name: userName,
-    roles: userRoles || '',
-  };
-
-  next();
 };
 
-export const optionalAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const userId = req.headers['x-replit-user-id'] as string;
-  const userName = req.headers['x-replit-user-name'] as string;
-  const userRoles = req.headers['x-replit-user-roles'] as string;
+// Admin role requirement middleware
+export const requireAdmin = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  await requireAuth(req, res, () => {
+    if (req.user?.role !== 'administrator') {
+      return res.status(403).json({
+        success: false,
+        error: 'Требуются права администратора'
+      });
+    }
+    next();
+  });
+};
 
-  if (userId && userName) {
-    req.user = {
-      id: userId,
-      name: userName,
-      roles: userRoles || '',
-    };
-  }
-
-  next();
+// Role-based authentication middleware
+export const requireRoleAuth = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  await requireAuth(req, res, next);
 };
