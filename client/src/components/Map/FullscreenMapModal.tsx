@@ -366,7 +366,7 @@ export function FullscreenMapModal({
                           <label className="text-xs font-medium">Цена (₽)</label>
                           <Slider
                             value={priceRange}
-                            onValueChange={setPriceRange}
+                            onValueChange={(value) => setPriceRange(value as [number, number])}
                             min={0}
                             max={10000000}
                             step={100000}

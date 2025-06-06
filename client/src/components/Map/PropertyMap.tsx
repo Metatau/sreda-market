@@ -259,6 +259,23 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
             </div>
           </Card>
 
+          {/* Fullscreen Button */}
+          <Card className="p-2">
+            <div className="flex items-center space-x-2 mb-2">
+              <Maximize2 className="h-4 w-4" />
+              <span className="text-sm font-medium">Просмотр</span>
+            </div>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setShowFullscreenModal(true)}
+              className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <Maximize2 className="h-4 w-4" />
+              <span className="text-sm font-medium">Полный экран</span>
+            </Button>
+          </Card>
+
           {/* Map Info */}
           <Card className="p-2">
             <div className="flex items-center space-x-2">
@@ -275,19 +292,6 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                 </>
               )}
             </div>
-          </Card>
-
-          {/* Fullscreen Button */}
-          <Card className="p-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowFullscreenModal(true)}
-              className="w-full flex items-center space-x-2"
-            >
-              <Maximize2 className="h-4 w-4" />
-              <span className="text-sm">Полный экран</span>
-            </Button>
           </Card>
 
           {/* Analytics Card */}
