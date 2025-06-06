@@ -8,13 +8,10 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* О сервисе */}
           <div>
-            <h3 className="text-xl font-bold mb-4">О SREDA Market</h3>
+            <h3 className="text-xl font-bold mb-4">SREDA Market</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
               Аналитическая платформа для инвестиций в недвижимость с AI-агентом, 
               инвестиционными рейтингами, прогнозами цен и комплексным анализом рынка.
-            </p>
-            <p className="text-gray-300 text-sm mt-3">
-              Профессиональные решения для частных инвесторов и агентств недвижимости.
             </p>
           </div>
 
@@ -69,9 +66,7 @@ export function Footer() {
         <div className="border-t border-gray-700 mt-8 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
             <p>© 2025 SREDA Market. Все права защищены.</p>
-            <p className="mt-2 md:mt-0">
-              Дата публикации документов: 07 июня 2025 г.
-            </p>
+            
           </div>
         </div>
       </div>
