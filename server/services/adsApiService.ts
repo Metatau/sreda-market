@@ -548,14 +548,14 @@ export class AdsApiService {
       
       console.log('Allowed cities from database:', allowedCityNames);
 
-      // Используем параметр city согласно документации ads-api.ru
-      const citiesToSync = cities || allowedCityNames.slice(0, 3); // Ограничиваем для тестирования
+      // Загружаем ВСЕ утвержденные города (не ограничиваем для тестирования)
+      const citiesToSync = cities || allowedCityNames;
       
       for (const city of citiesToSync) {
         console.log(`Syncing properties for city: ${city}`);
         const filters = { 
           city: city,
-          limit: 10 // Ограничиваем количество для тестирования
+          limit: 100 // Увеличиваем лимит для полноценной загрузки
         };
         const response = await this.fetchProperties(filters, credentials);
 
@@ -686,9 +686,9 @@ export class AdsApiService {
             // АВТОМАТИЧЕСКИ рассчитываем инвестиционный рейтинг для нового объекта
             try {
               console.log(`Calculating investment analytics for new property ${newProperty.id}`);
-              const { investmentAnalyticsService } = await import('./investmentAnalyticsService');
-              const analytics = await investmentAnalyticsService.calculateAdvancedAnalytics(newProperty.id);
-              console.log(`Investment analytics calculated for property ${newProperty.id}: ${analytics.investmentRating}`);
+              const { schedulerService } = await import('./schedulerService');
+              await schedulerService.calculatePropertyAnalytics(newProperty.id);
+              console.log(`Investment analytics calculated for property ${newProperty.id}`);
             } catch (analyticsError) {
               console.error(`Failed to calculate analytics for property ${newProperty.id}:`, analyticsError);
               // Не прерываем загрузку, продолжаем с следующим объектом
@@ -804,22 +804,41 @@ export class AdsApiService {
   async isServiceAvailable(): Promise<boolean> {
     try {
       if (!this.apiKey || !this.userEmail) {
-        console.log('ADS API credentials missing');
+        console.log('ADS API credentials missing - API Key:', !!this.apiKey, 'Email:', !!this.userEmail);
         return false;
       }
       
       // Тестируем основной API endpoint с минимальными параметрами
-      console.log('Testing ADS API availability...');
-      const response = await this.makeRequest<any>('/api', { limit: 1 });
+      console.log('Testing ADS API availability with credentials...');
+      console.log('API Key present:', !!this.apiKey);
+      console.log('Email present:', !!this.userEmail);
       
-      // Проверяем что ответ содержит ожидаемую структуру
-      const isValid = response && (
-        Array.isArray(response) || 
-        (typeof response === 'object' && response.data)
-      );
-      
-      console.log(`ADS API availability test: ${isValid ? 'SUCCESS' : 'FAILED'}`);
-      return isValid;
+      try {
+        const response = await this.makeRequest<any>('/api', { limit: 1 });
+        
+        // Проверяем что ответ содержит ожидаемую структуру
+        const isValid = response && (
+          Array.isArray(response) || 
+          (typeof response === 'object' && response.data)
+        );
+        
+        console.log(`ADS API availability test: ${isValid ? 'SUCCESS' : 'FAILED'}`);
+        console.log('Response structure:', typeof response, Object.keys(response || {}));
+        return isValid;
+      } catch (apiError) {
+        console.error('ADS API request failed:', apiError instanceof Error ? apiError.message : String(apiError));
+        
+        // Если это ошибка аутентификации, возможно нужны обновленные ключи
+        if (apiError instanceof Error && (
+          apiError.message.includes('401') || 
+          apiError.message.includes('403') || 
+          apiError.message.includes('authentication')
+        )) {
+          console.log('Authentication error detected - credentials may be invalid');
+        }
+        
+        return false;
+      }
     } catch (error) {
       console.error('ADS API availability test failed:', error instanceof Error ? error.message : String(error));
       return false;
