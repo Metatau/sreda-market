@@ -103,8 +103,8 @@ export const TelegramLoginWidget = ({
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.setAttribute('data-telegram-login', username);
     script.setAttribute('data-size', buttonSize);
-    script.setAttribute('data-radius', cornerRadius.toString());
-    script.setAttribute('data-auth-url', `${window.location.origin}/api/auth/telegram`);
+    script.setAttribute('data-userpic', 'false');
+    script.setAttribute('data-auth-url', 'https://sreda.market/');
     script.setAttribute('data-request-access', requestAccess);
 
     console.log('Widget attributes set:', {
