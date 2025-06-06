@@ -78,6 +78,12 @@ export function createRateLimit(options: RateLimitOptions) {
   } = options;
   
   return (req: Request, res: Response, next: NextFunction) => {
+    // Skip rate limiting in development for map routes
+    if (process.env.NODE_ENV === 'development' && req.path.startsWith('/api/map/')) {
+      next();
+      return;
+    }
+    
     const identifier = keyGenerator(req);
     
     if (!rateLimiter.checkLimit(identifier, max, windowMs)) {
@@ -126,7 +132,7 @@ export const apiRateLimit = createRateLimit({
 
 export const mapRateLimit = createRateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 500, // Very high limits for map functionality
+  max: 2000, // Extremely high limits for map functionality
   message: 'Too many map requests, please slow down'
 });
 
