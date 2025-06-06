@@ -84,7 +84,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: accessToken ? 'mapbox://styles/metatau/cmbkg51ya00op01s57nc41f8q' : {
+      style: accessToken ? 'mapbox://styles/mapbox/light-v11' : {
         version: 8 as const,
         sources: {
           'osm': {
