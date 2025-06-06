@@ -19,6 +19,8 @@ import { PropertyService } from "./services/PropertyService";
 import { globalErrorHandler } from "./utils/errors";
 import { corsMiddleware } from "./middleware/cors";
 import { generalRateLimit, authRateLimit, aiRateLimit, apiRateLimit } from "./middleware/rateLimiting";
+import { performanceMonitor } from "./services/performanceService";
+import { responseCacheMiddleware, cacheControl, etag, compression } from "./middleware/cache";
 import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, chatMessageSchema, investmentAnalysisSchema } from "./validation/schemas";
 import { imageRoutes } from "./routes/imageRoutes";
 import mapRoutes from "./routes/mapRoutes";
@@ -28,6 +30,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Global middleware
   app.use(corsMiddleware);
   app.use(generalRateLimit);
+  app.use(performanceMonitor.middleware());
+  app.use(compression);
 
   // Инициализация администратора при запуске
   try {
@@ -117,19 +121,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
-  // Region routes
-  app.get("/api/regions", regionController.getRegions);
-  app.get("/api/regions/:id", regionController.getRegion);
-  app.get("/api/regions/:id/analytics", regionController.getRegionAnalytics);
+  // Region routes with caching
+  app.get("/api/regions", cacheControl(600, 'api'), etag, responseCacheMiddleware(600), regionController.getRegions);
+  app.get("/api/regions/:id", cacheControl(300, 'api'), etag, responseCacheMiddleware(300), regionController.getRegion);
+  app.get("/api/regions/:id/analytics", cacheControl(180, 'dynamic'), etag, responseCacheMiddleware(180), regionController.getRegionAnalytics);
 
-  // Property class routes
-  app.get("/api/property-classes", propertyClassController.getPropertyClasses);
-  app.get("/api/property-classes/:id", propertyClassController.getPropertyClass);
+  // Property class routes with caching
+  app.get("/api/property-classes", cacheControl(1800, 'static'), etag, responseCacheMiddleware(1800), propertyClassController.getPropertyClasses);
+  app.get("/api/property-classes/:id", cacheControl(1800, 'static'), etag, responseCacheMiddleware(1800), propertyClassController.getPropertyClass);
 
-  // Property routes
-  app.get("/api/properties", propertyController.getProperties);
-  app.get("/api/properties/map-data", propertyController.getMapData);
-  app.get("/api/properties/:id", propertyController.getProperty);
+  // Property routes with caching
+  app.get("/api/properties", cacheControl(120, 'dynamic'), etag, responseCacheMiddleware(120), propertyController.getProperties);
+  app.get("/api/properties/map-data", cacheControl(300, 'api'), etag, responseCacheMiddleware(300), propertyController.getMapData);
+  app.get("/api/properties/:id", cacheControl(600, 'api'), etag, responseCacheMiddleware(600), propertyController.getProperty);
   app.post("/api/properties/search", propertyController.searchProperties);
 
   // Analytics routes
