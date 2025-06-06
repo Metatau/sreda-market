@@ -1,12 +1,20 @@
 import OpenAI from "openai";
 import { AI_SYSTEM_PROMPT } from "./aiPrompt";
+import { aiCacheService } from "./aiCacheService";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
 });
 
-export async function generateAIResponse(userMessage: string): Promise<string> {
+export async function generateAIResponse(userMessage: string, context?: any): Promise<string> {
+  // Check cache first
+  const cacheKey = userMessage;
+  const cachedResponse = aiCacheService.get(cacheKey, context);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -24,7 +32,12 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
       temperature: 0.7
     });
 
-    return response.choices[0].message.content || "Извините, не удалось получить ответ.";
+    const aiResponse = response.choices[0].message.content || "Извините, не удалось получить ответ.";
+    
+    // Cache the response for 1 hour
+    aiCacheService.set(cacheKey, aiResponse, context, 60 * 60 * 1000);
+    
+    return aiResponse;
   } catch (error) {
     console.error("OpenAI API error:", error);
     throw new Error("Ошибка при обращении к ИИ-сервису");

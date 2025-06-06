@@ -17,9 +17,16 @@ import { PropertyClassController } from "./controllers/PropertyClassController";
 import { PropertyController } from "./controllers/PropertyController";
 import { PropertyService } from "./services/PropertyService";
 import { globalErrorHandler } from "./utils/errors";
+import { corsMiddleware } from "./middleware/cors";
+import { generalRateLimit, authRateLimit, aiRateLimit, apiRateLimit } from "./middleware/rateLimiting";
+import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, chatMessageSchema, investmentAnalysisSchema } from "./validation/schemas";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Global middleware
+  app.use(corsMiddleware);
+  app.use(generalRateLimit);
+
   // Инициализация администратора при запуске
   try {
     await UserService.initializeAdministrator();
@@ -379,13 +386,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Chat with role-based access and quota checking
-  app.post("/api/chat", requireRoleAuth, checkAIQuota, async (req, res) => {
+  app.post("/api/chat", aiRateLimit, requireRoleAuth, checkAIQuota, validateBody(chatMessageSchema), async (req, res) => {
     try {
       const { message, sessionId } = req.body;
-      
-      if (!message) {
-        return res.status(400).json({ error: "Message is required" });
-      }
 
       const response = await generateAIResponse(message);
       
@@ -414,9 +417,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Property Recommendations
-  app.post("/api/ai/recommendations", async (req, res) => {
+  app.post("/api/ai/recommendations", aiRateLimit, requireRoleAuth, checkAIQuota, validateBody(aiRequestSchema), async (req, res) => {
     try {
-      const { budget, purpose, region, rooms } = req.body;
+      const { context } = req.body;
+      const { budget, purpose, region, rooms } = context?.preferences || {};
       
       const recommendations = await generatePropertyRecommendations({
         budget,
