@@ -157,9 +157,10 @@ export function HomePage() {
 
               {/* Map View */}
               <TabsContent value="map" className="space-y-6">
-                <PropertyMap
-                  filters={filters}
-                  onPropertySelect={handlePropertySelect}
+                <AdvancedPropertyMap
+                  properties={[]}
+                  selectedRegion={regionsData?.find(r => r.id === filters.regionId)}
+                  onPropertySelect={setSelectedProperty}
                 />
                 
                 {/* Properties grid below map */}

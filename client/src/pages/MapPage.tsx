@@ -139,9 +139,9 @@ export default function MapPage() {
             <Card>
               <CardContent className="p-0">
                 <div className="h-[500px] relative bg-gray-100 rounded-lg overflow-hidden">
-                  <PropertyMap
+                  <AdvancedPropertyMap
                     properties={properties}
-                    selectedProperty={selectedProperty}
+                    selectedRegion={regionsData?.find(r => r.id === filters.regionId)}
                     onPropertySelect={handlePropertyClick}
                   />
                   
