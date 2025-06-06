@@ -598,7 +598,7 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto z-[10000]" style={{ zIndex: 10000 }}>
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">
               Инвестиционная аналитика
