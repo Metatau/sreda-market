@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { AddressSearch } from './AddressSearch';
 import { createMapboxTilesetService } from '@/services/mapboxTilesets';
 import { createMapDataSourceManager } from '@/services/mapDataSources';
+import { createMapDrawingService, type DrawnArea } from '@/services/mapDrawing';
 import type { Property } from '@/types';
 
 // Используем глобальный объект mapboxgl из CDN
@@ -41,10 +42,13 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
   const [heatmapIntensity, setHeatmapIntensity] = useState<number>(1);
   const [selectedPropertyState, setSelectedProperty] = useState<Property | null>(null);
   const [useMapboxTileset, setUseMapboxTileset] = useState(false);
+  const [drawingMode, setDrawingMode] = useState<'none' | 'polygon' | 'rectangle'>('none');
+  const [drawnArea, setDrawnArea] = useState<DrawnArea | null>(null);
   
   // Инициализация сервисов
   const mapboxTilesetService = useRef(createMapboxTilesetService());
   const dataSourceManager = useRef(createMapDataSourceManager());
+  const drawingService = useRef(createMapDrawingService());
 
   // Initialize map
   useEffect(() => {
@@ -86,6 +90,17 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       } catch (error) {
         console.error('Failed to initialize data sources:', error);
       }
+
+      // Инициализируем инструменты рисования
+      drawingService.current.initialize(map.current, (area: DrawnArea) => {
+        setDrawnArea(area);
+        if (area) {
+          console.log('Area drawn:', {
+            area: (area.area / 1000000).toFixed(2) + ' км²',
+            coordinates: area.coordinates
+          });
+        }
+      });
     });
 
     return () => {
