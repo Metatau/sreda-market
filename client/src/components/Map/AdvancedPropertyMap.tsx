@@ -258,7 +258,14 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
 
   // Update map view when region changes
   useEffect(() => {
-    if (!mapInstance || !selectedRegion) return;
+    if (!mapInstance) return;
+
+    // If no region selected, show all of Russia
+    if (!selectedRegion) {
+      console.log('Showing all of Russia');
+      mapInstance.setView([61.5240, 105.3188], 4); // Center of Russia with zoom level 4
+      return;
+    }
 
     // Define region coordinates for all cities (matching exact database region IDs)
     const regionCoordinates: Record<number, { lat: number; lng: number; zoom: number }> = {
