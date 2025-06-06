@@ -1,108 +1,24 @@
-export interface Region {
-  id: number;
-  name: string;
-  regionType: string;
-  coordinates?: string;
-  timezone: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+// Import types from shared schema to eliminate duplication
+export type {
+  Region,
+  PropertyClass,
+  Property,
+  PropertyAnalytics,
+  InvestmentAnalytics,
+  User,
+  PriceHistory,
+  InfrastructureProject,
+  InsertRegion,
+  InsertPropertyClass,
+  InsertProperty,
+  InsertPropertyAnalytics,
+  InsertInvestmentAnalytics,
+  InsertChatMessage,
+  InsertUser
+} from '@shared/schema';
 
-export interface PropertyClass {
-  id: number;
-  name: string;
-  minPricePerSqm: number;
-  maxPricePerSqm: number;
-  description?: string;
-  criteria?: any;
-  createdAt: string;
-}
-
-export interface Property {
-  id: number;
-  externalId?: string;
-  regionId?: number;
-  propertyClassId?: number;
-  title: string;
-  description?: string;
-  price: number;
-  pricePerSqm?: number;
-  area?: string;
-  rooms?: number;
-  floor?: number;
-  totalFloors?: number;
-  address: string;
-  district?: string;
-  metroStation?: string;
-  coordinates?: string;
-  propertyType: string;
-  marketType?: 'secondary' | 'new_construction';
-  source: string;
-  url?: string;
-  phone?: string;
-  imageUrl?: string;
-  images?: string[];
-  totalArea?: number;
-  livingArea?: number;
-  kitchenArea?: number;
-  floorsTotal?: number;
-  metroDistance?: number;
-  autoClassified: boolean;
-  manualOverride: boolean;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  investmentRating?: number;
-  region?: Region;
-  propertyClass?: PropertyClass;
-  analytics?: PropertyAnalytics;
-  investmentAnalytics?: InvestmentAnalytics;
-}
-
-export interface PropertyAnalytics {
-  id: number;
-  propertyId: number;
-  regionId?: number;
-  roi?: number;
-  rentalYield?: number;
-  appreciation?: number;
-  liquidityScore?: number;
-  investmentScore?: number;
-  investmentRating?: string;
-  priceGrowthRate?: string;
-  marketTrend?: string;
-  calculatedAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface InvestmentAnalytics {
-  id: number;
-  propertyId: number;
-  priceChange1y?: string;
-  priceChange3m?: string;
-  priceVolatility?: string;
-  rentalYield?: string;
-  rentalIncomeMonthly?: number;
-  rentalRoiAnnual?: string;
-  rentalPaybackYears?: string;
-  flipPotentialProfit?: number;
-  flipRoi?: string;
-  flipTimeframeMonths?: number;
-  renovationCostEstimate?: number;
-  safeHavenScore?: number;
-  capitalPreservationIndex?: string;
-  liquidityScore?: number;
-  priceForecast3y?: string;
-  infrastructureImpactScore?: string;
-  developmentRiskScore?: string;
-  investmentRating?: string;
-  riskLevel?: string;
-  recommendedStrategy?: string;
-  calculatedAt?: string;
-  expiresAt?: string;
-}
+// Re-export ChatMessage with alias to avoid conflicts
+export type { ChatMessage as SharedChatMessage } from '@shared/schema';
 
 export interface SearchFilters {
   regionId?: number;
@@ -110,6 +26,8 @@ export interface SearchFilters {
   minPrice?: number;
   maxPrice?: number;
   rooms?: number;
+  minArea?: number;
+  maxArea?: number;
   propertyType?: string;
   marketType?: 'secondary' | 'new_construction';
   query?: string;
@@ -121,15 +39,23 @@ export type PropertyFilters = SearchFilters;
 export interface Pagination {
   page: number;
   perPage: number;
-  total: number;
-  pages: number;
-  hasNext: boolean;
-  hasPrev: boolean;
+  total?: number;
+  pages?: number;
+  hasNext?: boolean;
+  hasPrev?: boolean;
 }
 
 export interface PropertiesResponse {
   properties: Property[];
   pagination: Pagination;
+  total: number;
+}
+
+export interface PropertyWithRelations extends Property {
+  region?: Region;
+  propertyClass?: PropertyClass;
+  analytics?: PropertyAnalytics;
+  investmentAnalytics?: InvestmentAnalytics;
 }
 
 export interface MapDataPoint {
@@ -146,17 +72,24 @@ export interface MapDataPoint {
     propertyClass?: string;
     rooms?: number;
     area?: string;
+    investmentScore?: number;
+    roi?: string;
+    liquidityScore?: number;
+    investmentRating?: string;
   };
 }
 
-export interface ChatMessage {
-  id: number | string;
-  sessionId: string;
-  role: "user" | "assistant";
-  content: string;
-  type?: string;
-  metadata?: any;
-  createdAt: string;
+export interface MapBounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
+export interface HeatmapData {
+  lat: number;
+  lng: number;
+  intensity: number;
 }
 
 export interface ChatResponse {
