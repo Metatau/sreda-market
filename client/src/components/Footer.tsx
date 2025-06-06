@@ -8,7 +8,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* О сервисе */}
           <div>
-            <h3 className="text-xl font-quantum font-bold mb-4 tracking-wider">SREDA Market</h3>
+            <h3 className="text-xl font-quantum font-bold mb-4 tracking-wider">SREDA MARKET</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
               Аналитическая платформа для инвестиций в недвижимость с AI-агентом, 
               инвестиционными рейтингами, прогнозами цен и комплексным анализом рынка.
