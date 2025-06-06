@@ -11,7 +11,7 @@ import { trackMapEvent } from '@/lib/yandexMetrika';
 import { leafletMapService } from '@/services/leafletMapService';
 import { openStreetMapService } from '@/services/openStreetMapService';
 import { Input } from '@/components/ui/input';
-import { FullscreenMapModal } from './FullscreenMapModal';
+
 
 export interface PropertyMapProps {
   properties: Property[];
