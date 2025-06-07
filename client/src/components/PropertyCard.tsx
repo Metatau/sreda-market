@@ -111,7 +111,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
 
         {/* Description - 2 lines */}
         <div className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-          {property.description || `${propertyClassName} класс, ${property.rooms ? `${property.rooms} комнаты` : 'свободная планировка'}, ${property.area ? `${property.area} м²` : ''}. ${property.district ? `Район ${property.district}` : 'Отличное расположение'}, современный ремонт.`}
+          {property.description || `${property.rooms ? `${property.rooms} комнаты` : 'Квартира'}, ${property.area ? `${property.area} м²` : ''}.`}
         </div>
 
         <div className="flex items-center text-sm text-gray-600 mb-3">
@@ -141,35 +141,22 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
         {/* Investment Metrics */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-center space-x-6">
-            {roi && (
-              <div className="flex items-center bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs">
-                <i className="fas fa-chart-line mr-1"></i>
-                ROI {roi.toFixed(1)}%
+            {pricePerSqm && (
+              <div className="flex items-center bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs">
+                <Square className="w-3 h-3 mr-1" />
+                {Math.round(pricePerSqm).toLocaleString('ru-RU')} ₽/м²
               </div>
             )}
-            {liquidityScore && (
-              <div className="flex items-center bg-orange-50 text-orange-700 px-2 py-1 rounded text-xs">
-                <i className="fas fa-tachometer-alt mr-1"></i>
-                {liquidityScore}/10
-              </div>
-            )}
-            {priceGrowthRate && (
-              <div className="flex items-center bg-green-50 text-green-700 px-2 py-1 rounded text-xs">
-                <i className="fas fa-trending-up mr-1"></i>
-                +{priceGrowthRate.toFixed(1)}%
+            {property.rooms && (
+              <div className="flex items-center bg-gray-50 text-gray-700 px-2 py-1 rounded text-xs">
+                <Bed className="w-3 h-3 mr-1" />
+                {property.rooms} комн.
               </div>
             )}
           </div>
 
           <div className="flex items-center justify-between">
-            {/* Investment Rating */}
-            <div className="flex-1 mr-24">
-              {investmentRating && (
-                <Badge className={`inline-flex items-center rounded-full border transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent font-bold text-sm px-3 py-1 pt-[7px] pb-[7px] ${getInvestmentRatingColor(investmentRating)}`}>
-                  {investmentRating}
-                </Badge>
-              )}
-            </div>
+            <div className="flex-1 mr-4"></div>
 
             <Button 
               size="sm" 
