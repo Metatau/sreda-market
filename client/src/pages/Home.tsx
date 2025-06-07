@@ -44,8 +44,8 @@ export default function Home() {
       <Navigation />
 
       {/* Map Section - Full Width Always Active */}
-      <div className="w-full">
-        <div className="relative h-[500px] bg-white border-b">
+      <div className="w-full pt-4 px-4">
+        <div className="relative h-[500px] bg-white border-b rounded-lg shadow-sm">
           <PropertyMap 
             properties={properties as any}
             selectedProperty={selectedProperty}
