@@ -61,16 +61,20 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     if (!mapContainer.current || mapId) return;
 
     const initializeMap = async () => {
-      const [newMapId] = await safePromise(
-        leafletMapService.createMap(mapContainer.current!, {
+      try {
+        const newMapId = await leafletMapService.createMap(mapContainer.current!, {
           center: [55.7558, 37.6176], // Moscow
           zoom: 10
-        })
-      );
-
-      if (newMapId) {
-        setMapId(newMapId);
-        setMapLoaded(true);
+        });
+        
+        if (newMapId) {
+          setMapId(newMapId);
+          setMapLoaded(true);
+        }
+      } catch (error) {
+        console.error('Failed to initialize map:', error);
+      }
+    };
         trackMapEvent('map_initialized');
       }
     };
@@ -96,22 +100,24 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
           
           return {
             id: property.id,
-            position: { lat, lng },
+            coordinates: [lng, lat] as [number, number],
             popup: property,
-            className: property.propertyClass?.name || '',
+            className: 'default',
             price: property.price
           };
         });
 
-      await safePromise(
-        leafletMapService.addPropertyMarkers(mapId, propertyMarkers, {
-          onMarkerClick: (property: Property) => {
-            setSelectedProperty(property);
-            onPropertySelect?.(property);
-          },
-          getMarkerColor: (className: string) => getPropertyClassColor(className)
-        })
-      );
+      const result = leafletMapService.addPropertyMarkers(mapId, propertyMarkers, {
+        onMarkerClick: (property: any) => {
+          setSelectedProperty(property);
+          onPropertySelect?.(property);
+        },
+        getMarkerColor: (className: string) => getPropertyClassColor(className)
+      });
+      
+      if (!result) {
+        console.warn('Failed to add property markers to map');
+      }
     };
 
     updateProperties();
@@ -123,7 +129,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
 
     const updateHeatmap = async () => {
       if (heatmapMode === 'none') {
-        await safePromise(leafletMapService.removeHeatmap(mapId));
+        leafletMapService.removeHeatmap(mapId);
         return;
       }
 
@@ -141,21 +147,18 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
               intensity = 0.8; // Uniform density
               break;
             case 'investment':
-              intensity = property.analytics?.investmentScore ? 
-                property.analytics.investmentScore / 10 : 0.3;
+              intensity = 0.6; // Default investment intensity
               break;
           }
 
           return { lat, lng, intensity: intensity * heatmapIntensity };
         });
 
-      await safePromise(
-        leafletMapService.addHeatmap(mapId, heatmapData, {
-          radius: 25,
-          blur: 15,
-          maxZoom: 17
-        })
-      );
+      leafletMapService.addHeatmap(mapId, heatmapData, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 17
+      });
     };
 
     updateHeatmap();
@@ -168,9 +171,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     const highlightProperty = async () => {
       if (selectedProperty.coordinates) {
         const [lat, lng] = selectedProperty.coordinates.split(',').map(Number);
-        await safePromise(
-          leafletMapService.highlightMarker(mapId, selectedProperty.id, { lat, lng })
-        );
+        leafletMapService.highlightMarker(mapId, selectedProperty.id, { lat, lng });
       }
     };
 

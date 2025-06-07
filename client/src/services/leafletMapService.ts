@@ -329,6 +329,145 @@ export class LeafletMapService {
 
     return mapInstance.leafletMap.getZoom();
   }
+
+  /**
+   * Добавление маркеров недвижимости
+   */
+  addPropertyMarkers(
+    mapId: string, 
+    properties: Array<{
+      id: number;
+      coordinates: [number, number];
+      popup: any;
+      className: string;
+      price: number;
+    }>,
+    options?: {
+      onMarkerClick?: (property: any) => void;
+      getMarkerColor?: (className: string) => string;
+    }
+  ): boolean {
+    const mapInstance = this.maps.get(mapId);
+    if (!mapInstance) {
+      return false;
+    }
+
+    properties.forEach(property => {
+      const marker = window.L.marker([property.coordinates[1], property.coordinates[0]]);
+      
+      if (property.popup) {
+        marker.bindPopup(`
+          <div>
+            <h3>${property.popup.title || 'Property'}</h3>
+            <p>Price: ${property.price.toLocaleString()} ₽</p>
+            <p>Class: ${property.className}</p>
+          </div>
+        `);
+      }
+
+      if (options?.onMarkerClick) {
+        marker.on('click', () => options.onMarkerClick!(property.popup));
+      }
+
+      marker.addTo(mapInstance.leafletMap);
+      mapInstance.markers.push(marker);
+    });
+
+    return true;
+  }
+
+  /**
+   * Добавление тепловой карты
+   */
+  addHeatmap(
+    mapId: string,
+    data: Array<{ lat: number; lng: number; intensity: number }>,
+    options?: {
+      radius?: number;
+      blur?: number;
+      maxZoom?: number;
+    }
+  ): boolean {
+    const mapInstance = this.maps.get(mapId);
+    if (!mapInstance) {
+      return false;
+    }
+
+    // Простая реализация тепловой карты через круги
+    data.forEach(point => {
+      const circle = window.L.circle([point.lat, point.lng], {
+        color: this.getHeatmapColor(point.intensity),
+        fillColor: this.getHeatmapColor(point.intensity),
+        fillOpacity: 0.3,
+        radius: (options?.radius || 25) * point.intensity
+      });
+
+      circle.addTo(mapInstance.leafletMap);
+      mapInstance.layers.push(circle);
+    });
+
+    return true;
+  }
+
+  /**
+   * Удаление тепловой карты
+   */
+  removeHeatmap(mapId: string): boolean {
+    const mapInstance = this.maps.get(mapId);
+    if (!mapInstance) {
+      return false;
+    }
+
+    // Удаляем все слои (включая тепловую карту)
+    mapInstance.layers.forEach(layer => {
+      mapInstance.leafletMap.removeLayer(layer);
+    });
+    mapInstance.layers = [];
+
+    return true;
+  }
+
+  /**
+   * Выделение маркера
+   */
+  highlightMarker(
+    mapId: string,
+    propertyId: number,
+    coordinates: { lat: number; lng: number }
+  ): boolean {
+    const mapInstance = this.maps.get(mapId);
+    if (!mapInstance) {
+      return false;
+    }
+
+    // Создаем выделяющий круг
+    const highlightCircle = window.L.circle([coordinates.lat, coordinates.lng], {
+      color: 'red',
+      fillColor: 'red',
+      fillOpacity: 0.2,
+      radius: 100
+    });
+
+    highlightCircle.addTo(mapInstance.leafletMap);
+    
+    // Удаляем выделение через 3 секунды
+    setTimeout(() => {
+      mapInstance.leafletMap.removeLayer(highlightCircle);
+    }, 3000);
+
+    return true;
+  }
+
+  /**
+   * Получение цвета для тепловой карты
+   */
+  private getHeatmapColor(intensity: number): string {
+    if (intensity > 0.8) return '#FF0000';
+    if (intensity > 0.6) return '#FF4500';
+    if (intensity > 0.4) return '#FFA500';
+    if (intensity > 0.2) return '#FFFF00';
+    return '#00FF00';
+  }
 }
 
 // Экспорт экземпляра сервиса
