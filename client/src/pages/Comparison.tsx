@@ -222,7 +222,7 @@ export function Comparison() {
                         <TableCell className="font-medium">Класс недвижимости</TableCell>
                         {compareList.map((property) => (
                           <TableCell key={property.id} className="text-center">
-                            {property.propertyClass?.name || 'N/A'}
+                            {property.propertyClassId ? `Класс ${property.propertyClassId}` : 'N/A'}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -230,7 +230,7 @@ export function Comparison() {
                         <TableCell className="font-medium">Регион</TableCell>
                         {compareList.map((property) => (
                           <TableCell key={property.id} className="text-center">
-                            {property.region?.name || 'N/A'}
+                            {property.regionId ? `Регион ${property.regionId}` : 'N/A'}
                           </TableCell>
                         ))}
                       </TableRow>
