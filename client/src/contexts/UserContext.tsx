@@ -55,7 +55,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const refreshUser = async () => {
     try {
-      const response = await fetch('/api/auth/profile', {
+      const response = await fetch('/api/users/profile', {
         credentials: 'include', // Include cookies for session authentication
       });
 

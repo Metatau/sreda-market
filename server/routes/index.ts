@@ -10,6 +10,7 @@ import { UserService } from "../services/userService";
 
 // Import modular routes
 import authRoutes from "./auth.routes";
+import usersRoutes from "./users.routes";
 import propertiesRoutes from "./properties.routes";
 import analyticsRoutes from "./analytics.routes";
 import { imageRoutes } from "./imageRoutes";
@@ -34,6 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register modular routes
   app.use('/api/auth', authRoutes);
+  app.use('/api/users', usersRoutes);
   app.use('/api/properties', propertiesRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/images', imageRoutes);
