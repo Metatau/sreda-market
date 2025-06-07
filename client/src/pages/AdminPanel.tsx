@@ -47,6 +47,8 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('overview');
   const [sourcesSearchTerm, setSourcesSearchTerm] = useState('');
   const [isAddSourceDialogOpen, setIsAddSourceDialogOpen] = useState(false);
+  const [editingSource, setEditingSource] = useState<DataSource | null>(null);
+  const [isEditSourceDialogOpen, setIsEditSourceDialogOpen] = useState(false);
   const [newSourceForm, setNewSourceForm] = useState({
     name: '',
     description: '',
@@ -124,6 +126,25 @@ export default function AdminPanel() {
       console.error('Error creating source:', error);
       toast({ 
         title: 'Ошибка создания источника', 
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  });
+
+  const updateSourceMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      return await apiRequest('PUT', `/api/admin/sources/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
+      toast({ title: 'Успешно', description: 'Источник обновлен' });
+      setIsEditSourceDialogOpen(false);
+      setEditingSource(null);
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: 'Ошибка обновления', 
         description: error.message,
         variant: 'destructive'
       });
@@ -221,10 +242,8 @@ export default function AdminPanel() {
   };
 
   const handleEditSource = (source: DataSource) => {
-    toast({
-      title: 'Редактирование источника',
-      description: 'Функция редактирования будет добавлена в следующих обновлениях',
-    });
+    setEditingSource(source);
+    setIsEditSourceDialogOpen(true);
   };
 
   const getSourceTypeIcon = (type: string) => {
