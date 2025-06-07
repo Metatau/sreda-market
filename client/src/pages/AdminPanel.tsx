@@ -1376,6 +1376,92 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+
+      {/* Edit Source Dialog */}
+      <Dialog open={isEditSourceDialogOpen} onOpenChange={setIsEditSourceDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Редактировать источник данных</DialogTitle>
+            <DialogDescription>
+              Измените настройки источника данных
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingSource && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-name">Название</Label>
+                <Input
+                  id="edit-name"
+                  defaultValue={editingSource.name}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-description">Описание</Label>
+                <Textarea
+                  id="edit-description"
+                  defaultValue={editingSource.description || ''}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-frequency">Частота обновления</Label>
+                <select 
+                  id="edit-frequency"
+                  defaultValue={editingSource.frequency}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  <option value="hourly">Ежечасно</option>
+                  <option value="daily">Ежедневно</option>
+                  <option value="weekly">Еженедельно</option>
+                </select>
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-tags">Теги (через запятую)</Label>
+                <Input
+                  id="edit-tags"
+                  defaultValue={editingSource.tags?.join(', ') || ''}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-4">
+                <Button
+                  onClick={() => {
+                    const name = (document.getElementById('edit-name') as HTMLInputElement)?.value;
+                    const description = (document.getElementById('edit-description') as HTMLTextAreaElement)?.value;
+                    const frequency = (document.getElementById('edit-frequency') as HTMLSelectElement)?.value;
+                    const tags = (document.getElementById('edit-tags') as HTMLInputElement)?.value;
+                    
+                    updateSourceMutation.mutate({
+                      id: editingSource.id,
+                      data: {
+                        name,
+                        description,
+                        frequency,
+                        tags: tags ? tags.split(',').map(tag => tag.trim()) : []
+                      }
+                    });
+                  }}
+                  disabled={updateSourceMutation.isPending}
+                >
+                  {updateSourceMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsEditSourceDialogOpen(false)}
+                >
+                  Отмена
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
