@@ -8,6 +8,7 @@ import {
   users,
   insights,
   dataSources,
+  promocodes,
   type Region,
   type PropertyClass,
   type Property,
@@ -25,6 +26,8 @@ import {
   type InsertInsight,
   type DataSource,
   type InsertDataSource,
+  type Promocode,
+  type InsertPromocode,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, ilike, desc, sql } from "drizzle-orm";
@@ -766,6 +769,64 @@ export class DatabaseStorage implements IStorage {
       .where(eq(dataSources.id, id));
     
     return true;
+  }
+
+  // Promocode management methods
+  async createPromocode(): Promise<Promocode> {
+    // Генерация 6-значного промокода
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24 часа от создания
+
+    const [newPromocode] = await db
+      .insert(promocodes)
+      .values({
+        code,
+        expiresAt,
+        isUsed: false,
+      })
+      .returning();
+    
+    return newPromocode;
+  }
+
+  async getPromocodeByCode(code: string): Promise<Promocode | undefined> {
+    const [promocode] = await db
+      .select()
+      .from(promocodes)
+      .where(eq(promocodes.code, code));
+    
+    return promocode;
+  }
+
+  async usePromocode(code: string, userId: number): Promise<boolean> {
+    const promocode = await this.getPromocodeByCode(code);
+    
+    if (!promocode || promocode.isUsed || this.isPromocodeExpired(promocode)) {
+      return false;
+    }
+
+    // Устанавливаем промокод как использованный и привязываем к пользователю
+    await db
+      .update(promocodes)
+      .set({
+        isUsed: true,
+        usedAt: new Date(),
+        userId: userId,
+      })
+      .where(eq(promocodes.id, promocode.id));
+
+    // Обновляем пользователя - даем промо подписку на 24 часа
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+    
+    await this.updateSubscription(userId, 'promo', expiresAt);
+    
+    return true;
+  }
+
+  isPromocodeExpired(promocode: Promocode): boolean {
+    return new Date() > promocode.expiresAt;
   }
 }
 

@@ -1068,6 +1068,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mount admin sources routes
   app.use("/api/admin/sources", adminSourcesRoutes);
 
+  // === PROMOCODE ROUTES ===
+  
+  // Создание нового промокода
+  app.post("/api/promocodes/generate", async (req, res) => {
+    try {
+      const promocode = await storage.createPromocode();
+      res.json({ 
+        success: true, 
+        data: {
+          code: promocode.code,
+          expiresAt: promocode.expiresAt
+        }
+      });
+    } catch (error) {
+      console.error("Error generating promocode:", error);
+      res.status(500).json({ success: false, error: "Failed to generate promocode" });
+    }
+  });
+
+  // Применение промокода (требует авторизации)
+  app.post("/api/promocodes/use", requireAuth, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { code } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ success: false, error: "Promocode is required" });
+      }
+
+      const success = await storage.usePromocode(code, req.user!.id);
+      
+      if (!success) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Invalid, expired, or already used promocode" 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Promocode applied successfully. You now have 24 hours of full access!" 
+      });
+    } catch (error) {
+      console.error("Error using promocode:", error);
+      res.status(500).json({ success: false, error: "Failed to apply promocode" });
+    }
+  });
+
   // Global error handler
   app.use(globalErrorHandler);
 
