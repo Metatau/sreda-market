@@ -49,17 +49,39 @@ export interface PropertiesResponse {
   total: number;
 }
 
-// Enhanced property interface that includes relations
-export interface PropertyWithRelations extends Property {
-  externalId?: string | null | undefined;
-  area?: string | null | undefined;
-  pricePerSqm?: number | null | undefined;
-  propertyType?: string | null;
+// Enhanced property interface that includes relations  
+export interface PropertyWithRelations {
+  id: number;
+  externalId?: string | null;
+  regionId?: number | null;
+  propertyClassId?: number | null;
+  title: string;
+  description?: string | null;
+  price: number;
+  pricePerSqm?: number;
+  area?: string | null;
+  rooms?: number | null;
+  floor?: number | null;
+  totalFloors?: number | null;
+  address: string;
+  district?: string | null;
+  metroStation?: string | null;
+  coordinates?: string | null;
+  propertyType?: string;
   marketType?: 'secondary' | 'new_construction' | null;
-  source?: string | null;
-  autoClassified?: boolean | null;
-  manualOverride?: boolean | null;
-  isActive?: boolean | null;
+  source?: string;
+  url?: string | null;
+  phone?: string | null;
+  imageUrl?: string | null;
+  images?: string[] | null;
+  totalArea?: string | null;
+  livingArea?: string | null;
+  kitchenArea?: string | null;
+  floorsTotal?: number | null;
+  metroDistance?: number | null;
+  autoClassified?: boolean;
+  manualOverride?: boolean;
+  isActive?: boolean;
   createdAt?: Date | null;
   updatedAt?: Date | null;
   region?: {
