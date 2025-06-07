@@ -331,7 +331,46 @@ export class LeafletMapService {
   }
 
   /**
-   * Добавление маркеров недвижимости
+   * Создание градиентного пина от синего к фиолетовому
+   */
+  private createGradientPin(price: number, maxPrice: number): any {
+    // Рассчитываем интенсивность градиента на основе цены
+    const intensity = Math.min(price / maxPrice, 1);
+    
+    // Интерполяция от синего (#2563eb) к фиолетовому (#9333ea)
+    const blueR = 37, blueG = 99, blueB = 235;
+    const purpleR = 147, purpleG = 51, purpleB = 234;
+    
+    const r = Math.round(blueR + (purpleR - blueR) * intensity);
+    const g = Math.round(blueG + (purpleG - blueG) * intensity);
+    const b = Math.round(blueB + (purpleB - blueB) * intensity);
+    
+    const color = `rgb(${r}, ${g}, ${b})`;
+    
+    // Создаем SVG иконку с градиентным цветом
+    const svgIcon = `
+      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="rgba(0,0,0,0.3)"/>
+          </filter>
+        </defs>
+        <circle cx="12" cy="12" r="8" fill="${color}" stroke="white" stroke-width="2" filter="url(#shadow)"/>
+        <circle cx="12" cy="12" r="3" fill="white" opacity="0.8"/>
+      </svg>
+    `;
+    
+    return window.L.divIcon({
+      html: svgIcon,
+      className: 'gradient-pin',
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -12]
+    });
+  }
+
+  /**
+   * Добавление маркеров недвижимости с градиентными пинами
    */
   addPropertyMarkers(
     mapId: string, 
@@ -352,21 +391,53 @@ export class LeafletMapService {
       return false;
     }
 
+    // Очищаем старые маркеры
+    this.clearMarkers(mapId);
+
+    // Находим максимальную цену для градиента
+    const maxPrice = Math.max(...properties.map(p => p.price));
+
     properties.forEach(property => {
-      const marker = window.L.marker([property.coordinates[1], property.coordinates[0]]);
+      const gradientIcon = this.createGradientPin(property.price, maxPrice);
+      const marker = window.L.marker(
+        [property.coordinates[1], property.coordinates[0]], 
+        { icon: gradientIcon }
+      );
       
       if (property.popup) {
+        const formattedPrice = property.price.toLocaleString('ru-RU');
         marker.bindPopup(`
-          <div>
-            <h3>${property.popup.title || 'Property'}</h3>
-            <p>Price: ${property.price.toLocaleString()} ₽</p>
-            <p>Class: ${property.className}</p>
+          <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 250px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+              ${property.popup.title || 'Объект недвижимости'}
+            </h3>
+            <p style="margin: 4px 0; font-size: 14px; color: #374151;">
+              <strong>Цена:</strong> ${formattedPrice} ₽
+            </p>
+            <p style="margin: 4px 0; font-size: 14px; color: #374151;">
+              <strong>Адрес:</strong> ${property.popup.address || 'Не указан'}
+            </p>
+            ${property.popup.area ? `<p style="margin: 4px 0; font-size: 14px; color: #374151;">
+              <strong>Площадь:</strong> ${property.popup.area}
+            </p>` : ''}
+            <button onclick="window.selectProperty && window.selectProperty(${property.id})" 
+                    style="margin-top: 8px; padding: 6px 12px; background: linear-gradient(135deg, #2563eb 0%, #9333ea 100%); 
+                           color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">
+              Подробнее
+            </button>
           </div>
         `);
       }
 
       if (options?.onMarkerClick) {
         marker.on('click', () => options.onMarkerClick!(property.popup));
+        // Добавляем глобальную функцию для кнопки в попапе
+        (window as any).selectProperty = (id: number) => {
+          const selectedProperty = properties.find(p => p.id === id);
+          if (selectedProperty && options?.onMarkerClick) {
+            options.onMarkerClick(selectedProperty.popup);
+          }
+        };
       }
 
       marker.addTo(mapInstance.leafletMap);

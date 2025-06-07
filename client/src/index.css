@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Градиентные пины карты */
+.gradient-pin {
+  background: transparent !important;
+  border: none !important;
+}
+
+.gradient-pin svg {
+  transition: transform 0.2s ease;
+}
+
+.gradient-pin:hover svg {
+  transform: scale(1.1);
+}
+
 :root {
   --background: 210 11% 98%; /* #F5F7FA */
   --foreground: 20 14.3% 4.1%;
