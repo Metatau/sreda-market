@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield } from 'lucide-react';
+import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail } from 'lucide-react';
 
 export default function Landing() {
   const [email, setEmail] = useState('');
@@ -316,51 +316,71 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
+      <footer className="bg-gray-900 text-white py-8 px-4 font-mono">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* О сервисе */}
             <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">S</span>
-                </div>
-                <span className="text-xl font-bold">SREDA MARKET</span>
-              </div>
-              <p className="text-gray-400">
-                AI платформа для поиска инвестиционной недвижимости
+              <h3 className="text-lg font-quantum font-bold mb-3 tracking-wider">SREDA Market</h3>
+              <p className="text-gray-300 text-xs leading-relaxed">
+                Аналитическая платформа для инвестиций в недвижимость с AI-агентом, 
+                инвестиционными рейтингами, прогнозами цен и комплексным анализом рынка.
               </p>
             </div>
-            
+
+            {/* Реквизиты */}
             <div>
-              <h3 className="font-semibold mb-4">Продукт</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Возможности</a></li>
-                <li><a href="#" className="hover:text-white">Тарифы</a></li>
-                <li><a href="#" className="hover:text-white">API</a></li>
-              </ul>
+              <h3 className="text-lg font-bold mb-3">Реквизиты</h3>
+              <div className="space-y-1 text-xs text-gray-300">
+                <p className="font-medium">ИП Шинкаренко А.А.</p>
+                <p>ОГРНИП: 315595800025579</p>
+                <p>ИНН: 590401203802</p>
+                
+                <div className="flex items-center space-x-2 mt-2">
+                  <Phone className="w-3 h-3" />
+                  <a href="tel:+78001015159" className="hover:text-blue-400 transition-colors">
+                    8 800 101 51 59
+                  </a>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-3 h-3" />
+                  <a href="mailto:info@monodigitalstudio.ru" className="hover:text-blue-400 transition-colors">
+                    info@monodigitalstudio.ru
+                  </a>
+                </div>
+              </div>
             </div>
 
+            {/* Правовые документы */}
             <div>
-              <h3 className="font-semibold mb-4">Поддержка</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Документация</a></li>
-                <li><a href="#" className="hover:text-white">Контакты</a></li>
-                <li><a href="#" className="hover:text-white">FAQ</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4">Компания</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">О нас</a></li>
-                <li><a href="#" className="hover:text-white">Блог</a></li>
-                <li><a href="#" className="hover:text-white">Карьера</a></li>
-              </ul>
+              <h3 className="text-lg font-bold mb-3">Правовые документы</h3>
+              <div className="space-y-1">
+                <Link href="/politika-konfidencialnosti/" className="block text-xs text-gray-300 hover:text-blue-400 transition-colors">
+                  Политика конфиденциальности
+                </Link>
+                <Link href="/politika-obrabotki-personalnyh-dannyh/" className="block text-xs text-gray-300 hover:text-blue-400 transition-colors">
+                  Политика обработки персональных данных
+                </Link>
+                <Link href="/polzovatelskoe-soglashenie/" className="block text-xs text-gray-300 hover:text-blue-400 transition-colors">
+                  Пользовательское соглашение
+                </Link>
+                <Link href="/publichnaya-oferta/" className="block text-xs text-gray-300 hover:text-blue-400 transition-colors">
+                  Публичная оферта
+                </Link>
+                <Link href="/soglasie-na-obrabotku-personalnyh-dannyh/" className="block text-xs text-gray-300 hover:text-blue-400 transition-colors">
+                  Согласие на обработку персональных данных
+                </Link>
+              </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 SREDA MARKET. Все права защищены.</p>
+          {/* Нижняя часть футера */}
+          <div className="border-t border-gray-700 mt-6 pt-4">
+            <div className="flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
+              <p>© 2025 SREDA Market. Все права защищены.</p>
+              
+            </div>
           </div>
         </div>
       </footer>
