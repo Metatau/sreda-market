@@ -2,35 +2,57 @@ import { storage } from '../storage';
 import { nanoid } from 'nanoid';
 
 export class UserService {
-  // Создание администратора при первом запуске
-  static async initializeAdministrator() {
-    const adminEmail = 'saabox@yandex.ru';
-    
+  // Создание администраторов при первом запуске
+  static async initializeAdministrators() {
     try {
-      const existingAdmin = await storage.getUserByEmail(adminEmail);
-      if (existingAdmin) {
-        console.log('Administrator already exists');
-        return existingAdmin;
-      }
-
-      // Создаем администратора
-      const admin = await storage.createUser({
+      await this.createAdminIfNotExists({
+        email: 'saabox@yandex.ru',
         username: 'admin',
-        email: adminEmail,
-        role: 'administrator',
         telegramHandle: '@metatau',
         firstName: 'Администратор',
-        lastName: 'Системы',
-        referralCode: nanoid(8),
-        bonusBalance: '0.00'
+        lastName: 'Системы'
       });
 
-      console.log('Administrator created successfully:', admin.email);
-      return admin;
+      await this.createAdminIfNotExists({
+        email: 'studiomono@yandex.ru',
+        username: 'studiomono',
+        telegramHandle: '@studiomono',
+        firstName: 'Studio',
+        lastName: 'Mono'
+      });
+
     } catch (error) {
-      console.error('Error initializing administrator:', error);
+      console.error('Error initializing administrators:', error);
       throw error;
     }
+  }
+
+  private static async createAdminIfNotExists(adminData: {
+    email: string;
+    username: string;
+    telegramHandle: string;
+    firstName: string;
+    lastName: string;
+  }) {
+    const existingAdmin = await storage.getUserByEmail(adminData.email);
+    if (existingAdmin) {
+      console.log(`Administrator ${adminData.email} already exists`);
+      return existingAdmin;
+    }
+
+    const admin = await storage.createUser({
+      username: adminData.username,
+      email: adminData.email,
+      role: 'administrator',
+      telegramHandle: adminData.telegramHandle,
+      firstName: adminData.firstName,
+      lastName: adminData.lastName,
+      referralCode: nanoid(8),
+      bonusBalance: '0.00'
+    });
+
+    console.log('Administrator created successfully:', admin.email);
+    return admin;
   }
 
   // Проверка и обновление подписки пользователя

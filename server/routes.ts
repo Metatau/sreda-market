@@ -37,7 +37,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Инициализация администратора при запуске
   try {
-    await UserService.initializeAdministrator();
+    await UserService.initializeAdministrators();
   } catch (error) {
     console.error('Failed to initialize administrator:', error);
   }
