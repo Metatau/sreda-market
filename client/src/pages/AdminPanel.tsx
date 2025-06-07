@@ -6,8 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle, Key, BarChart, Users, Settings, Globe, MessageSquare, FileText, Plus, Search, ToggleLeft, ToggleRight, Eye, Edit, Trash2 } from "lucide-react";
+import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle, Key, BarChart, Users, Settings, Globe, MessageSquare, FileText, Plus, Search, ToggleLeft, ToggleRight, Eye, Edit, Trash2, Upload } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Navigation } from "@/components/Navigation";
 
@@ -43,6 +46,21 @@ export default function AdminPanel() {
   const [showCredentials, setShowCredentials] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [sourcesSearchTerm, setSourcesSearchTerm] = useState('');
+  const [isAddSourceDialogOpen, setIsAddSourceDialogOpen] = useState(false);
+  const [newSourceForm, setNewSourceForm] = useState({
+    name: '',
+    description: '',
+    type: '',
+    frequency: 'daily',
+    tags: '',
+    config: {
+      websiteUrl: '',
+      channelUrl: '',
+      rssUrl: '',
+      fileName: '',
+      keywords: ''
+    }
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -93,6 +111,34 @@ export default function AdminPanel() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
       toast({ title: 'Успешно', description: 'Источник удален' });
+    }
+  });
+
+  const createSourceMutation = useMutation({
+    mutationFn: async (sourceData: any) => {
+      const response = await fetch('/api/admin/sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sourceData)
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create source');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
+      toast({ title: 'Успешно', description: 'Источник создан' });
+      setIsAddSourceDialogOpen(false);
+      resetForm();
+    },
+    onError: (error: Error) => {
+      toast({ 
+        title: 'Ошибка', 
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   });
 
@@ -202,6 +248,74 @@ export default function AdminPanel() {
       pdf_document: 'PDF документ'
     };
     return labels[type as keyof typeof labels] || type;
+  };
+
+  const resetForm = () => {
+    setNewSourceForm({
+      name: '',
+      description: '',
+      type: '',
+      frequency: 'daily',
+      tags: '',
+      config: {
+        websiteUrl: '',
+        channelUrl: '',
+        rssUrl: '',
+        fileName: '',
+        keywords: ''
+      }
+    });
+  };
+
+  const handleSubmitSource = () => {
+    if (!newSourceForm.name || !newSourceForm.type) {
+      toast({
+        title: 'Ошибка',
+        description: 'Заполните обязательные поля: название и тип источника',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const sourceData = {
+      name: newSourceForm.name,
+      description: newSourceForm.description || undefined,
+      type: newSourceForm.type,
+      frequency: newSourceForm.frequency,
+      tags: newSourceForm.tags ? newSourceForm.tags.split(',').map(tag => tag.trim()) : [],
+      config: getConfigForType(newSourceForm.type)
+    };
+
+    createSourceMutation.mutate(sourceData);
+  };
+
+  const getConfigForType = (type: string) => {
+    switch (type) {
+      case 'website':
+        return {
+          websiteUrl: newSourceForm.config.websiteUrl,
+          keywords: newSourceForm.config.keywords ? newSourceForm.config.keywords.split(',').map(k => k.trim()) : []
+        };
+      case 'telegram_channel':
+        return {
+          channelUrl: newSourceForm.config.channelUrl,
+          keywords: newSourceForm.config.keywords ? newSourceForm.config.keywords.split(',').map(k => k.trim()) : []
+        };
+      case 'rss_feed':
+        return {
+          rssUrl: newSourceForm.config.rssUrl,
+          keywords: newSourceForm.config.keywords ? newSourceForm.config.keywords.split(',').map(k => k.trim()) : []
+        };
+      case 'uploaded_file':
+      case 'spreadsheet':
+      case 'pdf_document':
+        return {
+          fileName: newSourceForm.config.fileName,
+          keywords: newSourceForm.config.keywords ? newSourceForm.config.keywords.split(',').map(k => k.trim()) : []
+        };
+      default:
+        return {};
+    }
   };
 
   if (statusLoading) {
@@ -648,10 +762,185 @@ export default function AdminPanel() {
                       className="pl-10"
                     />
                   </div>
-                  <Button className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    Добавить источник
-                  </Button>
+                  <Dialog open={isAddSourceDialogOpen} onOpenChange={setIsAddSourceDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Добавить источник
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Добавить новый источник данных</DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6">
+                        {/* Основная информация */}
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="name">Название источника *</Label>
+                            <Input
+                              id="name"
+                              value={newSourceForm.name}
+                              onChange={(e) => setNewSourceForm(prev => ({ ...prev, name: e.target.value }))}
+                              placeholder="Введите название источника"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="description">Описание</Label>
+                            <Textarea
+                              id="description"
+                              value={newSourceForm.description}
+                              onChange={(e) => setNewSourceForm(prev => ({ ...prev, description: e.target.value }))}
+                              placeholder="Краткое описание источника данных"
+                              rows={3}
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="type">Тип источника *</Label>
+                            <Select value={newSourceForm.type} onValueChange={(value) => setNewSourceForm(prev => ({ ...prev, type: value }))}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Выберите тип источника" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="website">Веб-сайт</SelectItem>
+                                <SelectItem value="telegram_channel">Telegram канал</SelectItem>
+                                <SelectItem value="rss_feed">RSS лента</SelectItem>
+                                <SelectItem value="uploaded_file">Загруженный файл</SelectItem>
+                                <SelectItem value="spreadsheet">Таблица</SelectItem>
+                                <SelectItem value="pdf_document">PDF документ</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="frequency">Частота обновления</Label>
+                            <Select value={newSourceForm.frequency} onValueChange={(value) => setNewSourceForm(prev => ({ ...prev, frequency: value }))}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="hourly">Ежечасно</SelectItem>
+                                <SelectItem value="daily">Ежедневно</SelectItem>
+                                <SelectItem value="weekly">Еженедельно</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="tags">Теги</Label>
+                            <Input
+                              id="tags"
+                              value={newSourceForm.tags}
+                              onChange={(e) => setNewSourceForm(prev => ({ ...prev, tags: e.target.value }))}
+                              placeholder="Теги через запятую"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Конфигурация в зависимости от типа */}
+                        {newSourceForm.type && (
+                          <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Настройки источника</h3>
+                            
+                            {newSourceForm.type === 'website' && (
+                              <div>
+                                <Label htmlFor="websiteUrl">URL веб-сайта</Label>
+                                <Input
+                                  id="websiteUrl"
+                                  value={newSourceForm.config.websiteUrl}
+                                  onChange={(e) => setNewSourceForm(prev => ({ 
+                                    ...prev, 
+                                    config: { ...prev.config, websiteUrl: e.target.value }
+                                  }))}
+                                  placeholder="https://example.com"
+                                />
+                              </div>
+                            )}
+
+                            {newSourceForm.type === 'telegram_channel' && (
+                              <div>
+                                <Label htmlFor="channelUrl">URL Telegram канала</Label>
+                                <Input
+                                  id="channelUrl"
+                                  value={newSourceForm.config.channelUrl}
+                                  onChange={(e) => setNewSourceForm(prev => ({ 
+                                    ...prev, 
+                                    config: { ...prev.config, channelUrl: e.target.value }
+                                  }))}
+                                  placeholder="https://t.me/channel_name"
+                                />
+                              </div>
+                            )}
+
+                            {newSourceForm.type === 'rss_feed' && (
+                              <div>
+                                <Label htmlFor="rssUrl">URL RSS ленты</Label>
+                                <Input
+                                  id="rssUrl"
+                                  value={newSourceForm.config.rssUrl}
+                                  onChange={(e) => setNewSourceForm(prev => ({ 
+                                    ...prev, 
+                                    config: { ...prev.config, rssUrl: e.target.value }
+                                  }))}
+                                  placeholder="https://example.com/rss.xml"
+                                />
+                              </div>
+                            )}
+
+                            {(newSourceForm.type === 'uploaded_file' || newSourceForm.type === 'spreadsheet' || newSourceForm.type === 'pdf_document') && (
+                              <div>
+                                <Label htmlFor="fileName">Имя файла</Label>
+                                <Input
+                                  id="fileName"
+                                  value={newSourceForm.config.fileName}
+                                  onChange={(e) => setNewSourceForm(prev => ({ 
+                                    ...prev, 
+                                    config: { ...prev.config, fileName: e.target.value }
+                                  }))}
+                                  placeholder="example.xlsx"
+                                />
+                              </div>
+                            )}
+
+                            <div>
+                              <Label htmlFor="keywords">Ключевые слова</Label>
+                              <Input
+                                id="keywords"
+                                value={newSourceForm.config.keywords}
+                                onChange={(e) => setNewSourceForm(prev => ({ 
+                                  ...prev, 
+                                  config: { ...prev.config, keywords: e.target.value }
+                                }))}
+                                placeholder="недвижимость, инвестиции, аналитика"
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Кнопки */}
+                        <div className="flex justify-end space-x-3 pt-4">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => {
+                              setIsAddSourceDialogOpen(false);
+                              resetForm();
+                            }}
+                          >
+                            Отмена
+                          </Button>
+                          <Button 
+                            onClick={handleSubmitSource}
+                            disabled={createSourceMutation.isPending}
+                          >
+                            {createSourceMutation.isPending ? 'Создание...' : 'Создать источник'}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
