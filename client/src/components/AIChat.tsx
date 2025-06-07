@@ -107,7 +107,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
       {/* Full Screen AI Panel */}
       {isOpen && (
         <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm">
-          <div className="fixed right-0 top-0 h-full w-1/2 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out">
+          <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-1/2 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out">
             <div className="flex h-full">
               {/* Sidebar */}
               <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col">
