@@ -80,8 +80,8 @@ export default function Home() {
       <Navigation />
 
       {/* Map Section - Full Width Always Active */}
-      <div className="w-full pt-4 px-4">
-        <div className="relative h-[500px] bg-white border-b rounded-lg shadow-sm">
+      <div className="w-full pt-4 px-4 mb-6">
+        <div className="relative h-[500px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
           <PropertyMap 
             properties={allProperties as any}
             selectedProperty={selectedProperty}
@@ -89,7 +89,6 @@ export default function Home() {
             regionId={filters.regionId}
             activeMapTool={activeMapTool}
           />
-
         </div>
       </div>
 
