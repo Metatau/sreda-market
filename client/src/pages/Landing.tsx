@@ -149,12 +149,17 @@ export default function Landing() {
           description: "Ваш промокод готов к использованию",
         });
       } else {
-        throw new Error('Failed to generate promocode');
+        const errorData = await response.json();
+        if (response.status === 429) {
+          throw new Error(errorData.error || 'Превышен лимит создания промокодов');
+        }
+        throw new Error(errorData.error || 'Failed to generate promocode');
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Не удалось создать промокод. Попробуйте позже.";
       toast({
         title: "Ошибка",
-        description: "Не удалось создать промокод. Попробуйте позже.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

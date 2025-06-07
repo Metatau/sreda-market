@@ -89,9 +89,12 @@ export interface IStorage {
   toggleDataSourceStatus(id: number): Promise<boolean>;
   
   // Promocode management
-  createPromocode(): Promise<Promocode>;
+  createPromocode(clientIp?: string): Promise<Promocode>;
   getPromocodeByCode(code: string): Promise<Promocode | undefined>;
-  usePromocode(code: string, userId: number): Promise<boolean>;
+  usePromocode(code: string, userId: number, clientIp?: string): Promise<boolean>;
+  getUserPromocodeUsage(userId: number): Promise<number>;
+  getPromocodeCreationCountByIp(ip: string, hoursBack: number): Promise<number>;
+  getPromocodeUsageCountByIp(ip: string, hoursBack: number): Promise<number>;
   isPromocodeExpired(promocode: Promocode): boolean;
 }
 

@@ -198,16 +198,32 @@ export function Profile() {
         // Обновляем данные пользователя
         loadReferralStats();
       } else {
+        // Улучшенная обработка ошибок с детализированными сообщениями
+        let errorMessage = data.error || "Промокод недействителен";
+        
+        // Специальные сообщения для различных типов ошибок
+        if (errorMessage.includes("лимит использования") || errorMessage.includes("правила безопасности")) {
+          errorMessage = "Превышен лимит использования промокодов или нарушены правила безопасности";
+        } else if (errorMessage.includes("уже использован")) {
+          errorMessage = "Этот промокод уже был использован";
+        } else if (errorMessage.includes("истек")) {
+          errorMessage = "Срок действия промокода истек";
+        } else if (errorMessage.includes("активная подписка")) {
+          errorMessage = "У вас уже есть активная подписка";
+        } else if (errorMessage.includes("7 дней")) {
+          errorMessage = "Промокод можно использовать только в первые 7 дней после регистрации";
+        }
+        
         toast({
-          title: "Ошибка",
-          description: data.error || "Промокод недействителен",
+          title: "Ошибка применения промокода",
+          description: errorMessage,
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Promocode error:', error);
       toast({
-        title: "Ошибка",
+        title: "Ошибка соединения",
         description: "Не удалось применить промокод",
         variant: "destructive",
       });
