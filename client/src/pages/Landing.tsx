@@ -259,7 +259,7 @@ export default function Landing() {
                       placeholder=""
                     />
                     <div className="flex items-center ml-4">
-                      <span className="text-sm font-quantum font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 tracking-wider">
+                      <span className="text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 tracking-wider font-['Audiowide']">
                         AI SREDA
                       </span>
                     </div>
@@ -267,23 +267,107 @@ export default function Landing() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-6 gap-2 h-64">
-                {Array.from({ length: 24 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`rounded-lg opacity-80 hover:opacity-100 transition-all cursor-pointer transform hover:scale-105 animate-pulse ${
-                      i % 4 === 0 ? 'bg-red-400' :
-                      i % 4 === 1 ? 'bg-yellow-400' :
-                      i % 4 === 2 ? 'bg-green-400' : 'bg-blue-400'
-                    }`}
-                    style={{
-                      height: `${Math.random() * 60 + 40}%`,
-                      marginTop: `${Math.random() * 20}%`,
-                      animationDelay: `${Math.random() * 2}s`,
-                      animationDuration: `${2 + Math.random() * 2}s`
-                    }}
+              {/* Интерактивная карта российских городов */}
+              <div className="relative h-64 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl overflow-hidden">
+                <svg viewBox="0 0 500 300" className="w-full h-full">
+                  {/* Упрощенный контур России */}
+                  <path
+                    d="M60 180 Q120 100 220 110 Q320 105 420 125 Q460 145 480 180 Q470 230 440 250 Q360 270 240 265 Q140 260 80 240 Q50 210 60 180Z"
+                    fill="rgba(59, 130, 246, 0.08)"
+                    stroke="rgba(59, 130, 246, 0.2)"
+                    strokeWidth="2"
+                    className="drop-shadow-sm"
                   />
-                ))}
+                  
+                  {/* Города с анимированными маркерами */}
+                  {[
+                    { name: "Москва", x: 220, y: 170, size: "large", color: "red" },
+                    { name: "СПб", x: 190, y: 140, size: "large", color: "blue" },
+                    { name: "Казань", x: 250, y: 160, size: "medium", color: "green" },
+                    { name: "Пермь", x: 280, y: 150, size: "medium", color: "purple" },
+                    { name: "Екатеринбург", x: 310, y: 155, size: "medium", color: "orange" },
+                    { name: "Тюмень", x: 340, y: 150, size: "medium", color: "teal" },
+                    { name: "Уфа", x: 290, y: 170, size: "medium", color: "pink" },
+                    { name: "Сочи", x: 200, y: 230, size: "medium", color: "yellow" }
+                  ].map((city, index) => (
+                    <g key={city.name} className="cursor-pointer group">
+                      {/* Пульсирующий круг */}
+                      <circle
+                        cx={city.x}
+                        cy={city.y}
+                        r={city.size === "large" ? 15 : 12}
+                        fill="none"
+                        stroke={`rgb(59 130 246 / 0.3)`}
+                        strokeWidth="2"
+                        className="animate-ping"
+                        style={{
+                          animationDelay: `${index * 0.4}s`,
+                          animationDuration: '3s'
+                        }}
+                      />
+                      
+                      {/* Основная точка города */}
+                      <circle
+                        cx={city.x}
+                        cy={city.y}
+                        r={city.size === "large" ? 8 : 6}
+                        fill="rgb(59 130 246 / 0.8)"
+                        className="group-hover:fill-blue-600 transition-colors duration-200 drop-shadow-sm"
+                      />
+                      
+                      {/* Название города */}
+                      <text
+                        x={city.x}
+                        y={city.y - 20}
+                        textAnchor="middle"
+                        className="text-xs font-medium fill-gray-700 group-hover:fill-blue-700 transition-colors duration-200"
+                        style={{ fontSize: '11px' }}
+                      >
+                        {city.name}
+                      </text>
+                      
+                      {/* Количество объектов (симуляция) */}
+                      <text
+                        x={city.x}
+                        y={city.y + 20}
+                        textAnchor="middle"
+                        className="text-xs fill-gray-500 group-hover:fill-blue-600 transition-colors duration-200"
+                        style={{ fontSize: '9px' }}
+                      >
+                        {Math.floor(Math.random() * 5000 + 500)}+
+                      </text>
+                    </g>
+                  ))}
+                  
+                  {/* Соединительные линии между крупными городами */}
+                  <path
+                    d="M220 170 L190 140"
+                    stroke="rgba(59, 130, 246, 0.2)"
+                    strokeWidth="1"
+                    strokeDasharray="3,3"
+                    className="animate-pulse"
+                  />
+                  <path
+                    d="M220 170 L250 160"
+                    stroke="rgba(59, 130, 246, 0.2)"
+                    strokeWidth="1"
+                    strokeDasharray="3,3"
+                    className="animate-pulse"
+                    style={{ animationDelay: '0.5s' }}
+                  />
+                </svg>
+              </div>
+              
+              {/* Статистика по городам */}
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-blue-200/50">
+                  <div className="text-lg font-bold text-blue-600">85%</div>
+                  <div className="text-xs text-gray-600">Средняя ликвидность</div>
+                </div>
+                <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border border-green-200/50">
+                  <div className="text-lg font-bold text-green-600">+12.5%</div>
+                  <div className="text-xs text-gray-600">Годовая доходность</div>
+                </div>
               </div>
               
               {/* Всплывающие метрики */}
