@@ -330,9 +330,6 @@ export default function InvestmentAnalyticsDemo() {
         {/* Интерактивная карта */}
         <div className="mb-8">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Карта инвестиционных объектов</CardTitle>
-            </CardHeader>
             <CardContent className="p-0">
               <AdvancedPropertyMap
                 properties={sortedProperties}
