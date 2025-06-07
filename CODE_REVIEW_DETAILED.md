@@ -43,6 +43,11 @@ export const regions = pgTable("regions", {
 - Enum типы для валидации данных
 - Relations между таблицами четко определены
 
+**Recent Enhancements:**
+- Added IP tracking fields (`created_from_ip`, `used_from_ip`) to promocodes table
+- Implemented comprehensive anti-fraud protection with rate limiting
+- Enhanced schema with security monitoring capabilities
+
 **Issues:**
 - Coordinates stored as text instead of PostGIS geometry (migration planned)
 - Some analytics fields could benefit from constraints
