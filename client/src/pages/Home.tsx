@@ -9,7 +9,6 @@ import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
 import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
-import { MapAnalyticsDemo } from '@/components/MapAnalyticsDemo';
 import { useProperties, useRegions, useNewProperties } from '@/hooks/api';
 import type { Property, PropertyFilters as FilterType } from '@/types';
 import { TrendingUp, BarChart3, Clock, Grid3X3, Map, Layers } from 'lucide-react';
