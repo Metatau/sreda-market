@@ -7,7 +7,11 @@ import type { PropertyFilters, Pagination } from "../storage";
 export class PropertyService {
   async getProperties(filters: PropertyFilters, pagination: Pagination) {
     try {
-      return await storage.getProperties(filters, pagination);
+      console.log('PropertyService.getProperties called with filters:', filters);
+      console.log('PropertyService.getProperties called with pagination:', pagination);
+      const result = await storage.getProperties(filters, pagination);
+      console.log('PropertyService.getProperties returned:', result.properties.length, 'properties');
+      return result;
     } catch (error) {
       throw new DatabaseError(`Failed to fetch properties: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
