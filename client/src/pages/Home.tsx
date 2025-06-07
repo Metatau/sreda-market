@@ -18,7 +18,7 @@ import { TrendingUp, BarChart3, Building2, Clock, Map, Grid3x3, Layers } from "l
 import type { SearchFilters, Property, PropertyWithRelations } from "@/types";
 
 // Enhanced Map Components
-import { InteractiveAnalyticsMap } from "@/components/Map/InteractiveAnalyticsMap";
+import { PropertyMap } from "@/components/Map/PropertyMapRefactored";
 import { MapAnalyticsDemo } from "@/components/Map/MapAnalyticsDemo";
 
 export default function Home() {
@@ -258,13 +258,30 @@ export default function Home() {
               {/* Enhanced Map Analytics View */}
               <TabsContent value="map" className="mt-6">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  {/* Main Map */}
+                  {/* Main Map - Using existing PropertyMap component */}
                   <div className="lg:col-span-3">
-                    <InteractiveAnalyticsMap
-                      properties={properties as PropertyWithRelations[]}
-                      onPropertySelect={handlePropertySelect}
-                      className="w-full"
-                    />
+                    <div className="relative h-[600px] rounded-lg border shadow-lg overflow-hidden">
+                      <PropertyMap 
+                        properties={properties as any}
+                        selectedProperty={selectedProperty}
+                        onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
+                      />
+                      
+                      {/* Enhanced Analytics Overlay */}
+                      <div className="absolute top-4 left-4 z-10">
+                        <Card className="bg-white/95 backdrop-blur-sm border shadow-lg">
+                          <CardContent className="p-3">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Layers className="h-4 w-4 text-blue-600" />
+                              <span className="font-medium">Аналитическая карта активна</span>
+                            </div>
+                            <div className="text-xs text-gray-600 mt-1">
+                              Отображено {properties.length} объектов
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Demo Panel */}
