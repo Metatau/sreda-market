@@ -20,6 +20,7 @@ export default function Home() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [activeMapTool, setActiveMapTool] = useState<'none' | 'heatmap' | 'geoanalysis' | 'investment'>('none');
 
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
@@ -60,11 +61,20 @@ export default function Home() {
       <div className="w-full bg-white border-b shadow-sm mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="hover:shadow-md transition-shadow">
+            <Card 
+              className={`hover:shadow-md transition-all cursor-pointer ${
+                activeMapTool === 'heatmap' ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+              }`}
+              onClick={() => setActiveMapTool(activeMapTool === 'heatmap' ? 'none' : 'heatmap')}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <BarChart3 className="h-6 w-6 text-blue-600" />
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    activeMapTool === 'heatmap' ? 'bg-blue-600' : 'bg-blue-100'
+                  }`}>
+                    <BarChart3 className={`h-6 w-6 ${
+                      activeMapTool === 'heatmap' ? 'text-white' : 'text-blue-600'
+                    }`} />
                   </div>
                   <div>
                     <h4 className="font-semibold">Тепловые карты</h4>
@@ -74,11 +84,20 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card 
+              className={`hover:shadow-md transition-all cursor-pointer ${
+                activeMapTool === 'geoanalysis' ? 'ring-2 ring-green-500 bg-green-50' : ''
+              }`}
+              onClick={() => setActiveMapTool(activeMapTool === 'geoanalysis' ? 'none' : 'geoanalysis')}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-green-600" />
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    activeMapTool === 'geoanalysis' ? 'bg-green-600' : 'bg-green-100'
+                  }`}>
+                    <MapPin className={`h-6 w-6 ${
+                      activeMapTool === 'geoanalysis' ? 'text-white' : 'text-green-600'
+                    }`} />
                   </div>
                   <div>
                     <h4 className="font-semibold">Геоанализ</h4>
@@ -88,11 +107,20 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card 
+              className={`hover:shadow-md transition-all cursor-pointer ${
+                activeMapTool === 'investment' ? 'ring-2 ring-orange-500 bg-orange-50' : ''
+              }`}
+              onClick={() => setActiveMapTool(activeMapTool === 'investment' ? 'none' : 'investment')}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-orange-600" />
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    activeMapTool === 'investment' ? 'bg-orange-600' : 'bg-orange-100'
+                  }`}>
+                    <TrendingUp className={`h-6 w-6 ${
+                      activeMapTool === 'investment' ? 'text-white' : 'text-orange-600'
+                    }`} />
                   </div>
                   <div>
                     <h4 className="font-semibold">Инвест-аналитика</h4>
@@ -104,6 +132,90 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Active Tool Panel */}
+      {activeMapTool !== 'none' && (
+        <div className="w-full bg-gray-50 border-b shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            {activeMapTool === 'heatmap' && (
+              <div className="bg-white rounded-lg p-4 border">
+                <h3 className="font-semibold mb-3 text-blue-600">Настройки тепловых карт</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Тип карты</label>
+                    <select className="w-full border rounded-md px-3 py-2">
+                      <option>Карта цен</option>
+                      <option>Плотность объектов</option>
+                      <option>Инвестиционная привлекательность</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Интенсивность</label>
+                    <input type="range" min="0.1" max="2" step="0.1" className="w-full" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Радиус</label>
+                    <input type="range" min="100" max="1000" step="50" className="w-full" />
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {activeMapTool === 'geoanalysis' && (
+              <div className="bg-white rounded-lg p-4 border">
+                <h3 className="font-semibold mb-3 text-green-600">Инструменты геоанализа</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <button className="border rounded-lg p-3 text-center hover:bg-gray-50">
+                    <div className="text-lg mb-1">📏</div>
+                    <div className="text-sm">Измерить расстояние</div>
+                  </button>
+                  <button className="border rounded-lg p-3 text-center hover:bg-gray-50">
+                    <div className="text-lg mb-1">🎯</div>
+                    <div className="text-sm">Радиус от точки</div>
+                  </button>
+                  <button className="border rounded-lg p-3 text-center hover:bg-gray-50">
+                    <div className="text-lg mb-1">📊</div>
+                    <div className="text-sm">Статистика района</div>
+                  </button>
+                  <button className="border rounded-lg p-3 text-center hover:bg-gray-50">
+                    <div className="text-lg mb-1">🏢</div>
+                    <div className="text-sm">Инфраструктура</div>
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {activeMapTool === 'investment' && (
+              <div className="bg-white rounded-lg p-4 border">
+                <h3 className="font-semibold mb-3 text-orange-600">Инвестиционная аналитика</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">ROI-зоны</span>
+                      <input type="checkbox" />
+                    </div>
+                    <div className="text-xs text-gray-600">Показать зоны доходности</div>
+                  </div>
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Прогноз роста</span>
+                      <input type="checkbox" />
+                    </div>
+                    <div className="text-xs text-gray-600">Потенциал роста цен</div>
+                  </div>
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Ликвидность</span>
+                      <input type="checkbox" />
+                    </div>
+                    <div className="text-xs text-gray-600">Скорость продажи</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Content Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
