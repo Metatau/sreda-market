@@ -30,7 +30,7 @@ export default function LandingPage() {
       description: "Расчет доходности, рисков и прогнозов для каждого объекта недвижимости"
     },
     {
-      icon: <Map className="h-8 w-8 text-green-600" />,
+      icon: <MapPin className="h-8 w-8 text-green-600" />,
       title: "Интерактивная карта",
       description: "Поиск объектов на карте с фильтрами и детальной информацией"
     },

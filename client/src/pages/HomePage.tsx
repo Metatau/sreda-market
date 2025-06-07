@@ -134,7 +134,7 @@ export function HomePage() {
                       value="map" 
                       className="flex items-center space-x-2 data-[state=active]:bg-primary data-[state=active]:text-white"
                     >
-                      <Map className="h-4 w-4" />
+                      <MapPin className="h-4 w-4" />
                       <span>Карта</span>
                     </TabsTrigger>
                     <TabsTrigger 

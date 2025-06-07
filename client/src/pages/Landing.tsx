@@ -198,7 +198,7 @@ export default function Landing() {
       details: "Анализ рынка, оценка рисков и инвестиционные стратегии"
     },
     {
-      icon: <Map className="h-8 w-8 text-orange-600" />,
+      icon: <MapPin className="h-8 w-8 text-orange-600" />,
       title: "Геоаналитика",
       description: "Анализ инфраструктуры и потенциала развития",
       details: "Транспорт, школы, больницы, планы застройки"
