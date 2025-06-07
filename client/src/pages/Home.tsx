@@ -162,43 +162,45 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Property Section Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-bold text-gray-900 text-[20px]">
-                Недвижимость в {selectedRegionName}
-              </h2>
-
-              <div className="flex items-center space-x-4">
-                <p className="text-sm text-gray-600">
-                  Найдено {pagination?.total || 0} объектов
-                </p>
-                <Select defaultValue="price_asc">
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Сортировка" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
-                    <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
-                    <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
-                    <SelectItem value="area">По площади</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Enhanced View Mode Tabs */}
+            {/* Enhanced View Mode Tabs - Moved to top */}
             <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'map')} className="mb-6">
-              <TabsList className="grid w-full grid-cols-2 max-w-md">
-                <TabsTrigger value="grid" className="flex items-center gap-2">
-                  <Grid3x3 className="h-4 w-4" />
-                  Список объектов
-                </TabsTrigger>
-                <TabsTrigger value="map" className="flex items-center gap-2">
-                  <Map className="h-4 w-4" />
-                  Аналитическая карта
-                  <Badge variant="secondary" className="ml-1">Новинка</Badge>
-                </TabsTrigger>
-              </TabsList>
+              <div className="flex items-center justify-between mb-4">
+                <TabsList className="grid w-full grid-cols-2 max-w-md">
+                  <TabsTrigger value="grid" className="flex items-center gap-2">
+                    <Grid3x3 className="h-4 w-4" />
+                    Список объектов
+                  </TabsTrigger>
+                  <TabsTrigger value="map" className="flex items-center gap-2">
+                    <Map className="h-4 w-4" />
+                    Аналитическая карта
+                    <Badge variant="secondary" className="ml-1">Новинка</Badge>
+                  </TabsTrigger>
+                </TabsList>
+
+                <div className="flex items-center space-x-4">
+                  <p className="text-sm text-gray-600">
+                    Найдено {pagination?.total || 0} объектов
+                  </p>
+                  <Select defaultValue="price_asc">
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Сортировка" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
+                      <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
+                      <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
+                      <SelectItem value="area">По площади</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Property Section Header */}
+              <div className="mb-6">
+                <h2 className="font-bold text-gray-900 text-[20px]">
+                  Недвижимость в {selectedRegionName}
+                </h2>
+              </div>
 
               {/* Grid View Content */}
               <TabsContent value="grid" className="mt-6">
