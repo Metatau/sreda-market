@@ -80,6 +80,41 @@ router.get('/tags', async (req: any, res: any) => {
   }
 });
 
+// Get single insight
+router.get('/:id', async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const numId = parseInt(id, 10);
+    
+    if (isNaN(numId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Некорректный ID аналитической заметки'
+      });
+    }
+    
+    const insight = await storage.getInsight(numId);
+    
+    if (!insight) {
+      return res.status(404).json({
+        success: false,
+        error: 'Аналитическая заметка не найдена'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: insight
+    });
+  } catch (error) {
+    console.error('Error fetching insight:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения аналитической заметки'
+    });
+  }
+});
+
 // Admin endpoints for managing insights
 router.post('/', requireAuth, async (req: AuthenticatedRequest, res: any) => {
   try {
