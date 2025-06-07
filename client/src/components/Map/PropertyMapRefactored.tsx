@@ -320,11 +320,11 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
       <div 
         ref={mapContainer} 
         className="w-full h-full rounded-lg"
-        style={{ minHeight: '676px' }}
+        style={{ minHeight: '473px' }}
       />
       
       {/* Map Controls Panel */}
-      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 space-y-4 min-w-[200px]">
+      <div className="absolute top-4 right-4 bottom-4 bg-white rounded-lg shadow-lg p-4 space-y-4 min-w-[200px] max-h-[calc(100%-2rem)] overflow-y-auto">
         <div>
           <h3 className="text-sm font-semibold text-gray-800 mb-3">Инструменты карты</h3>
           
