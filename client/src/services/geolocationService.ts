@@ -9,23 +9,19 @@ interface RegionCoordinates {
   coordinates: [number, number];
 }
 
-// Russian city coordinates
+// Russian city coordinates (matching database IDs)
 const RUSSIAN_CITIES: RegionCoordinates[] = [
   { id: 1, name: "Москва", coordinates: [55.7558, 37.6176] },
   { id: 2, name: "Санкт-Петербург", coordinates: [59.9311, 30.3609] },
   { id: 3, name: "Новосибирск", coordinates: [55.0084, 82.9357] },
   { id: 4, name: "Екатеринбург", coordinates: [56.8431, 60.6454] },
-  { id: 5, name: "Нижний Новгород", coordinates: [56.2965, 43.9361] },
-  { id: 6, name: "Казань", coordinates: [55.8304, 49.0661] },
-  { id: 7, name: "Челябинск", coordinates: [55.1644, 61.4368] },
-  { id: 8, name: "Омск", coordinates: [54.9884, 73.3242] },
-  { id: 9, name: "Самара", coordinates: [53.2001, 50.15] },
-  { id: 10, name: "Ростов-на-Дону", coordinates: [47.2357, 39.7015] },
+  { id: 5, name: "Казань", coordinates: [55.8304, 49.0661] },
   { id: 11, name: "Уфа", coordinates: [54.7388, 55.9721] },
   { id: 12, name: "Красноярск", coordinates: [56.0184, 92.8672] },
-  { id: 13, name: "Воронеж", coordinates: [51.6720, 39.1843] },
-  { id: 14, name: "Пермь", coordinates: [58.0105, 56.2502] },
-  { id: 15, name: "Волгоград", coordinates: [48.7080, 44.5133] }
+  { id: 13, name: "Пермь", coordinates: [58.0105, 56.2502] },
+  { id: 35, name: "Калининград", coordinates: [54.7065, 20.4522] },
+  { id: 36, name: "Тюмень", coordinates: [57.1522, 65.5343] },
+  { id: 37, name: "Сочи", coordinates: [43.6028, 39.7342] }
 ];
 
 export class GeolocationService {
