@@ -222,18 +222,29 @@ Error: Property 'addPropertyMarkers' does not exist on type 'LeafletMapService'
 - Add request size limits
 - Sanitize all user inputs
 
-## Security Assessment (7/10)
+## Security Assessment (9/10)
 
 ### Authentication Security
 - Password hashing implemented (bcrypt)
 - Telegram signature verification
 - Session management present
 
+### IP-Based Anti-Fraud System (NEW)
+- Comprehensive IP tracking for promocode operations
+- Multi-layer rate limiting: 3 creations/hour, 5 uses/day per IP
+- Self-application prevention mechanism
+- Administrative monitoring with real-time security metrics
+- Detailed error handling with appropriate HTTP status codes
+
 ### Areas for Improvement
 - Missing CSRF tokens
-- No rate limiting implemented
 - Environment variable validation needed
 - SQL injection protection (Drizzle provides this)
+
+### Implemented Security Features
+- Rate limiting for promotional codes
+- IP-based fraud detection and prevention
+- Comprehensive logging and monitoring
 
 ## Performance Analysis
 
