@@ -385,8 +385,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat with role-based access and quota checking
-  app.post("/api/chat", aiRateLimit, requireRoleAuth, checkAIQuota, validateBody(chatMessageSchema), async (req, res) => {
+  // AI Chat with role-based access (unlimited usage)
+  app.post("/api/chat", aiRateLimit, requireRoleAuth, validateBody(chatMessageSchema), async (req, res) => {
     try {
       const { message, sessionId } = req.body;
 
@@ -416,8 +416,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Property Recommendations
-  app.post("/api/ai/recommendations", aiRateLimit, requireRoleAuth, checkAIQuota, validateBody(aiRequestSchema), async (req, res) => {
+  // AI Property Recommendations (unlimited usage)
+  app.post("/api/ai/recommendations", aiRateLimit, requireRoleAuth, validateBody(aiRequestSchema), async (req, res) => {
     try {
       const { context } = req.body;
       const { budget, purpose, region, rooms } = context?.preferences || {};
