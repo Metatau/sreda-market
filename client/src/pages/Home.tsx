@@ -19,6 +19,7 @@ import type { SearchFilters, Property, PropertyWithRelations } from "@/types";
 
 // Enhanced Map Components
 import { InteractiveAnalyticsMap } from "@/components/Map/InteractiveAnalyticsMap";
+import { MapAnalyticsDemo } from "@/components/Map/MapAnalyticsDemo";
 
 export default function Home() {
   const [filters, setFilters] = useState<SearchFilters>({});
@@ -256,11 +257,21 @@ export default function Home() {
 
               {/* Enhanced Map Analytics View */}
               <TabsContent value="map" className="mt-6">
-                <InteractiveAnalyticsMap
-                  properties={properties as PropertyWithRelations[]}
-                  onPropertySelect={handlePropertySelect}
-                  className="w-full"
-                />
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  {/* Main Map */}
+                  <div className="lg:col-span-3">
+                    <InteractiveAnalyticsMap
+                      properties={properties as PropertyWithRelations[]}
+                      onPropertySelect={handlePropertySelect}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  {/* Demo Panel */}
+                  <div className="lg:col-span-1">
+                    <MapAnalyticsDemo />
+                  </div>
+                </div>
 
                 {/* Map Analytics Features Info */}
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
