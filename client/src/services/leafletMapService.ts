@@ -330,6 +330,8 @@ export class LeafletMapService {
     return mapInstance.leafletMap.getZoom();
   }
 
+
+
   /**
    * Создание градиентного пина от синего к фиолетовому
    */
@@ -464,16 +466,24 @@ export class LeafletMapService {
       return false;
     }
 
-    // Простая реализация тепловой карты через круги
-    data.forEach(point => {
+    // Удаляем предыдущую тепловую карту
+    this.removeHeatmap(mapId);
+
+    // Простая реализация тепловой карты через круги с градиентом
+    data.forEach((point, index) => {
       const circle = window.L.circle([point.lat, point.lng], {
         color: this.getHeatmapColor(point.intensity),
         fillColor: this.getHeatmapColor(point.intensity),
-        fillOpacity: 0.3,
-        radius: (options?.radius || 25) * point.intensity
+        fillOpacity: 0.4 + (point.intensity * 0.4), // Динамическая прозрачность
+        radius: Math.max(50, (options?.radius || 100) * point.intensity), // Минимальный радиус 50м
+        weight: 2,
+        opacity: 0.8
       });
 
       circle.addTo(mapInstance.leafletMap);
+      
+      // Помечаем как тепловой слой
+      (circle as any)._isHeatmapLayer = true;
       mapInstance.layers.push(circle);
     });
 
@@ -489,11 +499,14 @@ export class LeafletMapService {
       return false;
     }
 
-    // Удаляем все слои (включая тепловую карту)
-    mapInstance.layers.forEach(layer => {
+    // Удаляем только тепловые слои
+    const heatmapLayers = mapInstance.layers.filter((layer: any) => layer._isHeatmapLayer);
+    heatmapLayers.forEach(layer => {
       mapInstance.leafletMap.removeLayer(layer);
     });
-    mapInstance.layers = [];
+    
+    // Обновляем массив слоев, исключая тепловые
+    mapInstance.layers = mapInstance.layers.filter((layer: any) => !layer._isHeatmapLayer);
 
     return true;
   }
@@ -511,20 +524,31 @@ export class LeafletMapService {
       return false;
     }
 
-    // Создаем выделяющий круг
+    // Удаляем предыдущее выделение
+    if ((mapInstance as any).highlightLayer) {
+      mapInstance.leafletMap.removeLayer((mapInstance as any).highlightLayer);
+    }
+
+    // Создаем анимированное выделение
     const highlightCircle = window.L.circle([coordinates.lat, coordinates.lng], {
-      color: 'red',
-      fillColor: 'red',
-      fillOpacity: 0.2,
-      radius: 100
+      color: '#ff6b35',
+      fillColor: '#ff6b35',
+      fillOpacity: 0.3,
+      radius: 150,
+      weight: 3,
+      opacity: 1
     });
 
     highlightCircle.addTo(mapInstance.leafletMap);
+    (mapInstance as any).highlightLayer = highlightCircle;
     
-    // Удаляем выделение через 3 секунды
+    // Удаляем выделение через 4 секунды
     setTimeout(() => {
-      mapInstance.leafletMap.removeLayer(highlightCircle);
-    }, 3000);
+      if ((mapInstance as any).highlightLayer) {
+        mapInstance.leafletMap.removeLayer((mapInstance as any).highlightLayer);
+        delete (mapInstance as any).highlightLayer;
+      }
+    }, 4000);
 
     return true;
   }
@@ -533,11 +557,17 @@ export class LeafletMapService {
    * Получение цвета для тепловой карты
    */
   private getHeatmapColor(intensity: number): string {
-    if (intensity > 0.8) return '#FF0000';
-    if (intensity > 0.6) return '#FF4500';
-    if (intensity > 0.4) return '#FFA500';
-    if (intensity > 0.2) return '#FFFF00';
-    return '#00FF00';
+    // Градиент от зеленого (низкие цены) к красному (высокие цены)
+    if (intensity > 0.9) return '#8B0000'; // Темно-красный
+    if (intensity > 0.8) return '#FF0000'; // Красный
+    if (intensity > 0.7) return '#FF4500'; // Оранжево-красный
+    if (intensity > 0.6) return '#FF6347'; // Томатный
+    if (intensity > 0.5) return '#FFA500'; // Оранжевый
+    if (intensity > 0.4) return '#FFD700'; // Золотой
+    if (intensity > 0.3) return '#FFFF00'; // Желтый
+    if (intensity > 0.2) return '#9ACD32'; // Желто-зеленый
+    if (intensity > 0.1) return '#32CD32'; // Лайм-зеленый
+    return '#008000'; // Зеленый
   }
 }
 

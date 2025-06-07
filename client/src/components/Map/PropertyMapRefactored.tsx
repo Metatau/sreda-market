@@ -227,7 +227,26 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
         const heatmapData = properties
         .filter(p => p.coordinates)
         .map(property => {
-          const [lat, lng] = property.coordinates!.split(',').map(Number);
+          let lat: number, lng: number;
+          
+          // Парсинг координат в зависимости от формата
+          if (property.coordinates!.startsWith('POINT(')) {
+            // Формат: POINT(longitude latitude)
+            const coords = property.coordinates!.match(/POINT\(([^)]+)\)/)?.[1];
+            if (coords) {
+              const [longitude, latitude] = coords.split(' ').map(Number);
+              lng = longitude;
+              lat = latitude;
+            } else {
+              return null; // Пропускаем некорректные координаты
+            }
+          } else {
+            // Формат: "latitude,longitude"
+            const [latitude, longitude] = property.coordinates!.split(',').map(Number);
+            lat = latitude;
+            lng = longitude;
+          }
+
           let intensity = 0.5;
 
           switch (heatmapMode) {
@@ -243,7 +262,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           }
 
           return { lat, lng, intensity: intensity * heatmapIntensity };
-        });
+        })
+        .filter(Boolean) as Array<{lat: number, lng: number, intensity: number}>;
 
         if (typeof leafletMapService.addHeatmap === 'function') {
           leafletMapService.addHeatmap(mapId, heatmapData, {
