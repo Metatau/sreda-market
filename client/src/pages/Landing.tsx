@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +13,7 @@ export default function Landing() {
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
 
   const [typedText, setTypedText] = useState('');
-  const [isAnimating, setIsAnimating] = useState(false);
+  const animationRef = useRef<{ interval?: NodeJS.Timeout; timeout?: NodeJS.Timeout }>({});
 
   const searchQueries = [
     'Выгодные квартиры в Москве с высокой доходностью',
@@ -71,44 +71,48 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, []);
 
-  // Анимация набора текста
-  useEffect(() => {
-    if (isAnimating) return; // Предотвращаем множественные запуски
+  // Функция запуска анимации печатания
+  const startTypingAnimation = () => {
+    // Очищаем предыдущие таймеры
+    if (animationRef.current.interval) clearInterval(animationRef.current.interval);
+    if (animationRef.current.timeout) clearTimeout(animationRef.current.timeout);
     
-    let typingInterval: NodeJS.Timeout;
-    let nextQueryTimeout: NodeJS.Timeout;
+    const currentQuery = searchQueries[currentSearchIndex];
+    let currentChar = 0;
     
-    // Задержка для стабилизации после загрузки
-    const startDelay = setTimeout(() => {
-      const currentQuery = searchQueries[currentSearchIndex];
-      let currentChar = 0;
-      
-      setIsAnimating(true);
-      setTypedText('');
-      
-      typingInterval = setInterval(() => {
-        if (currentChar <= currentQuery.length) {
-          const newText = currentQuery.slice(0, currentChar);
-          setTypedText(newText);
-          currentChar++;
-        } else {
-          clearInterval(typingInterval);
-          // Переходим к следующему запросу через 2 секунды после завершения набора
-          nextQueryTimeout = setTimeout(() => {
-            setIsAnimating(false);
-            setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
-          }, 2000);
-        }
-      }, 80); // Скорость набора: 80мс на символ
-    }, 500); // Задержка 500мс перед началом анимации
+    setTypedText('');
+    
+    animationRef.current.interval = setInterval(() => {
+      if (currentChar <= currentQuery.length) {
+        const newText = currentQuery.slice(0, currentChar);
+        setTypedText(newText);
+        currentChar++;
+      } else {
+        if (animationRef.current.interval) clearInterval(animationRef.current.interval);
+        // Переходим к следующему запросу через 2 секунды
+        animationRef.current.timeout = setTimeout(() => {
+          setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
+        }, 2000);
+      }
+    }, 80);
+  };
 
+  // Запуск анимации при изменении индекса
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      startTypingAnimation();
+    }, 1000); // Задержка 1 секунда для стабилизации
+
+    return () => clearTimeout(delay);
+  }, [currentSearchIndex]);
+
+  // Очистка при размонтировании компонента
+  useEffect(() => {
     return () => {
-      clearTimeout(startDelay);
-      clearTimeout(nextQueryTimeout);
-      if (typingInterval) clearInterval(typingInterval);
-      setIsAnimating(false);
+      if (animationRef.current.interval) clearInterval(animationRef.current.interval);
+      if (animationRef.current.timeout) clearTimeout(animationRef.current.timeout);
     };
-  }, [currentSearchIndex, searchQueries, isAnimating]);
+  }, []);
 
   // Таймер обратного отсчета
   useEffect(() => {
