@@ -193,9 +193,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User management endpoints
-  app.get("/api/users/profile", requireRoleAuth, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/users/profile", requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
     try {
-      const user = await storage.getUser(parseInt(req.user!.id.toString()));
+      const user = await storage.getUser(req.user!.id);
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }

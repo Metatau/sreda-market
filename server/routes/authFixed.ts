@@ -112,7 +112,12 @@ router.post('/register', async (req: any, res: any) => {
 // Session-based profile endpoint
 router.get('/profile', async (req: any, res: any) => {
   try {
+    console.log('Profile request - Session:', req.session);
+    console.log('Profile request - Session ID:', req.sessionID);
+    console.log('Profile request - User ID from session:', req.session?.userId);
+    
     if (!req.session || !req.session.userId) {
+      console.log('No session or userId found');
       return res.status(401).json({
         success: false,
         error: 'Not authenticated'
