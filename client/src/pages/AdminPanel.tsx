@@ -1772,7 +1772,7 @@ export default function AdminPanel() {
 
               <div className="space-y-3">
                 <Label>Функции плана</Label>
-                {editingPlan.features.map((feature, index) => (
+                {editingPlan.features.map((feature: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <span className="text-sm font-medium">{feature.name}</span>
                     {feature.value !== undefined ? (

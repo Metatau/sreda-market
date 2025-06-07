@@ -61,14 +61,17 @@ export function UnifiedPropertyMap({
         await leafletMapService.loadLeaflet();
         const newMapId = `unified_map_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
+        const mapElement = document.getElementById('map-container');
+        if (!mapElement) {
+          console.error('Map container not found');
+          return;
+        }
         const success = leafletMapService.createMap(
           newMapId,
-          'map-container',
-          centerCoordinates,
-          zoomLevel
+          mapElement as HTMLElement
         );
 
-        if (success) {
+        if (typeof success === 'string') {
           setMapId(newMapId);
           setIsMapLoaded(true);
         }
@@ -92,7 +95,7 @@ export function UnifiedPropertyMap({
 
     const markers = mapData.map(property => ({
       id: property.id,
-      coordinates: property.coordinates as [number, number],
+      coordinates: property.coordinates ? (JSON.parse(property.coordinates) as [number, number]) : ([0, 0] as [number, number]),
       popup: {
         id: property.id,
         title: property.title,
