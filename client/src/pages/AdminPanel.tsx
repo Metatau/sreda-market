@@ -120,21 +120,8 @@ export default function AdminPanel() {
 
   const createSourceMutation = useMutation({
     mutationFn: async (sourceData: any) => {
-      console.log('Sending request to create source:', sourceData);
-      const response = await fetch('/api/admin/sources', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sourceData)
-      });
-      
-      console.log('Response status:', response.status);
-      const responseData = await response.json();
-      console.log('Response data:', responseData);
-      
-      if (!response.ok) {
-        throw new Error(responseData.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      return responseData;
+      console.log('Creating source with apiRequest:', sourceData);
+      return await apiRequest('POST', '/api/admin/sources', sourceData);
     },
     onSuccess: (data) => {
       console.log('Source created successfully:', data);
