@@ -1,14 +1,6 @@
-import { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { Property } from '@/types';
-import { safePromise } from '@/lib/errorHandling';
-import { trackMapEvent } from '@/lib/yandexMetrika';
 import { leafletMapService } from '@/services/leafletMapService';
-
-import { MapControls } from './components/MapControls';
-import { SearchResults } from './components/SearchResults';
-import { PropertyPopup } from './components/PropertyPopup';
-import { useMapState } from './hooks/useMapState';
-import { useMapSearch } from './hooks/useMapSearch';
 
 export interface PropertyMapProps {
   properties: Property[];
@@ -29,32 +21,11 @@ const getPropertyClassColor = (className: string): string => {
 };
 
 export function PropertyMap({ properties, selectedProperty, onPropertySelect }: PropertyMapProps) {
-  const {
-    mapContainer,
-    mapId,
-    setMapId,
-    mapLoaded,
-    setMapLoaded,
-    heatmapMode,
-    setHeatmapMode,
-    heatmapIntensity,
-    setHeatmapIntensity,
-    selectedPropertyState,
-    setSelectedProperty,
-    searchQuery,
-    setSearchQuery,
-    searchResults,
-    setSearchResults,
-    isSearching,
-    setIsSearching,
-
-  } = useMapState();
-
-  const { performSearch, handleSearchResultSelect } = useMapSearch(
-    setSearchResults,
-    setIsSearching,
-    mapId
-  );
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const [mapId, setMapId] = useState<string | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
+  const [heatmapIntensity, setHeatmapIntensity] = useState(0.7);
 
   // Initialize map
   useEffect(() => {
@@ -75,9 +46,6 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         console.error('Failed to initialize map:', error);
       }
     };
-        trackMapEvent('map_initialized');
-      }
-    };
 
     initializeMap();
 
@@ -86,7 +54,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         leafletMapService.destroyMap(mapId);
       }
     };
-  }, [mapContainer, mapId, setMapId, setMapLoaded]);
+  }, []);
 
   // Update properties on map
   useEffect(() => {
@@ -109,7 +77,6 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
 
       const result = leafletMapService.addPropertyMarkers(mapId, propertyMarkers, {
         onMarkerClick: (property: any) => {
-          setSelectedProperty(property);
           onPropertySelect?.(property);
         },
         getMarkerColor: (className: string) => getPropertyClassColor(className)
@@ -121,7 +88,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     };
 
     updateProperties();
-  }, [mapId, mapLoaded, properties, onPropertySelect, setSelectedProperty]);
+  }, [mapId, mapLoaded, properties, onPropertySelect]);
 
   // Handle heatmap mode changes
   useEffect(() => {
@@ -178,43 +145,56 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     highlightProperty();
   }, [mapId, selectedProperty]);
 
-  const handleSearchSubmit = () => {
-    performSearch(searchQuery);
-  };
-
   return (
-    <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
-      <MapControls
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onSearchSubmit={handleSearchSubmit}
-        heatmapMode={heatmapMode}
-        onHeatmapModeChange={setHeatmapMode}
-        heatmapIntensity={heatmapIntensity}
-        onHeatmapIntensityChange={setHeatmapIntensity}
-        onFullscreenToggle={() => {}}
-        isSearching={isSearching}
+    <div className="relative w-full h-full">
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full rounded-lg"
+        style={{ minHeight: '400px' }}
       />
+      
+      {/* Map Controls */}
+      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 space-y-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Heatmap Mode
+          </label>
+          <select
+            value={heatmapMode}
+            onChange={(e) => setHeatmapMode(e.target.value as HeatmapMode)}
+            className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm"
+          >
+            <option value="none">None</option>
+            <option value="price">Price</option>
+            <option value="density">Density</option>
+            <option value="investment">Investment</option>
+          </select>
+        </div>
+        
+        {heatmapMode !== 'none' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Intensity: {Math.round(heatmapIntensity * 100)}%
+            </label>
+            <input
+              type="range"
+              min="0.1"
+              max="1"
+              step="0.1"
+              value={heatmapIntensity}
+              onChange={(e) => setHeatmapIntensity(parseFloat(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        )}
+      </div>
 
-      {searchResults.length > 0 && (
-        <SearchResults
-          results={searchResults}
-          onResultSelect={handleSearchResultSelect}
-          onClose={() => setSearchResults([])}
-        />
-      )}
-
-      {/* Map Container */}
-      <div ref={mapContainer} className="w-full h-full" />
-
-      {/* Loading State */}
+      {/* Loading indicator */}
       {!mapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+        <div className="absolute inset-0 bg-gray-100 flex items-center justify-center rounded-lg">
+          <div className="text-gray-600">Loading map...</div>
         </div>
       )}
-
-
     </div>
   );
 }
