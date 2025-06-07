@@ -11,8 +11,7 @@ export default function Landing() {
   const [timeLeft, setTimeLeft] = useState('07:59:32');
   const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
-  const [searchValue, setSearchValue] = useState('');
-  const [isUserTyping, setIsUserTyping] = useState(false);
+
   const [typedText, setTypedText] = useState('');
 
   const searchQueries = [
@@ -73,9 +72,6 @@ export default function Landing() {
 
   // Анимация набора текста
   useEffect(() => {
-    // Только если пользователь не вводит текст
-    if (isUserTyping) return;
-    
     const currentQuery = searchQueries[currentSearchIndex];
     let currentChar = 0;
     
@@ -97,7 +93,7 @@ export default function Landing() {
     }, 80); // Скорость набора: 80мс на символ
 
     return () => clearInterval(typingInterval);
-  }, [currentSearchIndex, searchQueries, isUserTyping]);
+  }, [currentSearchIndex, searchQueries]);
 
   // Таймер обратного отсчета
   useEffect(() => {
@@ -246,21 +242,9 @@ export default function Landing() {
                     <Search className="h-5 w-5 text-gray-400 mr-4 flex-shrink-0" />
                     <input
                       type="text"
-                      value={isUserTyping ? searchValue : typedText}
-                      onChange={(e) => {
-                        setSearchValue(e.target.value);
-                        setIsUserTyping(true);
-                      }}
-                      onFocus={() => {
-                        setIsUserTyping(true);
-                        setSearchValue('');
-                      }}
-                      onBlur={() => {
-                        if (!searchValue) {
-                          setIsUserTyping(false);
-                        }
-                      }}
-                      className="flex-1 text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400"
+                      value={typedText}
+                      readOnly
+                      className="flex-1 text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 cursor-default"
                       placeholder=""
                     />
                     <div className="flex items-center ml-4">
