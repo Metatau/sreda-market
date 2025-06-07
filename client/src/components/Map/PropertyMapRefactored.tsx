@@ -179,7 +179,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           
           return {
             id: property.id,
-            coordinates: [lng, lat] as [number, number],
+            coordinates: [lat, lng] as [number, number], // Leaflet использует [lat, lng]
             popup: property,
             className: 'default',
             price: property.price

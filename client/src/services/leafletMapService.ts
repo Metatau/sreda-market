@@ -469,23 +469,34 @@ export class LeafletMapService {
     // Удаляем предыдущую тепловую карту
     this.removeHeatmap(mapId);
 
+    // Создаем группу слоев для тепловой карты
+    const heatmapLayerGroup = window.L.layerGroup();
+
     // Простая реализация тепловой карты через круги с градиентом
     data.forEach((point, index) => {
+      const baseRadius = options?.radius || 500; // Базовый радиус в метрах
+      const dynamicRadius = Math.max(200, baseRadius * (0.5 + point.intensity * 0.8));
+      
       const circle = window.L.circle([point.lat, point.lng], {
         color: this.getHeatmapColor(point.intensity),
         fillColor: this.getHeatmapColor(point.intensity),
-        fillOpacity: 0.4 + (point.intensity * 0.4), // Динамическая прозрачность
-        radius: Math.max(50, (options?.radius || 100) * point.intensity), // Минимальный радиус 50м
-        weight: 2,
-        opacity: 0.8
+        fillOpacity: 0.3 + (point.intensity * 0.4), // Динамическая прозрачность
+        radius: dynamicRadius,
+        weight: 1,
+        opacity: 0.6
       });
 
-      circle.addTo(mapInstance.leafletMap);
+      heatmapLayerGroup.addLayer(circle);
       
       // Помечаем как тепловой слой
       (circle as any)._isHeatmapLayer = true;
-      mapInstance.layers.push(circle);
     });
+
+    // Добавляем группу слоев на карту
+    heatmapLayerGroup.addTo(mapInstance.leafletMap);
+    
+    // Сохраняем ссылку на группу для последующего удаления
+    (mapInstance as any)._heatmapLayerGroup = heatmapLayerGroup;
 
     return true;
   }
@@ -499,7 +510,13 @@ export class LeafletMapService {
       return false;
     }
 
-    // Удаляем только тепловые слои
+    // Удаляем группу тепловых слоев, если она существует
+    if ((mapInstance as any)._heatmapLayerGroup) {
+      mapInstance.leafletMap.removeLayer((mapInstance as any)._heatmapLayerGroup);
+      delete (mapInstance as any)._heatmapLayerGroup;
+    }
+
+    // Также удаляем отдельные тепловые слои (для совместимости)
     const heatmapLayers = mapInstance.layers.filter((layer: any) => layer._isHeatmapLayer);
     heatmapLayers.forEach(layer => {
       mapInstance.leafletMap.removeLayer(layer);
