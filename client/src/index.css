@@ -68,6 +68,34 @@
   .property-card:hover {
     transform: translateY(-2px);
   }
+}
+
+/* Custom animations for metric cards */
+@keyframes floatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+}
 
   .line-clamp-2 {
     overflow: hidden;

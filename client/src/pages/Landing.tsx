@@ -221,16 +221,22 @@ export default function Landing() {
               {animatedMetrics.map((metric) => (
                 <div
                   key={metric.id}
-                  className="absolute bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-white/50 pointer-events-none animate-bounce"
+                  className="absolute bg-gradient-to-br from-white/95 to-blue-50/90 backdrop-blur-md rounded-xl p-3 shadow-2xl border-2 border-blue-200/60 pointer-events-none transform transition-all duration-300 hover:scale-110"
                   style={{
                     left: `${metric.x}%`,
                     top: `${metric.y}%`,
-                    animationDuration: '0.6s',
-                    animationIterationCount: '3'
+                    animation: 'floatIn 0.6s ease-out forwards, fadeOut 2.4s ease-in 2.6s forwards',
+                    boxShadow: '0 8px 32px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)'
                   }}
                 >
-                  <div className="text-xs font-bold text-gray-800">{metric.value}</div>
-                  <div className="text-xs text-gray-600">{metric.label}</div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-full animate-pulse"></div>
+                    <div className="text-sm font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                      {metric.value}
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-600 font-medium mt-1">{metric.label}</div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-sm animate-ping"></div>
                 </div>
               ))}
               
