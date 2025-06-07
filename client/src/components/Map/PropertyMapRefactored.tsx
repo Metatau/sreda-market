@@ -248,16 +248,36 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           }
 
           let intensity = 0.5;
-
+          
+          // Разные алгоритмы расчета интенсивности для разных режимов
           switch (heatmapMode) {
             case 'price':
-              intensity = Math.min(property.price / 50000000, 1); // Normalize price
+              // Нормализация цены от 0 до 1
+              const maxPrice = Math.max(...properties.map(p => p.price));
+              const minPrice = Math.min(...properties.map(p => p.price));
+              intensity = maxPrice > minPrice ? 
+                (property.price - minPrice) / (maxPrice - minPrice) : 0.5;
+              intensity = Math.max(0.1, Math.min(1, intensity)); // Ограничиваем от 0.1 до 1
               break;
             case 'density':
-              intensity = 0.8; // Uniform density
+              // Показываем одинаковую интенсивность для всех объектов (плотность)
+              intensity = 0.7;
               break;
             case 'investment':
-              intensity = 0.6; // Default investment intensity
+              // Расчет инвестиционного потенциала на основе цены за кв.м
+              const pricePerSqm = property.pricePerSqm || (property.price / (parseFloat(property.area || '50')));
+              // Чем ниже цена за кв.м, тем выше инвестиционный потенциал
+              const maxPricePerSqm = Math.max(...properties.map(p => 
+                p.pricePerSqm || (p.price / (parseFloat(p.area || '50')))
+              ));
+              const minPricePerSqm = Math.min(...properties.map(p => 
+                p.pricePerSqm || (p.price / (parseFloat(p.area || '50')))
+              ));
+              
+              // Инвертируем значение - меньшая цена = больший потенциал
+              intensity = maxPricePerSqm > minPricePerSqm ? 
+                1 - ((pricePerSqm - minPricePerSqm) / (maxPricePerSqm - minPricePerSqm)) : 0.6;
+              intensity = Math.max(0.2, Math.min(1, intensity));
               break;
           }
 

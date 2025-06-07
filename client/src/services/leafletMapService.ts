@@ -459,6 +459,7 @@ export class LeafletMapService {
       radius?: number;
       blur?: number;
       maxZoom?: number;
+      mode?: string;
     }
   ): boolean {
     const mapInstance = this.maps.get(mapId);
@@ -478,8 +479,8 @@ export class LeafletMapService {
       const dynamicRadius = Math.max(200, baseRadius * (0.5 + point.intensity * 0.8));
       
       const circle = window.L.circle([point.lat, point.lng], {
-        color: this.getHeatmapColor(point.intensity),
-        fillColor: this.getHeatmapColor(point.intensity),
+        color: this.getHeatmapColor(point.intensity, options?.mode || 'price'),
+        fillColor: this.getHeatmapColor(point.intensity, options?.mode || 'price'),
         fillOpacity: 0.3 + (point.intensity * 0.4), // Динамическая прозрачность
         radius: dynamicRadius,
         weight: 1,
@@ -571,10 +572,28 @@ export class LeafletMapService {
   }
 
   /**
-   * Получение цвета для тепловой карты
+   * Получение цвета для тепловой карты с поддержкой разных режимов
    */
-  private getHeatmapColor(intensity: number): string {
-    // Градиент от зеленого (низкие цены) к красному (высокие цены)
+  private getHeatmapColor(intensity: number, mode: string = 'price'): string {
+    if (mode === 'investment') {
+      // Для инвестиционного потенциала: зеленый = высокий потенциал
+      if (intensity > 0.8) return '#006400'; // Темно-зеленый
+      if (intensity > 0.6) return '#32CD32'; // Лайм-зеленый
+      if (intensity > 0.4) return '#90EE90'; // Светло-зеленый
+      if (intensity > 0.2) return '#FFFF00'; // Желтый
+      return '#FFA500'; // Оранжевый
+    }
+    
+    if (mode === 'density') {
+      // Для плотности: синие оттенки
+      if (intensity > 0.8) return '#000080'; // Темно-синий
+      if (intensity > 0.6) return '#0000FF'; // Синий
+      if (intensity > 0.4) return '#4169E1'; // Королевский синий
+      if (intensity > 0.2) return '#87CEEB'; // Небесно-голубой
+      return '#ADD8E6'; // Светло-голубой
+    }
+    
+    // Для цен: градиент от зеленого к красному
     if (intensity > 0.9) return '#8B0000'; // Темно-красный
     if (intensity > 0.8) return '#FF0000'; // Красный
     if (intensity > 0.7) return '#FF4500'; // Оранжево-красный
