@@ -38,7 +38,7 @@ export const propertyFiltersSchema = z.object({
 // Chat message validation
 export const chatMessageSchema = z.object({
   message: z.string().min(1).max(2000),
-  sessionId: z.string().uuid().optional()
+  sessionId: z.string().optional()
 });
 
 // AI request validation
