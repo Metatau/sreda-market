@@ -13,6 +13,7 @@ import authRoutes from "./auth.routes";
 import usersRoutes from "./users.routes";
 import propertiesRoutes from "./properties.routes";
 import analyticsRoutes from "./analytics.routes";
+import promocodesRoutes from "./promocodes.routes";
 import { imageRoutes } from "./imageRoutes";
 import mapRoutes from "./mapRoutes";
 import insightsRoutes from "./insights";
@@ -38,6 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/users', usersRoutes);
   app.use('/api/properties', propertiesRoutes);
   app.use('/api/analytics', analyticsRoutes);
+  app.use('/api/promocodes', promocodesRoutes);
   app.use('/api/images', imageRoutes);
   app.use('/api/map', mapRoutes);
   app.use('/api/insights', insightsRoutes);
@@ -52,16 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Setup Vite for frontend routing (must be after API routes)
-  if (process.env.NODE_ENV === "development") {
-    const { setupVite } = await import("../vite");
-    await setupVite(app);
-  } else {
-    const { serveStatic } = await import("../vite");
-    serveStatic(app);
-  }
-
-  // Global error handler
+  // Global error handler (must be last middleware)
   app.use(globalErrorHandler);
 
   const server = createServer(app);
