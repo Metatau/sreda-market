@@ -33,10 +33,13 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
   });
 
   const handleFilterChange = (key: keyof PropertyFilters, value: any) => {
-    onFiltersChange({
+    const newFilters = {
       ...filters,
       [key]: value || undefined,
-    });
+    };
+    console.log('PropertyFilters - Filter change:', key, value);
+    console.log('PropertyFilters - New filters:', newFilters);
+    onFiltersChange(newFilters);
   };
 
   const clearFilters = () => {

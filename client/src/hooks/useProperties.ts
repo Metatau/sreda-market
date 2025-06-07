@@ -24,17 +24,20 @@ export function useAISearch() {
 export function useProperties(filters?: SearchFilters, page: number = 1, perPage: number = 20) {
   return useQuery({
     queryKey: ["properties", filters, page, perPage],
-    queryFn: () => propertyApi.getProperties({
-      page,
-      per_page: perPage,
-      region_id: filters?.regionId,
-      property_class_id: filters?.propertyClassId,
-      min_price: filters?.minPrice,
-      max_price: filters?.maxPrice,
-      rooms: filters?.rooms,
-      property_type: filters?.propertyType,
-      market_type: filters?.marketType,
-    }),
+    queryFn: () => {
+      console.log('useProperties API call with filters:', filters);
+      return propertyApi.getProperties({
+        page,
+        per_page: perPage,
+        region_id: filters?.regionId,
+        property_class_id: filters?.propertyClassId,
+        min_price: filters?.minPrice,
+        max_price: filters?.maxPrice,
+        rooms: filters?.rooms,
+        property_type: filters?.propertyType,
+        market_type: filters?.marketType,
+      });
+    },
   });
 }
 

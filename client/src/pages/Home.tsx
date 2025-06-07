@@ -34,6 +34,11 @@ export default function Home() {
   const allProperties = allPropertiesData?.properties || []; // Все объекты для карты
   const pagination = propertiesData?.pagination;
 
+  // Debug logging
+  console.log('Home component - Current filters:', filters);
+  console.log('Home component - Properties count:', properties.length);
+  console.log('Home component - Loading state:', isLoading);
+
 
 
   const calculateAnalytics = useMutation({
