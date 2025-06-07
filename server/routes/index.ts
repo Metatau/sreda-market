@@ -1,13 +1,58 @@
-/**
- * Temporary bridge to original routes during refactoring
- * This file will be removed once refactoring is complete
- */
-import { Express } from 'express';
-import { createServer, type Server } from 'http';
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { corsMiddleware } from "../middleware/cors";
+import { sessionConfig } from "../middleware/sessionAuth";
+import { generalRateLimit } from "../middleware/rateLimiting";
+import { performanceMonitor } from "../services/performanceService";
+import { compression } from "../middleware/cache";
+import { globalErrorHandler } from "../utils/errors";
+import { UserService } from "../services/userService";
+
+// Import modular routes
+import authRoutes from "./auth.routes";
+import propertiesRoutes from "./properties.routes";
+import analyticsRoutes from "./analytics.routes";
+import { imageRoutes } from "./imageRoutes";
+import mapRoutes from "./mapRoutes";
+import insightsRoutes from "./insights";
+import adminSourcesRoutes from "./adminSources";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Import original routes to maintain functionality
-  const { registerRoutes: originalRegisterRoutes } = await import('../routes');
-  return await originalRegisterRoutes(app);
-}
+  // Global middleware
+  app.use(corsMiddleware);
+  app.use(sessionConfig);
+  app.use(generalRateLimit);
+  app.use(performanceMonitor.middleware());
+  app.use(compression);
 
+  // Initialize administrators
+  try {
+    await UserService.initializeAdministrators();
+  } catch (error) {
+    console.error('Failed to initialize administrator:', error);
+  }
+
+  // Register modular routes
+  app.use('/api/auth', authRoutes);
+  app.use('/api/properties', propertiesRoutes);
+  app.use('/api/analytics', analyticsRoutes);
+  app.use('/api/images', imageRoutes);
+  app.use('/api/map', mapRoutes);
+  app.use('/api/insights', insightsRoutes);
+  app.use('/api/admin/sources', adminSourcesRoutes);
+
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  });
+
+  // Global error handler
+  app.use(globalErrorHandler);
+
+  const server = createServer(app);
+  return server;
+}

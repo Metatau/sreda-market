@@ -16,10 +16,13 @@ export function useMapData(properties: PropertyWithRelations[], mode: string) {
         const [lat, lng] = coords.map(Number);
         return !isNaN(lat) && !isNaN(lng);
       })
-      .map(property => ({
-        ...property,
-        coordinates: property.coordinates!.split(',').map(Number) as [number, number]
-      }));
+      .map(property => {
+        const coords = property.coordinates!.split(',').map(Number);
+        return {
+          ...property,
+          coordArray: coords as [number, number]
+        };
+      });
   }, [properties]);
 
   const processedData = useMemo(() => {
