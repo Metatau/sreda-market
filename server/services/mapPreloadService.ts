@@ -104,59 +104,20 @@ class MapPreloadService {
           avgPrice: 0
         },
         {
-          regionId: 11, // Ufa
-          name: 'Уфа - Центр',
+          regionId: 11, // Chelyabinsk
+          name: 'Челябинск - Центр',
           bounds: {
-            north: 54.7700,
-            south: 54.7100,
-            east: 56.0100,
-            west: 55.9300
+            north: 55.2000,
+            south: 55.1200,
+            east: 61.4800,
+            west: 61.3900
           },
           priority: 6,
           propertyCount: 0,
           avgPrice: 0
         },
         {
-          regionId: 12, // Krasnoyarsk
-          name: 'Красноярск - Центр',
-          bounds: {
-            north: 56.0500,
-            south: 55.9850,
-            east: 92.9100,
-            west: 92.8200
-          },
-          priority: 7,
-          propertyCount: 0,
-          avgPrice: 0
-        },
-        {
-          regionId: 13, // Perm
-          name: 'Пермь - Центр',
-          bounds: {
-            north: 58.0400,
-            south: 57.9800,
-            east: 56.2900,
-            west: 56.2100
-          },
-          priority: 8,
-          propertyCount: 0,
-          avgPrice: 0
-        },
-        {
-          regionId: 35, // Kaliningrad
-          name: 'Калининград - Центр',
-          bounds: {
-            north: 54.7400,
-            south: 54.6800,
-            east: 20.4900,
-            west: 20.4100
-          },
-          priority: 9,
-          propertyCount: 0,
-          avgPrice: 0
-        },
-        {
-          regionId: 36, // Tyumen
+          regionId: 12, // Tyumen
           name: 'Тюмень - Центр',
           bounds: {
             north: 57.1800,
@@ -164,12 +125,12 @@ class MapPreloadService {
             east: 65.5700,
             west: 65.4800
           },
-          priority: 10,
+          priority: 7,
           propertyCount: 0,
           avgPrice: 0
         },
         {
-          regionId: 37, // Sochi
+          regionId: 13, // Sochi
           name: 'Сочи - Центр',
           bounds: {
             north: 43.6350,
@@ -177,7 +138,59 @@ class MapPreloadService {
             east: 39.7700,
             west: 39.6950
           },
+          priority: 8,
+          propertyCount: 0,
+          avgPrice: 0
+        },
+        {
+          regionId: 14, // Perm
+          name: 'Пермь - Центр',
+          bounds: {
+            north: 58.0400,
+            south: 57.9800,
+            east: 56.2900,
+            west: 56.2100
+          },
+          priority: 9,
+          propertyCount: 0,
+          avgPrice: 0
+        },
+        {
+          regionId: 15, // Krasnoyarsk
+          name: 'Красноярск - Центр',
+          bounds: {
+            north: 56.0500,
+            south: 55.9850,
+            east: 92.9100,
+            west: 92.8200
+          },
+          priority: 10,
+          propertyCount: 0,
+          avgPrice: 0
+        },
+        {
+          regionId: 16, // Kaliningrad
+          name: 'Калининград - Центр',
+          bounds: {
+            north: 54.7400,
+            south: 54.6800,
+            east: 20.4900,
+            west: 20.4100
+          },
           priority: 11,
+          propertyCount: 0,
+          avgPrice: 0
+        },
+        {
+          regionId: 17, // Ufa
+          name: 'Уфа - Центр',
+          bounds: {
+            north: 54.7700,
+            south: 54.7100,
+            east: 56.0100,
+            west: 55.9300
+          },
+          priority: 12,
           propertyCount: 0,
           avgPrice: 0
         }

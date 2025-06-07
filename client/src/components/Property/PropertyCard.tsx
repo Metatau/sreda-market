@@ -2,11 +2,11 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { PropertyWithRelations } from "@/types";
+import type { Property } from "@/types";
 
 interface PropertyCardProps {
-  property: PropertyWithRelations;
-  onSelect?: (property: PropertyWithRelations) => void;
+  property: Property;
+  onSelect?: (property: Property) => void;
   onFavorite?: (propertyId: number) => void;
   isFavorite?: boolean;
 }
@@ -77,7 +77,15 @@ export function PropertyCard({ property, onSelect, onFavorite, isFavorite = fals
         </Button>
       </div>
 
-      <CardContent className="p-4">
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          {property.propertyClassId && (
+            <Badge className="bg-blue-100 text-blue-800">
+              Класс {property.propertyClassId}
+            </Badge>
+          )}
+        </div>
+
         <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
           {property.title}
         </h3>
@@ -87,7 +95,7 @@ export function PropertyCard({ property, onSelect, onFavorite, isFavorite = fals
           <span className="truncate">{property.address}</span>
         </div>
 
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="text-lg font-bold text-gray-900">
             {formatPrice(property.price)}
           </div>
@@ -98,55 +106,45 @@ export function PropertyCard({ property, onSelect, onFavorite, isFavorite = fals
           )}
         </div>
 
-        {/* Компактная строка с основными характеристиками */}
-        <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
-          <div className="flex items-center space-x-3">
-            {property.area && (
-              <span className="flex items-center">
-                <i className="fas fa-expand-arrows-alt mr-1"></i>
-                {property.area} м²
-              </span>
-            )}
-            {property.rooms && (
-              <span className="flex items-center">
-                <i className="fas fa-door-open mr-1"></i>
-                {property.rooms === 0 ? "Студия" : `${property.rooms}`}
-              </span>
-            )}
-            {property.floor && property.totalFloors && (
-              <span className="flex items-center">
-                <i className="fas fa-building mr-1"></i>
-                {property.floor}/{property.totalFloors}
-              </span>
-            )}
-          </div>
-          
-          {/* Компактный бейдж с классом недвижимости */}
-          {property.propertyClassId && (
-            <Badge variant="secondary" className="text-xs px-2 py-0.5">
-              Класс {property.propertyClassId}
-            </Badge>
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+          {property.area && (
+            <span>
+              <i className="fas fa-expand-arrows-alt mr-1"></i>
+              {property.area} м²
+            </span>
+          )}
+          {property.rooms && (
+            <span>
+              <i className="fas fa-door-open mr-1"></i>
+              {property.rooms === 0 ? "Студия" : `${property.rooms} комн.`}
+            </span>
+          )}
+          {property.floor && property.totalFloors && (
+            <span>
+              <i className="fas fa-building mr-1"></i>
+              {property.floor}/{property.totalFloors} эт.
+            </span>
           )}
         </div>
 
         {/* Investment Metrics */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-center space-x-4">
-            {property.investmentAnalytics?.rentalRoiAnnual && (
+            {property.analytics?.roi && (
               <div className="flex items-center space-x-1">
                 <i className="fas fa-chart-line text-green-600"></i>
                 <span className="text-xs text-gray-600">ROI:</span>
-                <span className={`text-xs font-semibold ${getRoiColor(Number(property.investmentAnalytics.rentalRoiAnnual))}`}>
-                  {parseFloat(property.investmentAnalytics.rentalRoiAnnual).toFixed(1)}%
+                <span className={`text-xs font-semibold ${getRoiColor(property.analytics.roi)}`}>
+                  {property.analytics.roi}%
                 </span>
               </div>
             )}
-            {property.investmentAnalytics?.liquidityScore && (
+            {property.analytics?.liquidityScore && (
               <div className="flex items-center space-x-1">
                 <i className="fas fa-tachometer-alt text-orange-600"></i>
                 <span className="text-xs text-gray-600">Ликв:</span>
-                <span className={`text-xs font-semibold ${getLiquidityColor(property.investmentAnalytics.liquidityScore)}`}>
-                  {property.investmentAnalytics.liquidityScore}/10
+                <span className={`text-xs font-semibold ${getLiquidityColor(property.analytics.liquidityScore)}`}>
+                  {property.analytics.liquidityScore}/10
                 </span>
               </div>
             )}

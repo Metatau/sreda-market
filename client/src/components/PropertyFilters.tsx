@@ -14,33 +14,14 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
   const { data: regions = [] } = useRegions();
   const { data: propertyClasses = [] } = usePropertyClasses();
 
-  // Определяем приоритетные российские города с их ID
-  const priorityCities = [
-    { id: 1, name: 'Москва' },
-    { id: 2, name: 'Санкт-Петербург' },
-    { id: 3, name: 'Новосибирск' },
-    { id: 4, name: 'Екатеринбург' },
-    { id: 5, name: 'Казань' },
-    { id: 11, name: 'Уфа' },
-    { id: 12, name: 'Красноярск' },
-    { id: 13, name: 'Пермь' },
-    { id: 35, name: 'Калининград' },
-    { id: 36, name: 'Тюмень' },
-    { id: 37, name: 'Сочи' }
-  ];
-
-  // Сортируем регионы по важности (приоритетные города первыми)
+  // Сортируем регионы по важности (крупные города и области первыми)
   const sortedRegions = [...regions].sort((a, b) => {
-    const aPriority = priorityCities.findIndex(city => city.id === a.id);
-    const bPriority = priorityCities.findIndex(city => city.id === b.id);
-    
-    if (aPriority !== -1 && bPriority !== -1) {
-      return aPriority - bPriority;
-    }
-    if (aPriority !== -1) return -1;
-    if (bPriority !== -1) return 1;
-    
-    return a.name.localeCompare(b.name);
+    const order = [
+      'Москва', 'Московская область', 'Санкт-Петербург', 'Ленинградская область',
+      'Новосибирск', 'Екатеринбург', 'Нижний Новгород', 'Казань',
+      'Уфа', 'Красноярск', 'Пермь', 'Калининград'
+    ];
+    return order.indexOf(a.name) - order.indexOf(b.name);
   });
 
   const handleFilterChange = (key: keyof PropertyFilters, value: any) => {

@@ -82,13 +82,6 @@ class ApiClient {
     max_price?: number;
     rooms?: number;
     property_type?: string;
-    market_type?: string;
-    regionId?: number;
-    propertyClassId?: number;
-    minPrice?: number;
-    maxPrice?: number;
-    propertyType?: string;
-    marketType?: string;
   }): Promise<PropertiesResponse> {
     return this.get<PropertiesResponse>("/properties", params);
   }

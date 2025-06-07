@@ -21,30 +21,6 @@ export interface PropertyMapProps {
 
 type HeatmapMode = 'none' | 'price' | 'density' | 'investment';
 
-// Функция для извлечения координат из формата POINT
-const extractCoordinates = (property: Property): [number, number] | null => {
-  if (!property.coordinates) return null;
-  
-  // Проверяем формат POINT(lng lat)
-  const pointMatch = property.coordinates.match(/POINT\(([^)]+)\)/);
-  if (pointMatch) {
-    const coords = pointMatch[1].split(' ').map(Number);
-    if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-      return [coords[1], coords[0]]; // [lat, lng] для Leaflet
-    }
-  }
-  
-  // Пробуем парсить как простую строку "lat,lng"
-  if (property.coordinates.includes(',')) {
-    const coords = property.coordinates.split(',').map(Number);
-    if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-      return [coords[0], coords[1]];
-    }
-  }
-  
-  return null;
-};
-
 const getPropertyClassColor = (className: string): string => {
   const colors: Record<string, string> = {
     'Эконом': 'bg-blue-500',
@@ -140,23 +116,11 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
         if (properties.length === 0) return;
         
         // Добавляем маркеры для свойств
-        console.log('PropertyMap: mapId:', mapId, 'mapLoaded:', mapLoaded, 'properties count:', properties.length);
-        console.log('PropertyMap: Processing', properties.length, 'markers');
-        
-        if (properties.length > 0) {
-          console.log('PropertyMap: Sample marker:', {
-            id: properties[0].id,
-            coordinates: extractCoordinates(properties[0]),
-            popup: properties[0]
-          });
-        }
-        
         properties.forEach((property) => {
-          const coords = extractCoordinates(property);
-          if (coords && coords.length === 2) {
-            const [lat, lon] = coords;
+          if (property.coordinates) {
+            const [lon, lat] = property.coordinates.split(',').map(Number);
             if (leafletMapService.getMap(mapId) && !isNaN(lon) && !isNaN(lat)) {
-              leafletMapService.addMarker(mapId, [lat, lon], {
+              leafletMapService.addMarker(mapId, [lon, lat], {
                 title: property.title,
                 popup: `
                   <div style="min-width: 200px;">
