@@ -13,6 +13,11 @@ export default function Landing() {
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
 
   const [typedText, setTypedText] = useState('');
+  
+  // Отладка для проверки состояния
+  useEffect(() => {
+    console.log('typedText state changed:', typedText);
+  }, [typedText]);
 
   const searchQueries = [
     'Выгодные квартиры в Москве с высокой доходностью',
@@ -75,16 +80,20 @@ export default function Landing() {
     const currentQuery = searchQueries[currentSearchIndex];
     let currentChar = 0;
     
+    console.log('Animation starting for query:', currentQuery);
+    
     // Очищаем текст перед началом нового
     setTypedText('');
     
     const typingInterval = setInterval(() => {
       if (currentChar <= currentQuery.length) {
         const newText = currentQuery.slice(0, currentChar);
+        console.log('Typing character:', currentChar, 'Text:', newText);
         setTypedText(newText);
         currentChar++;
       } else {
         clearInterval(typingInterval);
+        console.log('Finished typing, switching to next query in 2 seconds');
         // Переходим к следующему запросу через 2 секунды после завершения набора
         setTimeout(() => {
           setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
