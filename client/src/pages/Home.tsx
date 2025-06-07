@@ -52,6 +52,7 @@ export default function Home() {
             selectedProperty={selectedProperty}
             onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
             regionId={filters.regionId}
+            activeMapTool={activeMapTool}
           />
 
         </div>

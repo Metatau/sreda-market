@@ -8,6 +8,7 @@ export interface PropertyMapProps {
   selectedProperty?: Property | null;
   onPropertySelect?: (property: Property) => void;
   regionId?: number | null;
+  activeMapTool?: 'none' | 'heatmap' | 'geoanalysis' | 'investment';
 }
 
 type HeatmapMode = 'none' | 'price' | 'density' | 'investment';
@@ -22,7 +23,7 @@ const getPropertyClassColor = (className: string): string => {
   return colors[className] || 'bg-gray-500';
 };
 
-export function PropertyMap({ properties, selectedProperty, onPropertySelect, regionId }: PropertyMapProps) {
+export function PropertyMap({ properties, selectedProperty, onPropertySelect, regionId, activeMapTool = 'none' }: PropertyMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [mapId, setMapId] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -116,6 +117,39 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
 
     updateMapPosition();
   }, [regionId, mapId, mapLoaded]);
+
+  // Handle active map tool changes
+  useEffect(() => {
+    if (!mapId || !mapLoaded) return;
+
+    switch (activeMapTool) {
+      case 'heatmap':
+        // Активируем тепловую карту по умолчанию (цены)
+        setHeatmapMode('price');
+        leafletMapService.toggleHeatmap(mapId, 'price', properties, heatmapIntensity);
+        break;
+      
+      case 'geoanalysis':
+        // Очищаем тепловые карты и подготавливаем для геоанализа
+        setHeatmapMode('none');
+        leafletMapService.clearHeatmap(mapId);
+        // Здесь можно добавить специальные слои для геоанализа
+        break;
+      
+      case 'investment':
+        // Активируем инвестиционную тепловую карту
+        setHeatmapMode('investment');
+        leafletMapService.toggleHeatmap(mapId, 'investment', properties, heatmapIntensity);
+        break;
+      
+      case 'none':
+      default:
+        // Очищаем все дополнительные слои
+        setHeatmapMode('none');
+        leafletMapService.clearHeatmap(mapId);
+        break;
+    }
+  }, [activeMapTool, mapId, mapLoaded, properties, heatmapIntensity]);
 
   // Update properties on map
   useEffect(() => {
