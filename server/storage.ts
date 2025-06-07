@@ -772,7 +772,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Promocode management methods
-  async createPromocode(): Promise<Promocode> {
+  async createPromocode(clientIp?: string): Promise<Promocode> {
+    // Проверка лимита создания промокодов с одного IP (максимум 3 в час)
+    if (clientIp) {
+      const ipUsageCount = await this.getPromocodeCreationCountByIp(clientIp, 1); // за последний час
+      if (ipUsageCount >= 3) {
+        throw new Error("Превышен лимит создания промокодов с данного IP-адреса");
+      }
+    }
+
     // Генерация 6-значного промокода
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     const expiresAt = new Date();
@@ -784,6 +792,7 @@ export class DatabaseStorage implements IStorage {
         code,
         expiresAt,
         isUsed: false,
+        createdFromIp: clientIp,
       })
       .returning();
     
@@ -799,7 +808,7 @@ export class DatabaseStorage implements IStorage {
     return promocode;
   }
 
-  async usePromocode(code: string, userId: number): Promise<boolean> {
+  async usePromocode(code: string, userId: number, clientIp?: string): Promise<boolean> {
     const promocode = await this.getPromocodeByCode(code);
     
     if (!promocode || promocode.isUsed || this.isPromocodeExpired(promocode)) {
@@ -826,6 +835,19 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
+    // IP-валидация: проверка лимита использования промокодов с одного IP
+    if (clientIp) {
+      const ipUsageCount = await this.getPromocodeUsageCountByIp(clientIp, 24); // за последние 24 часа
+      if (ipUsageCount >= 5) { // Максимум 5 использований с одного IP в день
+        return false;
+      }
+
+      // Проверка на подозрительную активность - один IP не может использовать промокоды созданные с того же IP
+      if (promocode.createdFromIp === clientIp) {
+        return false;
+      }
+    }
+
     // Устанавливаем промокод как использованный и привязываем к пользователю
     await db
       .update(promocodes)
@@ -833,6 +855,7 @@ export class DatabaseStorage implements IStorage {
         isUsed: true,
         usedAt: new Date(),
         userId: userId,
+        usedFromIp: clientIp,
       })
       .where(eq(promocodes.id, promocode.id));
 
@@ -851,6 +874,43 @@ export class DatabaseStorage implements IStorage {
       .select({ count: sql<number>`count(*)` })
       .from(promocodes)
       .where(eq(promocodes.userId, userId));
+    
+    return result[0]?.count || 0;
+  }
+
+  // Проверка количества созданных промокодов с IP за определенный период
+  async getPromocodeCreationCountByIp(ip: string, hoursBack: number): Promise<number> {
+    const timeThreshold = new Date();
+    timeThreshold.setHours(timeThreshold.getHours() - hoursBack);
+    
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(promocodes)
+      .where(
+        and(
+          eq(promocodes.createdFromIp, ip),
+          gte(promocodes.createdAt, timeThreshold)
+        )
+      );
+    
+    return result[0]?.count || 0;
+  }
+
+  // Проверка количества использованных промокодов с IP за определенный период
+  async getPromocodeUsageCountByIp(ip: string, hoursBack: number): Promise<number> {
+    const timeThreshold = new Date();
+    timeThreshold.setHours(timeThreshold.getHours() - hoursBack);
+    
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(promocodes)
+      .where(
+        and(
+          eq(promocodes.usedFromIp, ip),
+          eq(promocodes.isUsed, true),
+          gte(promocodes.usedAt, timeThreshold)
+        )
+      );
     
     return result[0]?.count || 0;
   }

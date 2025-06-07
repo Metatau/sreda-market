@@ -1075,7 +1075,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Создание нового промокода
   app.post("/api/promocodes/generate", async (req, res) => {
     try {
-      const promocode = await storage.createPromocode();
+      const clientIp = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] as string;
+      const promocode = await storage.createPromocode(clientIp);
       res.json({ 
         success: true, 
         data: {
@@ -1085,7 +1086,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error generating promocode:", error);
-      res.status(500).json({ success: false, error: "Failed to generate promocode" });
+      if (error instanceof Error && error.message.includes("лимит")) {
+        res.status(429).json({ success: false, error: error.message });
+      } else {
+        res.status(500).json({ success: false, error: "Failed to generate promocode" });
+      }
     }
   });
 
@@ -1151,12 +1156,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const success = await storage.usePromocode(code, req.user!.id);
+      const clientIp = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] as string;
+      const success = await storage.usePromocode(code, req.user!.id, clientIp);
       
       if (!success) {
         return res.status(400).json({ 
           success: false, 
-          error: "Не удалось применить промокод" 
+          error: "Не удалось применить промокод. Возможно, превышен лимит использования или нарушены правила безопасности" 
         });
       }
 

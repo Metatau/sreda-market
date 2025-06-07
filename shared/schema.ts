@@ -259,9 +259,13 @@ export const promocodes = pgTable("promocodes", {
   usedAt: timestamp("used_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   expiresAt: timestamp("expires_at").notNull(),
+  createdFromIp: varchar("created_from_ip", { length: 45 }), // IPv4/IPv6
+  usedFromIp: varchar("used_from_ip", { length: 45 }), // IPv4/IPv6
 }, (table) => ({
   codeIdx: index("idx_promocodes_code").on(table.code),
   userIdx: index("idx_promocodes_user").on(table.userId),
+  createdIpIdx: index("idx_promocodes_created_ip").on(table.createdFromIp),
+  usedIpIdx: index("idx_promocodes_used_ip").on(table.usedFromIp),
 }));
 
 // Relations
