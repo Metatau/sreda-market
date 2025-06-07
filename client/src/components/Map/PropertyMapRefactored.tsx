@@ -302,38 +302,72 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
         style={{ minHeight: '400px' }}
       />
       
-      {/* Map Controls */}
-      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 space-y-3">
+      {/* Map Controls Panel */}
+      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 space-y-4 min-w-[200px]">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Heatmap Mode
-          </label>
-          <select
-            value={heatmapMode}
-            onChange={(e) => setHeatmapMode(e.target.value as HeatmapMode)}
-            className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm"
-          >
-            <option value="none">None</option>
-            <option value="price">Price</option>
-            <option value="density">Density</option>
-            <option value="investment">Investment</option>
-          </select>
+          <h3 className="text-sm font-semibold text-gray-800 mb-3">Инструменты карты</h3>
+          
+          {/* Tool Buttons */}
+          <div className="space-y-2">
+            <button
+              onClick={() => setHeatmapMode(heatmapMode === 'none' ? 'price' : 'none')}
+              className={`w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                heatmapMode === 'price' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              🌡️ Тепловая карта цен
+            </button>
+            
+            <button
+              onClick={() => setHeatmapMode(heatmapMode === 'density' ? 'none' : 'density')}
+              className={`w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                heatmapMode === 'density' 
+                  ? 'bg-green-500 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              📊 Плотность объектов
+            </button>
+            
+            <button
+              onClick={() => setHeatmapMode(heatmapMode === 'investment' ? 'none' : 'investment')}
+              className={`w-full px-3 py-2 text-sm rounded-md transition-colors ${
+                heatmapMode === 'investment' 
+                  ? 'bg-purple-500 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              📈 Инвест-потенциал
+            </button>
+          </div>
         </div>
-        
+
+        {/* Intensity Control */}
         {heatmapMode !== 'none' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Intensity: {Math.round(heatmapIntensity * 100)}%
+              Интенсивность: {Math.round(heatmapIntensity * 100)}%
             </label>
             <input
               type="range"
               min="0.1"
-              max="1"
+              max="2"
               step="0.1"
               value={heatmapIntensity}
               onChange={(e) => setHeatmapIntensity(parseFloat(e.target.value))}
               className="w-full"
             />
+          </div>
+        )}
+
+        {/* Active Tool Info */}
+        {heatmapMode !== 'none' && (
+          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+            {heatmapMode === 'price' && '🟢 Зеленый = дешевле, 🔴 Красный = дороже'}
+            {heatmapMode === 'density' && '📍 Показывает концентрацию объектов'}
+            {heatmapMode === 'investment' && '💰 Анализ инвестиционной привлекательности'}
           </div>
         )}
       </div>
