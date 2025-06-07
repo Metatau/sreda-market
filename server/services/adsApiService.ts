@@ -372,6 +372,45 @@ export class AdsApiService {
            (tooLowForSale && !hasSaleKeywords);
   }
 
+  async geocodeAddress(address: string, city: string): Promise<{lat: number, lng: number} | null> {
+    try {
+      // Формируем полный адрес для геокодирования
+      const fullAddress = `${address}, ${city}, Россия`;
+      
+      // Используем Nominatim OpenStreetMap API для геокодирования (бесплатный)
+      const encodedAddress = encodeURIComponent(fullAddress);
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodedAddress}&limit=1&countrycodes=ru`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'SredaMarket/1.0 (real-estate-platform)'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Geocoding API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        
+        // Проверяем, что координаты находятся в России
+        if (lat >= 41 && lat <= 82 && lng >= 19 && lng <= 180) {
+          console.log(`Geocoded "${address}" to [${lat}, ${lng}]`);
+          return { lat, lng };
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.log(`Geocoding error for "${address}": ${error}`);
+      return null;
+    }
+  }
+
   determineMarketType(adsProperty: AdsApiProperty): 'secondary' | 'new_construction' {
     const title = (adsProperty.title || '').toLowerCase();
     const description = (adsProperty.description || '').toLowerCase();
@@ -534,11 +573,35 @@ export class AdsApiService {
       pricePerSqm
     );
 
-    // Безопасная обработка координат
-    const defaultLat = 55.7558;
-    const defaultLng = 37.6176;
-    const lat = adsProperty.coordinates?.lat || defaultLat;
-    const lng = adsProperty.coordinates?.lng || defaultLng;
+    // Обработка координат с геокодированием адреса
+    let lat = 55.7558; // Москва по умолчанию
+    let lng = 37.6176;
+    
+    // Сначала пытаемся использовать координаты из API
+    if (adsProperty.coords && typeof adsProperty.coords === 'string') {
+      const coordsMatch = adsProperty.coords.match(/(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+      if (coordsMatch) {
+        lat = parseFloat(coordsMatch[1]);
+        lng = parseFloat(coordsMatch[2]);
+      }
+    } else if (adsProperty.coordinates?.lat && adsProperty.coordinates?.lng) {
+      lat = adsProperty.coordinates.lat;
+      lng = adsProperty.coordinates.lng;
+    }
+    
+    // Если координаты по-прежнему дефолтные, попытаемся геокодировать адрес
+    const isDefaultCoords = (lat === 55.7558 && lng === 37.6176);
+    if (isDefaultCoords && adsProperty.address) {
+      try {
+        const geocoded = await this.geocodeAddress(adsProperty.address, regionName);
+        if (geocoded) {
+          lat = geocoded.lat;
+          lng = geocoded.lng;
+        }
+      } catch (error) {
+        console.log(`Geocoding failed for address "${adsProperty.address}": ${error}`);
+      }
+    }
 
     return {
       externalId: String(adsProperty.id),
