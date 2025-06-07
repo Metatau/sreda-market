@@ -231,9 +231,6 @@ export default function Landing() {
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
               Начать поиск
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-3">
-              Смотреть демо
-            </Button>
           </div>
 
           {/* 3D визуализация тепловой карты */}
