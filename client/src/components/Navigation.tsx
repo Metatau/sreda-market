@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+
 import { 
   HomeIcon, 
   TrendingUpIcon, 
@@ -12,8 +11,7 @@ import {
   LogOutIcon,
   SettingsIcon,
   CrownIcon,
-  BookOpenIcon,
-  DatabaseIcon
+  BookOpenIcon
 } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 
@@ -51,7 +49,7 @@ export function Navigation() {
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <TrendingUpIcon className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">SREDA Market</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white font-quantum">SREDA Market</span>
           </Link>
 
           {/* Navigation Links */}
@@ -79,26 +77,10 @@ export function Navigation() {
           <div className="flex items-center space-x-4">
             {user && (
               <>
-                {/* Subscription Badge */}
-                {user.subscription?.type && (
-                  <Badge variant={user.subscription.type === 'premium' ? 'default' : 'secondary'}>
-                    {user.subscription.type === 'premium' && <CrownIcon className="h-3 w-3 mr-1" />}
-                    {user.subscription.type === 'premium' ? 'Premium' : 'Basic'}
-                  </Badge>
-                )}
-
-                {/* User Avatar */}
-                <div className="flex items-center space-x-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.profileImageUrl || ''} alt={user.username} />
-                    <AvatarFallback>
-                      {user.firstName ? user.firstName[0] : user.username[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {user.firstName || user.username}
-                  </span>
-                </div>
+                {/* User Name */}
+                <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {user.firstName || user.username}
+                </span>
 
                 {/* Logout Button */}
                 <Button 
