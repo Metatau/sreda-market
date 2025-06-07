@@ -78,6 +78,7 @@ export function validateFilters(query: Record<string, any>) {
     if (query.max_area) filters.maxArea = parseFloat(query.max_area as string);
     if (query.property_type) filters.propertyType = query.property_type as string;
     if (query.market_type) filters.marketType = query.market_type as string;
+    if (query.marketType) filters.marketType = query.marketType as string;
 
     return propertyFiltersSchema.parse(filters);
   } catch (error) {
