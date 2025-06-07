@@ -91,7 +91,7 @@ export function Navigation() {
 
         {/* Mobile Navigation */}
         <div className="md:hidden border-t border-gray-200 dark:border-gray-700">
-          <div className="flex overflow-x-auto py-2 space-x-1">
+          <div className="flex justify-around py-3">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = location === item.path;
@@ -99,12 +99,15 @@ export function Navigation() {
               return (
                 <Link key={item.path} href={item.path}>
                   <Button 
-                    variant={isActive ? "default" : "ghost"} 
+                    variant="ghost" 
                     size="sm"
-                    className="flex items-center space-x-1 whitespace-nowrap"
+                    className={`flex flex-col items-center justify-center p-2 min-w-0 ${
+                      isActive 
+                        ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20' 
+                        : 'text-gray-600 dark:text-gray-400'
+                    }`}
                   >
-                    <Icon className="h-4 w-4" />
-                    <span className="text-xs">{item.label}</span>
+                    <Icon className="h-5 w-5 mb-1" />
                   </Button>
                 </Link>
               );
