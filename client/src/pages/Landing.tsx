@@ -223,7 +223,6 @@ export default function Landing() {
           </div>
         </div>
       </header>
-
       {/* Hero секция */}
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
@@ -314,7 +313,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Возможности платформы */}
       <section id="features" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
@@ -345,7 +343,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Тарифные планы */}
       <section id="pricing" className="py-20">
         <div className="max-w-7xl mx-auto px-4">
@@ -423,13 +420,10 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Финальный CTA */}
       <section className="py-20 bg-blue-600 text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-            Получите персональный отчёт
-          </h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Получите персональный промокод</h2>
           <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-8 px-4">
             Анализ лучших инвестиционных объектов в вашем регионе
           </p>
@@ -465,7 +459,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 px-4 font-mono">
         <div className="container mx-auto max-w-6xl">
