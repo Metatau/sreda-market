@@ -30,6 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export function Profile() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { toast } = useToast();
 
   if (!isAuthenticated || !user) {
     return (
@@ -163,6 +164,58 @@ export function Profile() {
     setIsEditing(false);
   };
 
+  // Применение промокода
+  const handlePromocode = async () => {
+    const code = promoCodes.promo.trim();
+    if (!code) {
+      toast({
+        title: "Ошибка",
+        description: "Введите промокод",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setPaymentLoading('promo');
+      
+      const response = await fetch('/api/promocodes/use', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: "Промокод активирован!",
+          description: "Вы получили полный доступ на 24 часа",
+        });
+        setPromoCodes(prev => ({...prev, promo: ''}));
+        // Обновляем данные пользователя
+        loadReferralStats();
+      } else {
+        toast({
+          title: "Ошибка",
+          description: data.error || "Промокод недействителен",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Promocode error:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось применить промокод",
+        variant: "destructive",
+      });
+    } finally {
+      setPaymentLoading(null);
+    }
+  };
+
   const handlePayment = async (plan: string) => {
     try {
       setPaymentLoading(plan);
@@ -186,17 +239,28 @@ export function Profile() {
 
       if (data.success) {
         if (plan === 'promo') {
-          alert('Промо план активирован бесплатно на 30 дней!');
+          toast({
+            title: "Успех!",
+            description: "Промо план активирован на 30 дней",
+          });
         } else if (data.paymentUrl) {
           // Перенаправляем на страницу оплаты Бланк банка
           window.location.href = data.paymentUrl;
         }
       } else {
-        alert('Ошибка создания платежа: ' + data.error);
+        toast({
+          title: "Ошибка платежа",
+          description: data.error || "Не удалось создать платеж",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error('Payment error:', error);
-      alert('Произошла ошибка при создании платежа');
+      toast({
+        title: "Ошибка",
+        description: "Произошла ошибка при создании платежа",
+        variant: "destructive",
+      });
     } finally {
       setPaymentLoading(null);
     }
@@ -411,11 +475,11 @@ export function Profile() {
                         />
                         <Button 
                           className="w-full" 
-                          onClick={() => handlePayment('promo')}
+                          onClick={handlePromocode}
                           disabled={paymentLoading === 'promo'}
                         >
                           <CreditCard className="h-4 w-4 mr-2" />
-                          {paymentLoading === 'promo' ? 'Активация...' : 'Активировать'}
+                          {paymentLoading === 'promo' ? 'Применяем...' : 'Применить промокод'}
                         </Button>
                       </div>
                     </CardContent>
