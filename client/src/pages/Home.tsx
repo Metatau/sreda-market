@@ -18,11 +18,7 @@ import { TrendingUp, BarChart3, Building2, Clock, Map, Grid3x3, Layers } from "l
 import type { SearchFilters, Property, PropertyWithRelations } from "@/types";
 
 // Enhanced Map Components
-import { AdvancedHeatmapControls } from "@/components/Map/analytics/AdvancedHeatmapControls";
-import { StatisticsPanel } from "@/components/Map/analytics/StatisticsPanel";
-import { DrawingTools } from "@/components/Map/tools/DrawingTools";
-import { GeospatialService } from "@/components/Map/services/GeospatialService";
-import { AdvancedHeatmapMode, DrawingTool, GeospatialStats, MeasurementResult, HeatmapDataPoint } from "@/components/Map/types/geospatial";
+import { InteractiveAnalyticsMap } from "@/components/Map/InteractiveAnalyticsMap";
 
 export default function Home() {
   const [filters, setFilters] = useState<SearchFilters>({});
@@ -35,12 +31,6 @@ export default function Home() {
 
   // Enhanced Map Analytics State
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
-  const [heatmapMode, setHeatmapMode] = useState<AdvancedHeatmapMode>('none');
-  const [heatmapIntensity, setHeatmapIntensity] = useState(1.0);
-  const [activeTool, setActiveTool] = useState<DrawingTool | null>(null);
-  const [measurementResult, setMeasurementResult] = useState<MeasurementResult | null>(null);
-  const [geospatialStats, setGeospatialStats] = useState<GeospatialStats | null>(null);
-  const [showStatistics, setShowStatistics] = useState(false);
 
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
@@ -51,44 +41,15 @@ export default function Home() {
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
 
-  // Computed heatmap data for map analytics
-  const heatmapData = useMemo(() => {
-    if (heatmapMode === 'none' || !properties.length) return [];
-    return GeospatialService.generateHeatmapData(properties as PropertyWithRelations[], heatmapMode);
-  }, [properties, heatmapMode]);
-
-  // Analytics handlers
-  const handleToolSelect = (tool: DrawingTool) => {
-    setActiveTool(tool.isActive ? tool : null);
-    if (!tool.isActive) {
-      setMeasurementResult(null);
-      setGeospatialStats(null);
-      setShowStatistics(false);
-    }
-  };
-
-  const handleClearAll = () => {
-    setActiveTool(null);
-    setMeasurementResult(null);
-    setGeospatialStats(null);
-    setShowStatistics(false);
-  };
-
-  const handleAreaSelection = (bounds: any) => {
-    const stats = GeospatialService.calculateAreaStats(properties as PropertyWithRelations[], bounds);
-    setGeospatialStats(stats);
-    setShowStatistics(true);
-  };
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setFilters({ ...filters, query: searchQuery });
     setCurrentPage(1);
   };
 
-  const handlePropertySelect = async (property: Property) => {
+  const handlePropertySelect = async (property: PropertyWithRelations | Property) => {
     console.log('Property selected:', property.id);
-    setSelectedProperty(property);
+    setSelectedProperty(property as Property);
     setIsAnalyticsModalOpen(true);
     
     // Calculate analytics if not available
@@ -295,88 +256,11 @@ export default function Home() {
 
               {/* Enhanced Map Analytics View */}
               <TabsContent value="map" className="mt-6">
-                <div className="relative">
-                  {/* Map Container with Enhanced Analytics */}
-                  <div className="bg-white rounded-lg border shadow-lg overflow-hidden">
-                    <div className="h-[600px] relative bg-gray-100 flex items-center justify-center">
-                      <div className="text-center space-y-4">
-                        <Layers className="h-12 w-12 text-blue-600 mx-auto" />
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                            Интерактивная аналитическая карта
-                          </h3>
-                          <p className="text-gray-600 max-w-md">
-                            Расширенная визуализация недвижимости с тепловыми картами, 
-                            геоаналитикой и инструментами измерения областей
-                          </p>
-                          <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                              <span>10+ режимов тепловой карты</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-green-500 rounded"></div>
-                              <span>Инструменты измерения</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                              <span>Статистика по областям</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                              <span>Геопространственный анализ</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Heatmap Controls - Left Panel */}
-                  <div className="absolute top-4 left-4 z-10">
-                    <AdvancedHeatmapControls
-                      mode={heatmapMode}
-                      onModeChange={setHeatmapMode}
-                      intensity={heatmapIntensity}
-                      onIntensityChange={setHeatmapIntensity}
-                      propertyCount={properties.length}
-                    />
-                  </div>
-
-                  {/* Drawing Tools - Right Panel */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <DrawingTools
-                      activeTool={activeTool}
-                      onToolSelect={handleToolSelect}
-                      onClearAll={handleClearAll}
-                      measurementResult={measurementResult}
-                      isDrawing={false}
-                    />
-                  </div>
-
-                  {/* Statistics Panel */}
-                  <StatisticsPanel
-                    stats={geospatialStats}
-                    isVisible={showStatistics}
-                    onClose={() => setShowStatistics(false)}
-                  />
-
-                  {/* Heatmap Data Summary */}
-                  {heatmapMode !== 'none' && heatmapData.length > 0 && (
-                    <div className="absolute bottom-4 left-4 z-10">
-                      <Card className="bg-white/95 backdrop-blur-sm border shadow-lg">
-                        <CardContent className="p-3">
-                          <div className="flex items-center gap-2 text-sm">
-                            <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-red-600 rounded"></div>
-                            <span className="font-medium">
-                              Обработано {heatmapData.length} точек данных
-                            </span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-                </div>
+                <InteractiveAnalyticsMap
+                  properties={properties as PropertyWithRelations[]}
+                  onPropertySelect={handlePropertySelect}
+                  className="w-full"
+                />
 
                 {/* Map Analytics Features Info */}
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
