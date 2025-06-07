@@ -343,16 +343,28 @@ export class AdsApiService {
       return true;
     }
 
-    // Проверяем подозрительно низкую цену (менее 800,000 руб. для квартир)
+    // Проверяем цену - слишком низкая для продажи квартир
     const price = adsProperty.price || 0;
-    const suspiciouslyLowPrice = price < 800000;
+    const tooLowForSale = price < 1500000; // Минимум 1.5 млн для квартир на продажу
 
-    // Ключевые слова продажи для исключения
-    const saleKeywords = ['продам', 'продается', 'продажа', 'купить', 'приобрести', 'собственность'];
+    // Проверяем метрику цены - если указана "в месяц", это аренда
+    const priceMetric = (adsProperty.price_metric || '').toLowerCase();
+    const hasMonthlyMetric = priceMetric.includes('месяц') || priceMetric.includes('мес');
+
+    // Проверяем тип недвижимости в данных API
+    const nedvigimostType = (adsProperty.nedvigimost_type || '').toLowerCase();
+    const isRentalType = nedvigimostType.includes('сдам') || nedvigimostType.includes('аренда');
+
+    // Ключевые слова продажи
+    const saleKeywords = ['продам', 'продается', 'продажа', 'купить', 'приобрести', 'собственность', 'млн'];
     const hasSaleKeywords = saleKeywords.some(keyword => fullText.includes(keyword));
 
-    // Если есть признаки аренды ИЛИ подозрительно низкая цена без явных признаков продажи
-    return hasRentalKeywords || (suspiciouslyLowPrice && !hasSaleKeywords);
+    // Это аренда если:
+    // 1. Есть ключевые слова аренды
+    // 2. Тип недвижимости указывает на аренду  
+    // 3. Метрика цены "в месяц"
+    // 4. Цена слишком низкая для продажи без явных признаков продажи
+    return hasRentalKeywords || isRentalType || hasMonthlyMetric || (tooLowForSale && !hasSaleKeywords);
   }
 
   determineMarketType(adsProperty: AdsApiProperty): 'secondary' | 'new_construction' {
