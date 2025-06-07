@@ -71,48 +71,40 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, []);
 
-  // Функция запуска анимации печатания
-  const startTypingAnimation = () => {
-    // Очищаем предыдущие таймеры
-    if (animationRef.current.interval) clearInterval(animationRef.current.interval);
-    if (animationRef.current.timeout) clearTimeout(animationRef.current.timeout);
-    
-    const currentQuery = searchQueries[currentSearchIndex];
-    let currentChar = 0;
-    
-    setTypedText('');
-    
-    animationRef.current.interval = setInterval(() => {
-      if (currentChar <= currentQuery.length) {
-        const newText = currentQuery.slice(0, currentChar);
-        setTypedText(newText);
-        currentChar++;
-      } else {
-        if (animationRef.current.interval) clearInterval(animationRef.current.interval);
-        // Переходим к следующему запросу через 2 секунды
-        animationRef.current.timeout = setTimeout(() => {
-          setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
-        }, 2000);
-      }
-    }, 80);
-  };
-
-  // Запуск анимации при изменении индекса
+  // Анимация набора текста
   useEffect(() => {
-    const delay = setTimeout(() => {
-      startTypingAnimation();
-    }, 1000); // Задержка 1 секунда для стабилизации
+    const startTypingAnimation = () => {
+      // Очищаем предыдущие таймеры
+      if (animationRef.current.interval) clearInterval(animationRef.current.interval);
+      if (animationRef.current.timeout) clearTimeout(animationRef.current.timeout);
+      
+      const currentQuery = searchQueries[currentSearchIndex];
+      let currentChar = 0;
+      
+      setTypedText('');
+      
+      animationRef.current.interval = setInterval(() => {
+        if (currentChar <= currentQuery.length) {
+          setTypedText(currentQuery.slice(0, currentChar));
+          currentChar++;
+        } else {
+          if (animationRef.current.interval) clearInterval(animationRef.current.interval);
+          // Переходим к следующему запросу через 2 секунды
+          animationRef.current.timeout = setTimeout(() => {
+            setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
+          }, 2000);
+        }
+      }, 100);
+    };
 
-    return () => clearTimeout(delay);
-  }, [currentSearchIndex]);
-
-  // Очистка при размонтировании компонента
-  useEffect(() => {
+    const timer = setTimeout(startTypingAnimation, 500);
+    
     return () => {
+      clearTimeout(timer);
       if (animationRef.current.interval) clearInterval(animationRef.current.interval);
       if (animationRef.current.timeout) clearTimeout(animationRef.current.timeout);
     };
-  }, []);
+  }, [currentSearchIndex]);
 
   // Таймер обратного отсчета
   useEffect(() => {
