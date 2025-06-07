@@ -250,6 +250,20 @@ export const bonusTransactions = pgTable("bonus_transactions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Promocodes table
+export const promocodes = pgTable("promocodes", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 6 }).notNull().unique(),
+  userId: integer("user_id").references(() => users.id),
+  isUsed: boolean("is_used").default(false).notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+}, (table) => ({
+  codeIdx: index("idx_promocodes_code").on(table.code),
+  userIdx: index("idx_promocodes_user").on(table.userId),
+}));
+
 // Relations
 export const regionsRelations = relations(regions, ({ many }) => ({
   properties: many(properties),
@@ -358,6 +372,13 @@ export const bonusTransactionsRelations = relations(bonusTransactions, ({ one })
   }),
 }));
 
+export const promocodesRelations = relations(promocodes, ({ one }) => ({
+  user: one(users, {
+    fields: [promocodes.userId],
+    references: [users.id],
+  }),
+}));
+
 // Zod schemas
 export const insertRegionSchema = createInsertSchema(regions);
 export const selectRegionSchema = createSelectSchema(regions);
@@ -395,6 +416,9 @@ export const selectReferralEarningSchema = createSelectSchema(referralEarnings);
 export const insertBonusTransactionSchema = createInsertSchema(bonusTransactions);
 export const selectBonusTransactionSchema = createSelectSchema(bonusTransactions);
 
+export const insertPromocodeSchema = createInsertSchema(promocodes);
+export const selectPromocodeSchema = createSelectSchema(promocodes);
+
 // Types
 export type Region = typeof regions.$inferSelect;
 export type InsertRegion = typeof regions.$inferInsert;
@@ -431,6 +455,9 @@ export type InsertReferralEarning = typeof referralEarnings.$inferInsert;
 
 export type BonusTransaction = typeof bonusTransactions.$inferSelect;
 export type InsertBonusTransaction = typeof bonusTransactions.$inferInsert;
+
+export type Promocode = typeof promocodes.$inferSelect;
+export type InsertPromocode = typeof promocodes.$inferInsert;
 
 // Insights table for analytical notes
 export const insights = pgTable("insights", {

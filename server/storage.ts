@@ -84,6 +84,12 @@ export interface IStorage {
   updateDataSource(id: number, updates: Partial<InsertDataSource>): Promise<DataSource | undefined>;
   deleteDataSource(id: number): Promise<boolean>;
   toggleDataSourceStatus(id: number): Promise<boolean>;
+  
+  // Promocode management
+  createPromocode(): Promise<Promocode>;
+  getPromocodeByCode(code: string): Promise<Promocode | undefined>;
+  usePromocode(code: string, userId: number): Promise<boolean>;
+  isPromocodeExpired(promocode: Promocode): boolean;
 }
 
 export interface PropertyFilters {
