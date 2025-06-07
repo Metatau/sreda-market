@@ -10,14 +10,6 @@ interface PropertyFiltersProps {
   onFiltersChange: (filters: PropertyFilters) => void;
 }
 
-const propertyClassColors = {
-  1: "border-blue-500 bg-blue-50 text-blue-700", // Эконом
-  2: "border-emerald-500 bg-emerald-50 text-emerald-700", // Стандарт
-  3: "border-amber-500 bg-amber-50 text-amber-700", // Комфорт
-  4: "border-purple-500 bg-purple-50 text-purple-700", // Бизнес
-  5: "border-orange-500 bg-orange-50 text-orange-700", // Элит
-};
-
 export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersProps) {
   const { data: regions = [] } = useRegions();
   const { data: propertyClasses = [] } = usePropertyClasses();
@@ -63,25 +55,12 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
         {/* City Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Город</label>
-          <Select value={filters.regionId?.toString() || "all"} onValueChange={(value) => handleFilterChange('regionId', value === "all" ? null : parseInt(value))}>
+          <Select value={filters.regionId?.toString() || "all"} onValueChange={(value) => handleFilterChange('regionId', value === "all" ? undefined : parseInt(value))}>
             <SelectTrigger>
               <SelectValue placeholder="Все города" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Все города</SelectItem>
-              <SelectItem value="1">Москва</SelectItem>
-              <SelectItem value="2">Санкт-Петербург</SelectItem>
-              <SelectItem value="3">Новосибирск</SelectItem>
-              <SelectItem value="4">Екатеринбург</SelectItem>
-              <SelectItem value="5">Казань</SelectItem>
-              <SelectItem value="11">Уфа</SelectItem>
-              <SelectItem value="12">Красноярск</SelectItem>
-              <SelectItem value="13">Пермь</SelectItem>
-              <SelectItem value="35">Калининград</SelectItem>
-              <SelectItem value="36">Тюмень</SelectItem>
-              <SelectItem value="37">Сочи</SelectItem></SelectContent>
-          </Select>
-        </div>
               {sortedRegions.map((region) => (
                 <SelectItem key={region.id} value={region.id.toString()}>
                   {region.name}
@@ -117,7 +96,7 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
           <label className="block text-sm font-medium text-gray-700 mb-2">Класс недвижимости</label>
           <Select 
             value={filters.propertyClassId?.toString() || "all"} 
-            onValueChange={(value) => handleFilterChange('propertyClassId', value === "all" ? null : parseInt(value))}
+            onValueChange={(value) => handleFilterChange('propertyClassId', value === "all" ? undefined : parseInt(value))}
           >
             <SelectTrigger>
               <SelectValue placeholder="Все классы" />
@@ -129,7 +108,11 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
                   <div className="flex items-center justify-between w-full">
                     <span className="font-medium">{propertyClass.name}</span>
                     <span className="text-xs text-gray-500 ml-2">
-                      {propertyClass.minPricePerSqm.toLocaleString()}-{propertyClass.maxPricePerSqm.toLocaleString()} ₽/м²
+                      {propertyClass.minPricePerSqm.toLocaleString()}-
+                      {propertyClass.maxPricePerSqm === 999999999 
+                        ? "∞" 
+                        : propertyClass.maxPricePerSqm.toLocaleString()
+                      } ₽/м²
                     </span>
                   </div>
                 </SelectItem>
@@ -146,13 +129,13 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
               type="number"
               placeholder="от ₽"
               value={filters.minPrice || ''}
-              onChange={(e) => handleFilterChange('minPrice', e.target.value ? parseInt(e.target.value) : null)}
+              onChange={(e) => handleFilterChange('minPrice', e.target.value ? parseInt(e.target.value) : undefined)}
             />
             <Input
               type="number"
               placeholder="до ₽"
               value={filters.maxPrice || ''}
-              onChange={(e) => handleFilterChange('maxPrice', e.target.value ? parseInt(e.target.value) : null)}
+              onChange={(e) => handleFilterChange('maxPrice', e.target.value ? parseInt(e.target.value) : undefined)}
             />
           </div>
         </div>
@@ -169,7 +152,7 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
                   variant={isSelected ? "default" : "outline"}
                   size="sm"
                   className="aspect-square"
-                  onClick={() => handleFilterChange('rooms', isSelected ? null : rooms)}
+                  onClick={() => handleFilterChange('rooms', isSelected ? undefined : rooms)}
                 >
                   {rooms === 5 ? '5+' : rooms}
                 </Button>
