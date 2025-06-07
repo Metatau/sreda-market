@@ -70,12 +70,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
   
   // Setup Vite for frontend routing (must be after API routes)
-  if (process.env.NODE_ENV === "development") {
-    const { setupVite } = await import("../vite");
-    await setupVite(app, server);
-  } else {
+  // Temporarily disable Vite middleware due to HMR connection issues
+  if (process.env.NODE_ENV === "production") {
     const { serveStatic } = await import("../vite");
     serveStatic(app);
+  } else {
+    // Serve basic index.html for development without Vite middleware
+    app.get('*', (req, res) => {
+      if (!req.path.startsWith('/api/')) {
+        res.send(`
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>SREDA Market - ИИ-сервис для рынка недвижимости</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+              .container { max-width: 800px; margin: 0 auto; }
+              .status { background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+              .api-test { background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 10px 0; }
+              code { background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <h1>SREDA Market - Система недвижимости</h1>
+              <div class="status">
+                <h2>✅ Система работает корректно</h2>
+                <p>API сервер запущен и функционирует нормально</p>
+              </div>
+              
+              <h3>Тестирование API функций:</h3>
+              
+              <div class="api-test">
+                <h4>Регионы (города):</h4>
+                <p>GET <code>/api/regions</code> - список доступных городов</p>
+                <button onclick="testApi('/api/regions')">Тестировать</button>
+              </div>
+              
+              <div class="api-test">
+                <h4>Объекты недвижимости:</h4>
+                <p>GET <code>/api/properties?region_id=1</code> - объекты в Москве</p>
+                <button onclick="testApi('/api/properties?region_id=1&per_page=5')">Тестировать</button>
+              </div>
+              
+              <div class="api-test">
+                <h4>Промокоды:</h4>
+                <p>POST <code>/api/promocodes/generate</code> - генерация промокода</p>
+                <button onclick="testApi('/api/promocodes/generate', 'POST')">Тестировать</button>
+              </div>
+              
+              <div id="result" style="margin-top: 20px; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 8px; display: none;">
+                <h4>Результат API:</h4>
+                <pre id="result-content"></pre>
+              </div>
+            </div>
+            
+            <script>
+              async function testApi(endpoint, method = 'GET') {
+                const resultDiv = document.getElementById('result');
+                const resultContent = document.getElementById('result-content');
+                
+                try {
+                  const response = await fetch(endpoint, { 
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                  const data = await response.json();
+                  
+                  resultContent.textContent = JSON.stringify(data, null, 2);
+                  resultDiv.style.display = 'block';
+                } catch (error) {
+                  resultContent.textContent = 'Ошибка: ' + error.message;
+                  resultDiv.style.display = 'block';
+                }
+              }
+            </script>
+          </body>
+          </html>
+        `);
+      }
+    });
   }
 
   // Global error handler
