@@ -30,10 +30,7 @@ export function Navigation() {
   ];
 
   if (user?.role === 'administrator') {
-    navigationItems.push(
-      { path: '/admin', icon: SettingsIcon, label: 'Админ панель' },
-      { path: '/admin/sources', icon: BarChart3Icon, label: 'Источники данных' }
-    );
+    navigationItems.push({ path: '/admin', icon: SettingsIcon, label: 'Админ панель' });
   }
 
   const handleLogout = async () => {

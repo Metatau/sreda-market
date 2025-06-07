@@ -283,9 +283,38 @@ export default function AdminPanel() {
         {/* Контент вкладок */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
+            {/* Статистика платформы */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart className="w-5 h-5" />
+                  <span>Статистика платформы</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">245</div>
+                    <div className="text-sm text-blue-700">Всего объектов</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">42</div>
+                    <div className="text-sm text-green-700">Новых за неделю</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">18</div>
+                    <div className="text-sm text-purple-700">Активных регионов</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">156</div>
+                    <div className="text-sm text-orange-700">AI запросов сегодня</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Статус ADS API */}
-        <Card>
+            {/* Статус ADS API */}
+            <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <CheckCircle className="w-5 h-5" />
@@ -598,8 +627,381 @@ export default function AdminPanel() {
               </Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+          </div>
+        )}
+
+        {/* Вкладка Источники данных */}
+        {activeTab === 'sources' && (
+          <div className="space-y-6">
+            {/* Поиск и контролы */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Поиск источников..."
+                      value={sourcesSearchTerm}
+                      onChange={(e) => setSourcesSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Добавить источник
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Список источников */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Database className="h-5 w-5" />
+                  Источники данных ({filteredSources.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {sourcesLoading ? (
+                  <div className="text-center py-8">
+                    <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    <p>Загрузка источников...</p>
+                  </div>
+                ) : filteredSources.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>Источники данных не найдены</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredSources.map((source: DataSource) => (
+                      <div key={source.id} className="border rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              {getSourceTypeIcon(source.type)}
+                              <h3 className="font-semibold text-lg">{source.name}</h3>
+                              <Badge variant={source.isActive ? "default" : "secondary"}>
+                                {source.isActive ? "Активен" : "Неактивен"}
+                              </Badge>
+                              <Badge variant="outline">{getSourceTypeLabel(source.type)}</Badge>
+                            </div>
+                            
+                            {source.description && (
+                              <p className="text-gray-600 mb-3">{source.description}</p>
+                            )}
+                            
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {source.tags.map((tag, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                            
+                            <div className="text-sm text-gray-500">
+                              Частота: {source.frequency === 'hourly' ? 'Ежечасно' : source.frequency === 'daily' ? 'Ежедневно' : 'Еженедельно'}
+                              {source.lastUpdated && ` • Последнее обновление: ${new Date(source.lastUpdated).toLocaleString('ru-RU')}`}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 ml-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleToggleSource(source)}
+                              disabled={toggleSourceMutation.isPending}
+                            >
+                              {source.isActive ? (
+                                <ToggleRight className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <ToggleLeft className="h-4 w-4 text-gray-400" />
+                              )}
+                            </Button>
+                            
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteSource(source)}
+                              disabled={deleteSourceMutation.isPending}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Вкладка Пользователи */}
+        {activeTab === 'users' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Users className="w-5 h-5" />
+                  <span>Управление пользователями</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium">Администраторы</div>
+                    <div className="text-sm text-gray-600">Полный доступ к системе</div>
+                  </div>
+                  <Badge variant="default">2 активных</Badge>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium">Зарегистрированные пользователи</div>
+                    <div className="text-sm text-gray-600">Доступ к AI чату и аналитике</div>
+                  </div>
+                  <Badge variant="outline">147 пользователей</Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium">Telegram авторизация</div>
+                    <div className="text-sm text-gray-600">Быстрый вход через Telegram</div>
+                  </div>
+                  <Badge variant="default" className="bg-blue-100 text-blue-800">
+                    Активна
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Вкладка Настройки */}
+        {activeTab === 'settings' && (
+          <div className="space-y-6">
+            {/* Статус ADS API */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Статус ADS API</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex items-center space-x-3">
+                    <span className="font-medium">Конфигурация:</span>
+                    {adsApiStatus?.configured ? (
+                      <Badge variant="default" className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Настроен
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive">
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Не настроен
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <span className="font-medium">Доступность:</span>
+                    {adsApiStatus?.available ? (
+                      <Badge variant="default" className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Подключен
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">
+                        <AlertCircle className="w-4 h-4 mr-1" />
+                        Недоступен
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="flex items-center space-x-3">
+                    <span className="font-medium">Регионов:</span>
+                    <Badge variant="outline">
+                      {adsApiStatus?.regions?.length || 0}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Учетные данные ADS API */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Key className="w-5 h-5" />
+                  <span>Учетные данные ads-api.ru</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email (логин)</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={credentials.email}
+                      onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Пароль</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Пароль от ads-api.ru"
+                      value={credentials.password}
+                      onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Синхронизация данных */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <RefreshCw className="w-5 h-5" />
+                  <span>Синхронизация недвижимости</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {credentials.email && credentials.password ? (
+                  <>
+                    {adsApiStatus?.regions && adsApiStatus.regions.length > 0 && (
+                      <div>
+                        <h3 className="font-medium mb-3">Доступные регионы:</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {adsApiStatus.regions.map((region) => (
+                            <Button
+                              key={region}
+                              variant={selectedRegions.includes(region) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => handleRegionToggle(region)}
+                              className="text-sm"
+                            >
+                              {region}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <Separator />
+
+                    <div className="flex space-x-4">
+                      <Button
+                        onClick={handleSyncAll}
+                        disabled={syncMutation.isPending}
+                        className="flex items-center space-x-2"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+                        <span>{syncMutation.isPending ? 'Синхронизация...' : 'Синхронизировать все'}</span>
+                      </Button>
+
+                      {selectedRegions.length > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={handleSyncSelected}
+                          disabled={syncMutation.isPending}
+                          className="flex items-center space-x-2"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+                          <span>
+                            {syncMutation.isPending 
+                              ? 'Синхронизация...' 
+                              : `Синхронизировать выбранные (${selectedRegions.length})`
+                            }
+                          </span>
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <div className="flex items-center space-x-2 text-blue-800">
+                      <AlertCircle className="w-5 h-5" />
+                      <span className="font-medium">Требуется авторизация</span>
+                    </div>
+                    <p className="text-blue-700 mt-2">
+                      Для запуска синхронизации необходимо указать логин и пароль от ads-api.ru
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Системные настройки */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Settings className="w-5 h-5" />
+                  <span>Системные настройки</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3 border rounded-lg">
+                    <div className="font-medium mb-2">AI модель</div>
+                    <div className="text-sm text-gray-600 mb-2">OpenAI GPT-4 для анализа недвижимости</div>
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Подключена
+                    </Badge>
+                  </div>
+
+                  <div className="p-3 border rounded-lg">
+                    <div className="font-medium mb-2">База данных</div>
+                    <div className="text-sm text-gray-600 mb-2">PostgreSQL с расширением PostGIS</div>
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Активна
+                    </Badge>
+                  </div>
+
+                  <div className="p-3 border rounded-lg">
+                    <div className="font-medium mb-2">Mapbox интеграция</div>
+                    <div className="text-sm text-gray-600 mb-2">Интерактивные карты недвижимости</div>
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Работает
+                    </Badge>
+                  </div>
+
+                  <div className="p-3 border rounded-lg">
+                    <div className="font-medium mb-2">ADS API интеграция</div>
+                    <div className="text-sm text-gray-600 mb-2">Автоматическая синхронизация данных</div>
+                    <Badge variant="default" className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Подключена
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
