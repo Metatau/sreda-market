@@ -93,81 +93,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Map Analytics Tools */}
-      <div className="w-full bg-white border-b shadow-sm mt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card 
-              className={`hover:shadow-md transition-all cursor-pointer ${
-                activeMapTool === 'heatmap' ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-              }`}
-              onClick={() => setActiveMapTool(activeMapTool === 'heatmap' ? 'none' : 'heatmap')}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                    activeMapTool === 'heatmap' ? 'bg-blue-600' : 'bg-blue-100'
-                  }`}>
-                    <BarChart3 className={`h-6 w-6 ${
-                      activeMapTool === 'heatmap' ? 'text-white' : 'text-blue-600'
-                    }`} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Тепловые карты</h4>
-                    <p className="text-sm text-gray-600">Анализ цены, плотности, инвестиций</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card 
-              className={`hover:shadow-md transition-all cursor-pointer ${
-                activeMapTool === 'geoanalysis' ? 'ring-2 ring-green-500 bg-green-50' : ''
-              }`}
-              onClick={() => setActiveMapTool(activeMapTool === 'geoanalysis' ? 'none' : 'geoanalysis')}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                    activeMapTool === 'geoanalysis' ? 'bg-green-600' : 'bg-green-100'
-                  }`}>
-                    <MapPin className={`h-6 w-6 ${
-                      activeMapTool === 'geoanalysis' ? 'text-white' : 'text-green-600'
-                    }`} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Геоанализ</h4>
-                    <p className="text-sm text-gray-600">Измерения и региональная статистика</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className={`hover:shadow-md transition-all cursor-pointer ${
-                activeMapTool === 'investment' ? 'ring-2 ring-orange-500 bg-orange-50' : ''
-              }`}
-              onClick={() => setActiveMapTool(activeMapTool === 'investment' ? 'none' : 'investment')}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                    activeMapTool === 'investment' ? 'bg-orange-600' : 'bg-orange-100'
-                  }`}>
-                    <TrendingUp className={`h-6 w-6 ${
-                      activeMapTool === 'investment' ? 'text-white' : 'text-orange-600'
-                    }`} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Инвест-аналитика</h4>
-                    <p className="text-sm text-gray-600">ROI, доходность и прогнозы</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
 
       {/* Active Tool Panel */}
       {activeMapTool !== 'none' && (
@@ -401,6 +327,82 @@ export default function Home() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Map Analytics Tools */}
+      <div className="w-full bg-white border-b shadow-sm mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card 
+              className={`hover:shadow-md transition-all cursor-pointer ${
+                activeMapTool === 'heatmap' ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+              }`}
+              onClick={() => setActiveMapTool(activeMapTool === 'heatmap' ? 'none' : 'heatmap')}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    activeMapTool === 'heatmap' ? 'bg-blue-600' : 'bg-blue-100'
+                  }`}>
+                    <BarChart3 className={`h-6 w-6 ${
+                      activeMapTool === 'heatmap' ? 'text-white' : 'text-blue-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Тепловые карты</h4>
+                    <p className="text-sm text-gray-600">Анализ цены, плотности, инвестиций</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`hover:shadow-md transition-all cursor-pointer ${
+                activeMapTool === 'geoanalysis' ? 'ring-2 ring-green-500 bg-green-50' : ''
+              }`}
+              onClick={() => setActiveMapTool(activeMapTool === 'geoanalysis' ? 'none' : 'geoanalysis')}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    activeMapTool === 'geoanalysis' ? 'bg-green-600' : 'bg-green-100'
+                  }`}>
+                    <MapPin className={`h-6 w-6 ${
+                      activeMapTool === 'geoanalysis' ? 'text-white' : 'text-green-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Геоанализ</h4>
+                    <p className="text-sm text-gray-600">Измерения и региональная статистика</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`hover:shadow-md transition-all cursor-pointer ${
+                activeMapTool === 'investment' ? 'ring-2 ring-orange-500 bg-orange-50' : ''
+              }`}
+              onClick={() => setActiveMapTool(activeMapTool === 'investment' ? 'none' : 'investment')}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    activeMapTool === 'investment' ? 'bg-orange-600' : 'bg-orange-100'
+                  }`}>
+                    <TrendingUp className={`h-6 w-6 ${
+                      activeMapTool === 'investment' ? 'text-white' : 'text-orange-600'
+                    }`} />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Инвест-аналитика</h4>
+                    <p className="text-sm text-gray-600">ROI, доходность и прогнозы</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
