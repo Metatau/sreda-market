@@ -42,17 +42,9 @@ export const sessionConfig = session({
 // Session-based authentication middleware
 export const requireSessionAuth = async (req: SessionAuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    console.log('Session debug:', {
-      sessionId: req.sessionID,
-      session: req.session,
-      userId: req.session?.userId,
-      cookies: req.headers.cookie
-    });
-    
     const userId = req.session?.userId;
     
     if (!userId) {
-      console.log('No userId in session, rejecting request');
       return res.status(401).json({
         success: false,
         error: {
