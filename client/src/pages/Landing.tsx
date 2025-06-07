@@ -193,8 +193,8 @@ export default function Landing() {
     },
     {
       icon: <Bot className="h-8 w-8 text-purple-600" />,
-      title: "AI-советник",
-      description: "Персональные рекомендации на базе ChatGPT",
+      title: "AI-ассистент",
+      description: "Персональные рекомендации",
       details: "Анализ рынка, оценка рисков и инвестиционные стратегии"
     },
     {
@@ -405,9 +405,7 @@ export default function Landing() {
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Тарифные планы
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 px-4">
-              Выберите подходящий план для ваших инвестиций
-            </p>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 px-4">Выберите подходящий план</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
