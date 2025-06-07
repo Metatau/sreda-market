@@ -408,7 +408,7 @@ export default function AdminPanel() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto p-6 pt-8 space-y-6">
         <div className="flex items-center space-x-3">
           <Database className="w-8 h-8 text-primary" />
           <h1 className="text-3xl font-bold">Административная панель</h1>
