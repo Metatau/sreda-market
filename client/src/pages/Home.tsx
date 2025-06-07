@@ -70,14 +70,11 @@ export default function Home() {
     }
   };
 
-  const handleFilterChange = (newFilters: FilterType) => {
+  const handleFilterChange = async (newFilters: FilterType) => {
     setFilters(newFilters);
     setCurrentPage(1);
-    // Инвалидируем весь кеш properties для принудительного обновления
-    queryClient.invalidateQueries({ 
-      queryKey: ["properties"],
-      exact: false 
-    });
+    // Принудительно обновляем данные
+    await refetch();
   };
 
   return (

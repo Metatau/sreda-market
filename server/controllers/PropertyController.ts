@@ -17,6 +17,7 @@ export class PropertyController extends BaseController {
     );
 
     const filters = validateFilters(req.query);
+    console.log('Validated filters:', filters, 'Query params:', req.query);
     const result = await this.propertyService.getProperties(filters, { page, limit: perPage });
     
     this.sendSuccess(res, {
