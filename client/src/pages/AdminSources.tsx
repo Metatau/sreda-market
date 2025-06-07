@@ -437,13 +437,20 @@ function SourceFormDialog({ isOpen, onClose, source, onSuccess }: {
       const url = source ? `/api/admin/sources/${source.id}` : '/api/admin/sources';
       const method = source ? 'PUT' : 'POST';
       
-      await apiRequest(url, {
+      const response = await fetch(url, {
         method,
         body: JSON.stringify(data),
         headers: {
           'Content-Type': 'application/json'
         }
       });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save source');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({

@@ -12,7 +12,8 @@ import {
   LogOutIcon,
   SettingsIcon,
   CrownIcon,
-  BookOpenIcon
+  BookOpenIcon,
+  DatabaseIcon
 } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 
@@ -29,7 +30,10 @@ export function Navigation() {
   ];
 
   if (user?.role === 'administrator') {
-    navigationItems.push({ path: '/admin', icon: SettingsIcon, label: 'Админ панель' });
+    navigationItems.push(
+      { path: '/admin', icon: SettingsIcon, label: 'Админ панель' },
+      { path: '/admin/sources', icon: BarChart3Icon, label: 'Источники данных' }
+    );
   }
 
   const handleLogout = async () => {
