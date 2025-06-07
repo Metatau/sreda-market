@@ -16,7 +16,7 @@ import {
   ArrowRight,
   Brain,
   Calculator,
-  Map,
+  MapPin,
   Target
 } from 'lucide-react';
 

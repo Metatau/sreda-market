@@ -7,7 +7,7 @@ import { AIChat } from "@/components/AIChat";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Map, List, BarChart3, TrendingUp, Home, DollarSign } from "lucide-react";
+import { MapPin, List, BarChart3, TrendingUp, Home, DollarSign } from "lucide-react";
 import { useNewProperties } from "@/hooks/useNewProperties";
 import { useRegions } from "@/hooks/useProperties";
 import type { SearchFilters, Property } from "@/types";

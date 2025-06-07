@@ -12,7 +12,7 @@ import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal'
 import { useProperties, useRegions } from '@/hooks/useProperties';
 import { useNewProperties } from '@/hooks/useNewProperties';
 import type { Property, PropertyFilters as FilterType } from '@/types';
-import { TrendingUp, BarChart3, Clock, Grid3X3, Map, Layers } from 'lucide-react';
+import { TrendingUp, BarChart3, Clock, MapPin } from 'lucide-react';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,7 +78,7 @@ export default function Home() {
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Map className="h-6 w-6 text-green-600" />
+                    <MapPin className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
                     <h4 className="font-semibold">Геоанализ</h4>
@@ -176,46 +176,21 @@ export default function Home() {
 
             {/* Controls */}
             <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={viewMode === 'grid' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setViewMode('grid')}
-                      className="flex items-center gap-2"
-                    >
-                      <Grid3X3 className="h-4 w-4" />
-                      Список объектов
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled
-                      className="flex items-center gap-2 opacity-75"
-                    >
-                      <Map className="h-4 w-4" />
-                      Карта активна
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <p className="text-sm text-gray-600">
-                    Найдено {pagination?.total || 0} объектов
-                  </p>
-                  <Select defaultValue="price_asc">
-                    <SelectTrigger className="w-48">
-                      <SelectValue placeholder="Сортировка" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
-                      <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
-                      <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
-                      <SelectItem value="area">По площади</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Найдено {pagination?.total || 0} объектов
+                </p>
+                <Select defaultValue="price_asc">
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Сортировка" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
+                    <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
+                    <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
+                    <SelectItem value="area">По площади</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 

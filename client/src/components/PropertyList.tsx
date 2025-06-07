@@ -5,7 +5,7 @@ import { PropertyCard } from "./PropertyCard";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Grid3X3, List, Map, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Grid3X3, List, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import type { SearchFilters, Property } from "@/types";
 
 interface PropertyListProps {
@@ -117,7 +117,7 @@ export function PropertyList({
                   size="sm"
                   onClick={() => onViewModeChange?.('map')}
                 >
-                  <Map className="h-4 w-4" />
+                  <MapPin className="h-4 w-4" />
                 </Button>
               </div>
             </div>
