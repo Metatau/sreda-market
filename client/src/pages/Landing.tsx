@@ -215,8 +215,9 @@ export default function Landing() {
             </nav>
 
             <Link href="/login">
-              <Button variant="outline" className="hover:bg-blue-50">
-                Вход / Регистрация
+              <Button variant="outline" className="hover:bg-blue-50 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2">
+                <span className="hidden sm:inline">Вход / Регистрация</span>
+                <span className="sm:hidden">Вход</span>
               </Button>
             </Link>
           </div>
