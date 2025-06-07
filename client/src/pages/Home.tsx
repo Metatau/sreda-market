@@ -85,9 +85,9 @@ export default function Home() {
       <div className="w-full pt-4 px-4 mb-6">
         <div className="relative h-[500px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
           <PropertyMap 
-            properties={properties as any}
+            properties={properties}
             selectedProperty={selectedProperty}
-            onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
+            onPropertySelect={handlePropertySelect}
             regionId={filters.regionId}
             activeMapTool={activeMapTool}
           />
