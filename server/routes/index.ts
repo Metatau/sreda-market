@@ -36,6 +36,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error('Failed to initialize administrator:', error);
   }
 
+  // Ensure API routes always return JSON
+  app.use('/api/*', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  });
+
   // Register modular routes
   app.use('/api/auth', authRoutes);
   app.use('/api/users', usersRoutes);
