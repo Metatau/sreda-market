@@ -73,7 +73,8 @@ export default function Home() {
   const handleFilterChange = async (newFilters: FilterType) => {
     setFilters(newFilters);
     setCurrentPage(1);
-    // Принудительно обновляем данные
+    // Очищаем весь кеш и принудительно перезагружаем данные
+    queryClient.clear();
     await refetch();
   };
 

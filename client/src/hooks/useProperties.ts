@@ -23,7 +23,7 @@ export function useAISearch() {
 
 export function useProperties(filters?: SearchFilters, page: number = 1, perPage: number = 20) {
   return useQuery({
-    queryKey: ["properties", filters?.regionId, filters?.propertyClassId, filters?.minPrice, filters?.maxPrice, filters?.rooms, filters?.propertyType, filters?.marketType, page, perPage],
+    queryKey: ["properties", filters?.regionId, filters?.propertyClassId, filters?.minPrice, filters?.maxPrice, filters?.rooms, filters?.propertyType, filters?.marketType, page, perPage, Math.random()],
     queryFn: () => propertyApi.getProperties({
       page,
       per_page: perPage,
@@ -36,6 +36,7 @@ export function useProperties(filters?: SearchFilters, page: number = 1, perPage
       market_type: filters?.marketType,
     }),
     staleTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
