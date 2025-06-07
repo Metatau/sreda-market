@@ -181,10 +181,6 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
     performSearch(searchQuery);
   };
 
-  const handleSearchResultSelect = async (result: any) => {
-    await handleSearchResultSelect(result);
-  };
-
   return (
     <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
       <MapControls

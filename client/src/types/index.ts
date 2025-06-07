@@ -14,11 +14,9 @@ export type {
   InsertPropertyAnalytics,
   InsertInvestmentAnalytics,
   InsertChatMessage,
-  InsertUser
+  InsertUser,
+  ChatMessage
 } from '@shared/schema';
-
-// Re-export ChatMessage with alias to avoid conflicts
-export type { ChatMessage as SharedChatMessage } from '@shared/schema';
 
 export interface SearchFilters {
   regionId?: number;
@@ -52,35 +50,13 @@ export interface PropertiesResponse {
 }
 
 // Enhanced property interface that includes relations
-export interface PropertyWithRelations {
-  id: number;
-  externalId?: string | null;
-  regionId?: number | null;
-  propertyClassId?: number | null;
-  title: string;
-  description?: string | null;
-  price: number;
-  pricePerSqm?: number | null;
-  area?: string | null;
-  rooms?: number | null;
-  floor?: number | null;
-  totalFloors?: number | null;
-  address: string;
-  district?: string | null;
-  metroStation?: string | null;
-  coordinates?: string | null;
-  propertyType: string;
+export interface PropertyWithRelations extends Property {
+  externalId?: string | null | undefined;
+  area?: string | null | undefined;
+  pricePerSqm?: number | null | undefined;
+  propertyType?: string | null;
   marketType?: 'secondary' | 'new_construction' | null;
-  source: string;
-  url?: string | null;
-  phone?: string | null;
-  imageUrl?: string | null;
-  images?: string[] | null;
-  totalArea?: string | null;
-  livingArea?: string | null;
-  kitchenArea?: string | null;
-  floorsTotal?: number | null;
-  metroDistance?: number | null;
+  source?: string | null;
   autoClassified?: boolean | null;
   manualOverride?: boolean | null;
   isActive?: boolean | null;
