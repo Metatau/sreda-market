@@ -253,7 +253,6 @@ export class OptimizedPropertyService {
    * Построение условий фильтрации
    */
   private static buildFilterConditions(filters: PropertyFilters) {
-    console.log('🔍 Building filter conditions for:', filters);
     const conditions = [eq(properties.isActive, true)];
 
     if (filters.regionId) {
@@ -281,7 +280,6 @@ export class OptimizedPropertyService {
     }
 
     if (filters.marketType) {
-      console.log('🔍 Adding marketType filter:', filters.marketType);
       conditions.push(sql`properties.market_type = ${filters.marketType}`);
     }
 
