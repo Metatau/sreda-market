@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, Star, Building2 } from "lucide-react";
+import { Calculator, Star, Building2, Home } from "lucide-react";
 import { PropertyWithRelations } from "@/types";
 
 interface PropertyCardProps {
@@ -50,6 +50,15 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
     return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-md hover:shadow-lg hover:from-gray-600 hover:to-gray-700';
   };
 
+  // Функция для получения цвета класса недвижимости
+  const getPropertyClassColor = (className: string) => {
+    if (className === 'Элит') return 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-md hover:shadow-lg hover:from-amber-600 hover:to-yellow-700';
+    if (className === 'Бизнес') return 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md hover:shadow-lg hover:from-emerald-600 hover:to-teal-700';
+    if (className === 'Комфорт') return 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md hover:shadow-lg hover:from-cyan-600 hover:to-blue-700';
+    if (className === 'Эконом') return 'bg-gradient-to-r from-slate-500 to-gray-600 text-white shadow-md hover:shadow-lg hover:from-slate-600 hover:to-gray-700';
+    return 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md hover:shadow-lg hover:from-indigo-600 hover:to-purple-700';
+  };
+
   const rating = getInvestmentRating();
   const propertyType = getPropertyType();
 
@@ -61,13 +70,13 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
             <h3 className="truncate text-[16px] font-normal">{property.title}</h3>
             <p className="text-sm text-gray-600 truncate">{property.address}</p>
             <p className="text-sm text-gray-500">
-              {property.region?.name} • {propertyClassName}
+              {property.region?.name}
             </p>
           </div>
         </div>
 
-        {/* Теги рейтинга и типа недвижимости */}
-        <div className="flex gap-2 mb-4">
+        {/* Теги рейтинга, типа и класса недвижимости */}
+        <div className="flex flex-wrap gap-2 mb-4">
           <Badge 
             className={`text-xs font-medium px-3 py-1.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 ${getRatingColor(rating)}`}
           >
@@ -79,6 +88,12 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
           >
             <Building2 className="w-3 h-3 mr-1 drop-shadow-sm" />
             <span className="font-semibold">{propertyType}</span>
+          </Badge>
+          <Badge 
+            className={`text-xs font-medium px-3 py-1.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 ${getPropertyClassColor(propertyClassName)}`}
+          >
+            <Home className="w-3 h-3 mr-1 drop-shadow-sm" />
+            <span className="font-semibold">{propertyClassName}</span>
           </Badge>
         </div>
 
