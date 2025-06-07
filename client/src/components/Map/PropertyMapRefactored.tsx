@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { Property } from '@/types';
 import { leafletMapService } from '@/services/leafletMapService';
+import { geolocationService } from '@/services/geolocationService';
 
 export interface PropertyMapProps {
   properties: Property[];
   selectedProperty?: Property | null;
   onPropertySelect?: (property: Property) => void;
+  regionId?: number | null;
 }
 
 type HeatmapMode = 'none' | 'price' | 'density' | 'investment';
@@ -20,22 +22,48 @@ const getPropertyClassColor = (className: string): string => {
   return colors[className] || 'bg-gray-500';
 };
 
-export function PropertyMap({ properties, selectedProperty, onPropertySelect }: PropertyMapProps) {
+export function PropertyMap({ properties, selectedProperty, onPropertySelect, regionId }: PropertyMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [mapId, setMapId] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
   const [heatmapIntensity, setHeatmapIntensity] = useState(0.7);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([55.7558, 37.6176]); // Default: Moscow
 
-  // Initialize map
+  // Initialize map with geolocation or region-based positioning
   useEffect(() => {
     if (!mapContainer.current || mapId) return;
 
     const initializeMap = async () => {
       try {
+        let center: [number, number] = [55.7558, 37.6176]; // Default: Moscow
+        let zoom = 10;
+
+        // Try to get coordinates based on regionId first
+        if (regionId) {
+          const regionCoordinates = geolocationService.getRegionCoordinates(regionId);
+          if (regionCoordinates) {
+            center = regionCoordinates;
+            zoom = 12; // Closer zoom for specific regions
+          }
+        } else {
+          // Fall back to user's geolocation
+          try {
+            const nearestCity = await geolocationService.getNearestCity();
+            if (nearestCity) {
+              center = nearestCity.coordinates;
+              zoom = 11;
+            }
+          } catch (error) {
+            console.log('Using default location (Moscow)');
+          }
+        }
+
+        setMapCenter(center);
+        
         const newMapId = await leafletMapService.createMap(mapContainer.current!, {
-          center: [55.7558, 37.6176], // Moscow
-          zoom: 10
+          center,
+          zoom
         });
         
         if (newMapId) {
@@ -55,6 +83,39 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
       }
     };
   }, []);
+
+  // Update map position when regionId changes
+  useEffect(() => {
+    if (!mapId || !mapLoaded) return;
+
+    const updateMapPosition = async () => {
+      let center: [number, number] = [55.7558, 37.6176]; // Default: Moscow
+      let zoom = 10;
+
+      if (regionId) {
+        const regionCoordinates = geolocationService.getRegionCoordinates(regionId);
+        if (regionCoordinates) {
+          center = regionCoordinates;
+          zoom = 12;
+        }
+      } else {
+        try {
+          const nearestCity = await geolocationService.getNearestCity();
+          if (nearestCity) {
+            center = nearestCity.coordinates;
+            zoom = 11;
+          }
+        } catch (error) {
+          console.log('Using default location (Moscow)');
+        }
+      }
+
+      setMapCenter(center);
+      leafletMapService.setView(mapId, center, zoom);
+    };
+
+    updateMapPosition();
+  }, [regionId, mapId, mapLoaded]);
 
   // Update properties on map
   useEffect(() => {
