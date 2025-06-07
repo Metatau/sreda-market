@@ -11,28 +11,59 @@ import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
 import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
 import { useProperties, useRegions } from '@/hooks/useProperties';
 import { useNewProperties } from '@/hooks/useNewProperties';
-import type { Property, PropertyFilters as FilterType } from '@/types';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Property, PropertyFilters as FilterType, InvestmentAnalytics } from '@/types';
 import { TrendingUp, BarChart3, Clock, MapPin } from 'lucide-react';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterType>({});
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedAnalytics, setSelectedAnalytics] = useState<InvestmentAnalytics | null>(null);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [activeMapTool, setActiveMapTool] = useState<'none' | 'heatmap' | 'geoanalysis' | 'investment'>('none');
 
+  const queryClient = useQueryClient();
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
 
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
-  const analyticsData = null;
 
-  const handlePropertySelect = (property: Property) => {
-    setSelectedProperty(property);
-    setIsAnalyticsModalOpen(true);
+  const calculateAnalytics = useMutation({
+    mutationFn: async (propertyId: number): Promise<InvestmentAnalytics> => {
+      const response = await fetch(`/api/investment-analytics/${propertyId}/calculate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to calculate analytics');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/investment-analytics'] });
+    },
+  });
+
+  const handlePropertySelect = async (property: Property) => {
+    try {
+      setSelectedProperty(property);
+      const analytics = await calculateAnalytics.mutateAsync(property.id);
+      setSelectedAnalytics(analytics);
+      setIsAnalyticsModalOpen(true);
+    } catch (error) {
+      console.error('Failed to calculate analytics:', error);
+      // Still open modal but without analytics data
+      setSelectedAnalytics(null);
+      setIsAnalyticsModalOpen(true);
+    }
   };
 
   const handleFilterChange = (newFilters: FilterType) => {
@@ -363,9 +394,10 @@ export default function Home() {
           onClose={() => {
             setIsAnalyticsModalOpen(false);
             setSelectedProperty(null);
+            setSelectedAnalytics(null);
           }}
           property={selectedProperty as any}
-          analytics={analyticsData || {}}
+          analytics={selectedAnalytics || {}}
         />
       )}
 
