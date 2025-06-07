@@ -318,10 +318,10 @@ export default function Landing() {
       <section id="features" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Возможности платформы
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
               Полный набор инструментов для профессионального анализа недвижимости
             </p>
           </div>
@@ -349,10 +349,10 @@ export default function Landing() {
       <section id="pricing" className="py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Тарифные планы
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 px-4">
               Выберите подходящий план для ваших инвестиций
             </p>
           </div>
@@ -367,10 +367,10 @@ export default function Landing() {
                 )}
                 
                 <CardHeader className="text-center pb-8">
-                  <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
-                  <div className="text-4xl font-bold text-blue-600">
+                  <CardTitle className="text-xl sm:text-2xl mb-2">{plan.name}</CardTitle>
+                  <div className="text-3xl sm:text-4xl font-bold text-blue-600">
                     {plan.price}
-                    <span className="text-lg text-gray-600 font-normal">{plan.period}</span>
+                    <span className="text-base sm:text-lg text-gray-600 font-normal">{plan.period}</span>
                   </div>
                 </CardHeader>
 
@@ -426,10 +426,10 @@ export default function Landing() {
       {/* Финальный CTA */}
       <section className="py-20 bg-blue-600 text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
             Получите персональный отчёт
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-8 px-4">
             Анализ лучших инвестиционных объектов в вашем регионе
           </p>
 
@@ -471,7 +471,7 @@ export default function Landing() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* О сервисе */}
             <div>
-              <h3 className="text-lg font-quantum font-bold mb-3 tracking-wider">SREDA Market</h3>
+              <h3 className="text-base sm:text-lg font-quantum font-bold mb-3 tracking-wider">SREDA Market</h3>
               <p className="text-gray-300 text-xs leading-relaxed">
                 Аналитическая платформа для инвестиций в недвижимость с AI-агентом, 
                 инвестиционными рейтингами, прогнозами цен и комплексным анализом рынка.
@@ -480,7 +480,7 @@ export default function Landing() {
 
             {/* Реквизиты */}
             <div>
-              <h3 className="text-lg font-bold mb-3">Реквизиты</h3>
+              <h3 className="text-base sm:text-lg font-bold mb-3">Реквизиты</h3>
               <div className="space-y-1 text-xs text-gray-300">
                 <p className="font-medium">ИП Шинкаренко А.А.</p>
                 <p>ОГРНИП: 315595800025579</p>
@@ -504,7 +504,7 @@ export default function Landing() {
 
             {/* Правовые документы */}
             <div>
-              <h3 className="text-lg font-bold mb-3">Правовые документы</h3>
+              <h3 className="text-base sm:text-lg font-bold mb-3">Правовые документы</h3>
               <div className="space-y-1">
                 <Link href="/politika-konfidencialnosti/" className="block text-xs text-gray-300 hover:text-blue-400 transition-colors">
                   Политика конфиденциальности
