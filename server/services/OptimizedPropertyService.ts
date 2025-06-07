@@ -18,6 +18,7 @@ export interface PropertyFilters {
   minArea?: number;
   maxArea?: number;
   propertyType?: string;
+  marketType?: string;
   query?: string;
 }
 
@@ -276,6 +277,10 @@ export class OptimizedPropertyService {
 
     if (filters.propertyType) {
       conditions.push(eq(properties.propertyType, filters.propertyType));
+    }
+
+    if (filters.marketType) {
+      conditions.push(eq(properties.marketType, filters.marketType));
     }
 
     if (filters.minArea && filters.maxArea) {

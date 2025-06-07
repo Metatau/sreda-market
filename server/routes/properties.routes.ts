@@ -14,7 +14,9 @@ router.get('/',
   validateQuery(propertyFiltersSchema),
   async (req, res) => {
     try {
+      console.log('🔍 PROPERTIES ROUTE HIT with query:', req.query);
       const filters = req.query;
+      console.log('🔍 Filters being passed to service:', filters);
       const pagination = {
         page: parseInt(req.query.page as string) || 1,
         perPage: parseInt(req.query.perPage as string) || 10
