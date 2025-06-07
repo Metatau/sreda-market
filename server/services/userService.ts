@@ -14,7 +14,7 @@ export class UserService {
       });
 
       await this.createAdminIfNotExists({
-        email: 'studiomono@yandex.ru',
+        email: 'monostud.io@yandex.ru',
         username: 'studiomono',
         telegramHandle: '@studiomono',
         firstName: 'Studio',
