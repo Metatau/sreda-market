@@ -175,7 +175,7 @@ export default function Landing() {
         { name: "Глубина анализа", basic: "1 год", premium: false },
         { name: "Экспорт в PDF", basic: false, premium: false },
         { name: "Инсайты рынка", basic: false, premium: false },
-        { name: "Поддержка 24/7", basic: true, premium: false },
+        { name: "Поддержка 24/7", basic: false, premium: false },
 
       ]
     },
