@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Mail, Phone } from "lucide-react";
 
-export function Footer() {
+function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-8 px-4 font-mono">
       <div className="container mx-auto max-w-6xl">
@@ -66,10 +66,12 @@ export function Footer() {
         <div className="border-t border-gray-700 mt-6 pt-4">
           <div className="flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
             <p>© 2025 SREDA Market. Все права защищены.</p>
-            
           </div>
         </div>
       </div>
     </footer>
   );
 }
+
+export default Footer;
+export { Footer };
