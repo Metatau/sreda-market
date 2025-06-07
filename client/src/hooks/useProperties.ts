@@ -22,21 +22,26 @@ export function useAISearch() {
 }
 
 export function useProperties(filters?: SearchFilters, page: number = 1, perPage: number = 20) {
+  // Create a stable query key by serializing the filters
+  const filterKey = filters ? JSON.stringify(filters) : null;
+  
   return useQuery({
-    queryKey: ["properties", filters, page, perPage],
+    queryKey: ["properties", filterKey, page, perPage],
     queryFn: () => {
-      console.log('useProperties API call with filters:', filters);
-      return propertyApi.getProperties({
+      console.log('🔍 useProperties API call with filters:', filters);
+      const params = {
         page,
         per_page: perPage,
-        region_id: filters?.regionId,
-        property_class_id: filters?.propertyClassId,
-        min_price: filters?.minPrice,
-        max_price: filters?.maxPrice,
-        rooms: filters?.rooms,
-        property_type: filters?.propertyType,
-        market_type: filters?.marketType,
-      });
+        ...(filters?.regionId && { region_id: filters.regionId }),
+        ...(filters?.propertyClassId && { property_class_id: filters.propertyClassId }),
+        ...(filters?.minPrice && { min_price: filters.minPrice }),
+        ...(filters?.maxPrice && { max_price: filters.maxPrice }),
+        ...(filters?.rooms && { rooms: filters.rooms }),
+        ...(filters?.propertyType && { property_type: filters.propertyType }),
+        ...(filters?.marketType && { market_type: filters.marketType }),
+      };
+      console.log('🌐 API params being sent:', params);
+      return propertyApi.getProperties(params);
     },
   });
 }
