@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +56,7 @@ export default function AdminPanel() {
     config: {
       websiteUrl: '',
       channelUrl: '',
+      channelUsername: '',
       rssUrl: '',
       fileName: '',
       keywords: ''
@@ -260,6 +261,7 @@ export default function AdminPanel() {
       config: {
         websiteUrl: '',
         channelUrl: '',
+        channelUsername: '',
         rssUrl: '',
         fileName: '',
         keywords: ''
@@ -277,15 +279,44 @@ export default function AdminPanel() {
       return;
     }
 
+    // Дополнительная валидация в зависимости от типа
+    if (newSourceForm.type === 'telegram_channel' && !newSourceForm.config.channelUrl) {
+      toast({
+        title: 'Ошибка',
+        description: 'Для Telegram канала укажите URL канала',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (newSourceForm.type === 'website' && !newSourceForm.config.websiteUrl) {
+      toast({
+        title: 'Ошибка',
+        description: 'Для веб-сайта укажите URL',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (newSourceForm.type === 'rss_feed' && !newSourceForm.config.rssUrl) {
+      toast({
+        title: 'Ошибка',
+        description: 'Для RSS ленты укажите URL',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     const sourceData = {
       name: newSourceForm.name,
       description: newSourceForm.description || undefined,
       type: newSourceForm.type,
       frequency: newSourceForm.frequency,
-      tags: newSourceForm.tags ? newSourceForm.tags.split(',').map(tag => tag.trim()) : [],
+      tags: newSourceForm.tags ? newSourceForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : [],
       config: getConfigForType(newSourceForm.type)
     };
 
+    console.log('Creating source with data:', sourceData);
     createSourceMutation.mutate(sourceData);
   };
 
@@ -299,6 +330,7 @@ export default function AdminPanel() {
       case 'telegram_channel':
         return {
           channelUrl: newSourceForm.config.channelUrl,
+          channelUsername: newSourceForm.config.channelUrl.includes('@') ? newSourceForm.config.channelUrl : undefined,
           keywords: newSourceForm.config.keywords ? newSourceForm.config.keywords.split(',').map(k => k.trim()) : []
         };
       case 'rss_feed':
@@ -772,6 +804,9 @@ export default function AdminPanel() {
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Добавить новый источник данных</DialogTitle>
+                        <DialogDescription>
+                          Создайте новый источник данных для сбора аналитической информации
+                        </DialogDescription>
                       </DialogHeader>
                       
                       <div className="space-y-6">
@@ -861,17 +896,37 @@ export default function AdminPanel() {
                             )}
 
                             {newSourceForm.type === 'telegram_channel' && (
-                              <div>
-                                <Label htmlFor="channelUrl">URL Telegram канала</Label>
-                                <Input
-                                  id="channelUrl"
-                                  value={newSourceForm.config.channelUrl}
-                                  onChange={(e) => setNewSourceForm(prev => ({ 
-                                    ...prev, 
-                                    config: { ...prev.config, channelUrl: e.target.value }
-                                  }))}
-                                  placeholder="https://t.me/channel_name"
-                                />
+                              <div className="space-y-4">
+                                <div>
+                                  <Label htmlFor="channelUrl">URL Telegram канала</Label>
+                                  <Input
+                                    id="channelUrl"
+                                    value={newSourceForm.config.channelUrl}
+                                    onChange={(e) => setNewSourceForm(prev => ({ 
+                                      ...prev, 
+                                      config: { ...prev.config, channelUrl: e.target.value }
+                                    }))}
+                                    placeholder="https://t.me/channel_name"
+                                  />
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    Введите полный URL Telegram канала
+                                  </p>
+                                </div>
+                                <div>
+                                  <Label htmlFor="channelUsername">Username канала (опционально)</Label>
+                                  <Input
+                                    id="channelUsername"
+                                    value={newSourceForm.config.channelUsername}
+                                    onChange={(e) => setNewSourceForm(prev => ({ 
+                                      ...prev, 
+                                      config: { ...prev.config, channelUsername: e.target.value }
+                                    }))}
+                                    placeholder="@channel_name"
+                                  />
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    Username канала для дополнительной идентификации
+                                  </p>
+                                </div>
                               </div>
                             )}
 
