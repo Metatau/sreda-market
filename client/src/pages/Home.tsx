@@ -101,10 +101,7 @@ export default function Home() {
       {/* Navigation */}
       <Navigation />
 
-      {/* DEBUG: Test if content is visible */}
-      <div className="w-full bg-red-500 text-white text-center py-2 text-lg font-bold">
-        🔍 ОТЛАДКА: Если вы видите эту красную полосу, значит контент загружается правильно
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -167,40 +164,41 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Enhanced View Mode Tabs - VISIBLE */}
-            <div className="mb-6 border-2 border-blue-500 p-4 bg-blue-50">
-              <div className="text-xs text-blue-600 mb-2">DEBUG: Переключатели должны быть здесь</div>
-              <div className="flex bg-gray-100 rounded-lg p-1 w-fit mb-4">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors border ${
-                    viewMode === 'grid' 
-                      ? 'bg-white text-gray-900 shadow-sm border-blue-500' 
-                      : 'text-gray-600 hover:text-gray-900 border-gray-300'
-                  }`}
-                >
-                  <Grid3x3 className="h-4 w-4" />
-                  Список объектов
-                </button>
-                <button
-                  onClick={() => setViewMode('map')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors border ml-1 ${
-                    viewMode === 'map' 
-                      ? 'bg-white text-gray-900 shadow-sm border-blue-500' 
-                      : 'text-gray-600 hover:text-gray-900 border-gray-300'
-                  }`}
-                >
-                  <Map className="h-4 w-4" />
-                  Аналитическая карта
-                  <Badge variant="secondary" className="ml-1">Новинка</Badge>
-                </button>
-              </div>
-              <div className="text-xs text-gray-500">Текущий режим: {viewMode}</div>
-
+            {/* Header with View Mode Tabs */}
+            <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-gray-900 text-[20px]">
-                  Недвижимость в {selectedRegionName}
-                </h2>
+                <div className="flex items-center gap-4">
+                  <h2 className="font-bold text-gray-900 text-[20px]">
+                    Объекты недвижимости
+                  </h2>
+                  
+                  {/* View Mode Switcher */}
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                        viewMode === 'grid' 
+                          ? 'bg-white text-gray-900 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      <Grid3x3 className="h-4 w-4" />
+                      Список
+                    </button>
+                    <button
+                      onClick={() => setViewMode('map')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                        viewMode === 'map' 
+                          ? 'bg-white text-gray-900 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      <Map className="h-4 w-4" />
+                      Карта
+                      <Badge variant="secondary" className="ml-1 text-xs">Новинка</Badge>
+                    </button>
+                  </div>
+                </div>
                 
                 <div className="flex items-center space-x-4">
                   <p className="text-sm text-gray-600">
