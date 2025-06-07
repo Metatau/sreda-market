@@ -195,7 +195,6 @@ export default function Home() {
                     >
                       <Map className="h-4 w-4" />
                       Карта
-                      <Badge variant="secondary" className="ml-1 text-xs">Новинка</Badge>
                     </button>
                   </div>
                 </div>
