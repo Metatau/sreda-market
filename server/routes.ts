@@ -124,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/property-classes/:id", cacheControl(1800, 'static'), etag, responseCacheMiddleware(1800), propertyClassController.getPropertyClass);
 
   // Property routes with caching
-  app.get("/api/properties", generalRateLimit, propertyController.getProperties);
+  app.get("/api/properties", cacheControl(120, 'dynamic'), etag, responseCacheMiddleware(120), propertyController.getProperties);
   app.get("/api/properties/map-data", cacheControl(300, 'api'), etag, responseCacheMiddleware(300), propertyController.getMapData);
   app.get("/api/properties/:id", cacheControl(600, 'api'), etag, responseCacheMiddleware(600), propertyController.getProperty);
   app.post("/api/properties/search", propertyController.searchProperties);

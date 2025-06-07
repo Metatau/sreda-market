@@ -17,7 +17,9 @@ export class PropertyController extends BaseController {
     );
 
     const filters = validateFilters(req.query);
-    const result = await this.propertyService.getProperties(filters, { page, limit: perPage });
+    console.log('Property filters applied:', filters, 'Original query:', req.query);
+    
+    const result = await this.propertyService.getProperties(filters, { page, perPage });
     
     this.sendSuccess(res, {
       properties: result.properties,
@@ -58,7 +60,7 @@ export class PropertyController extends BaseController {
     
     const properties = query 
       ? await this.propertyService.searchProperties(query, filters)
-      : await this.propertyService.getProperties(filters, { page: 1, limit: 100 });
+      : await this.propertyService.getProperties(filters, { page: 1, perPage: 100 });
 
     this.sendSuccess(res, {
       properties: Array.isArray(properties) ? properties : properties.properties,

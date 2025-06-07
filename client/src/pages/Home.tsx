@@ -26,7 +26,7 @@ export default function Home() {
 
   const queryClient = useQueryClient();
   const { data: regions = [] } = useRegions();
-  const { data: propertiesData, isLoading, refetch } = useProperties(filters, currentPage, 9);
+  const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
   const { data: allPropertiesData, isLoading: isLoadingAllProperties } = useAllProperties(); // Все объекты для карты
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
 
@@ -70,12 +70,9 @@ export default function Home() {
     }
   };
 
-  const handleFilterChange = async (newFilters: FilterType) => {
+  const handleFilterChange = (newFilters: FilterType) => {
     setFilters(newFilters);
     setCurrentPage(1);
-    // Очищаем весь кеш и принудительно перезагружаем данные
-    queryClient.clear();
-    await refetch();
   };
 
   return (
@@ -86,9 +83,9 @@ export default function Home() {
       <div className="w-full pt-4 px-4 mb-6">
         <div className="relative h-[500px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
           <PropertyMap 
-            properties={properties}
+            properties={allProperties as any}
             selectedProperty={selectedProperty}
-            onPropertySelect={handlePropertySelect}
+            onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
             regionId={filters.regionId}
             activeMapTool={activeMapTool}
           />
@@ -265,7 +262,7 @@ export default function Home() {
             setSelectedAnalytics(null);
           }}
           property={selectedProperty as any}
-          analytics={selectedAnalytics as any}
+          analytics={selectedAnalytics || {}}
         />
       )}
 

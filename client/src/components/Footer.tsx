@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Mail, Phone } from "lucide-react";
 
-export default function Footer() {
+export function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-8 px-4 font-mono">
       <div className="container mx-auto max-w-6xl">
@@ -73,5 +73,3 @@ export default function Footer() {
     </footer>
   );
 }
-
-export { Footer };

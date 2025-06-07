@@ -61,7 +61,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
         id: Date.now() + 1,
         sessionId: response.sessionId,
         role: "assistant",
-        content: (response as any).content || (response as any).response || 'Ошибка получения ответа',
+        content: response.response,
         createdAt: new Date().toISOString(),
       };
 

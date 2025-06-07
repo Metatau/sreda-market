@@ -146,9 +146,9 @@ export function Comparison() {
                       </div>
                     </div>
                     
-                    {property.propertyClassId && (
-                      <Badge className="bg-blue-500 font-medium border">
-                        Класс {property.propertyClassId}
+                    {property.propertyClass && (
+                      <Badge className={`${getPropertyClassColor(property.propertyClass.name)} font-medium border`}>
+                        {property.propertyClass.name}
                       </Badge>
                     )}
                   </CardContent>
@@ -222,7 +222,7 @@ export function Comparison() {
                         <TableCell className="font-medium">Класс недвижимости</TableCell>
                         {compareList.map((property) => (
                           <TableCell key={property.id} className="text-center">
-                            {property.propertyClassId ? `Класс ${property.propertyClassId}` : 'N/A'}
+                            {property.propertyClass?.name || 'N/A'}
                           </TableCell>
                         ))}
                       </TableRow>
@@ -230,7 +230,7 @@ export function Comparison() {
                         <TableCell className="font-medium">Регион</TableCell>
                         {compareList.map((property) => (
                           <TableCell key={property.id} className="text-center">
-                            {property.regionId ? `Регион ${property.regionId}` : 'N/A'}
+                            {property.region?.name || 'N/A'}
                           </TableCell>
                         ))}
                       </TableRow>

@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  email: z.string().email('Неверный формат email'),
-  password: z.string().min(6, 'Пароль должен содержать минимум 6 символов')
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(1, 'Password is required')
 });
 
 export const registerSchema = z.object({
-  username: z.string().min(3, 'Имя пользователя должно содержать минимум 3 символа'),
-  email: z.string().email('Неверный формат email'),
-  password: z.string().min(6, 'Пароль должен содержать минимум 6 символов'),
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   telegramHandle: z.string().optional(),
@@ -16,10 +16,6 @@ export const registerSchema = z.object({
 });
 
 export const changePasswordSchema = z.object({
-  oldPassword: z.string().min(1, 'Необходимо указать текущий пароль'),
-  newPassword: z.string().min(6, 'Новый пароль должен содержать минимум 6 символов')
+  oldPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters')
 });
-
-export type LoginData = z.infer<typeof loginSchema>;
-export type RegisterData = z.infer<typeof registerSchema>;
-export type ChangePasswordData = z.infer<typeof changePasswordSchema>;

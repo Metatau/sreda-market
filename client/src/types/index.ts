@@ -38,13 +38,10 @@ export interface PropertyWithRelations extends Property {
 }
 
 // Frontend-compatible InvestmentAnalytics type
-export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'propertyId' | 'priceChange1y' | 'priceChange3m' | 'priceVolatility' | 'rentalYield' | 'rentalIncomeMonthly' | 'rentalRoiAnnual' | 'rentalPaybackYears' | 'flipRoi' | 'priceForecast3y' | 'flipPotentialProfit' | 'flipTimeframeMonths' | 'renovationCostEstimate' | 'safeHavenScore' | 'capitalPreservationIndex' | 'liquidityScore'> {
+export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'propertyId' | 'priceChange1y' | 'priceChange3m' | 'priceVolatility' | 'rentalYield' | 'rentalIncomeMonthly' | 'rentalRoiAnnual' | 'rentalPaybackYears' | 'flipRoi' | 'priceForecast3y' | 'flipPotentialProfit' | 'flipTimeframeMonths' | 'renovationCostEstimate'> {
   propertyId: number | undefined;
   roi?: number;
   investmentScore?: number;
-  safeHavenScore?: number | undefined;
-  capitalPreservationIndex?: string | undefined;
-  liquidityScore?: number | undefined;
   priceChange1y: string | undefined;
   priceChange3m: string | undefined;
   priceVolatility: string | undefined;

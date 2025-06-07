@@ -23,7 +23,7 @@ export function useAISearch() {
 
 export function useProperties(filters?: SearchFilters, page: number = 1, perPage: number = 20) {
   return useQuery({
-    queryKey: ["properties", filters?.regionId, filters?.propertyClassId, filters?.minPrice, filters?.maxPrice, filters?.rooms, filters?.propertyType, filters?.marketType, page, perPage],
+    queryKey: ["properties", filters, page, perPage],
     queryFn: () => propertyApi.getProperties({
       page,
       per_page: perPage,
@@ -35,9 +35,6 @@ export function useProperties(filters?: SearchFilters, page: number = 1, perPage
       property_type: filters?.propertyType,
       market_type: filters?.marketType,
     }),
-    staleTime: 1000 * 60, // 1 минута
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
   });
 }
 
@@ -73,14 +70,11 @@ export function useSearchProperties() {
 
 export function useMapData(filters?: { regionId?: number; propertyClassId?: number }) {
   return useQuery({
-    queryKey: ["mapData", filters?.regionId, filters?.propertyClassId],
+    queryKey: ["mapData", filters],
     queryFn: () => propertyApi.getMapData({
       region_id: filters?.regionId,
       property_class_id: filters?.propertyClassId,
     }),
-    staleTime: 1000 * 60 * 5, // 5 минут
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
   });
 }
 

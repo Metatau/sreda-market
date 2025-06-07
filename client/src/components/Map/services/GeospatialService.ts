@@ -14,7 +14,7 @@ export class GeospatialService {
     return properties
       .filter(property => property.coordinates && property.coordinates !== '')
       .map(property => {
-        const coords = this.parseCoordinates(property.coordinates!);
+        const coords = this.parseCoordinates(property.coordinates);
         if (!coords) return null;
 
         const value = this.calculateHeatmapValue(property, mode);
