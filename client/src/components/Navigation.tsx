@@ -76,23 +76,15 @@ export function Navigation() {
           {/* User Menu */}
           <div className="flex items-center space-x-4">
             {user && (
-              <>
-                {/* User Name */}
-                <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {user.firstName || user.username}
-                </span>
-
-                {/* Logout Button */}
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleLogout}
-                  className="flex items-center space-x-1"
-                >
-                  <LogOutIcon className="h-4 w-4" />
-                  <span className="hidden sm:block">Выйти</span>
-                </Button>
-              </>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center space-x-1"
+              >
+                <LogOutIcon className="h-4 w-4" />
+                <span className="hidden sm:block">Выйти</span>
+              </Button>
             )}
           </div>
         </div>
