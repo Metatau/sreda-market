@@ -7,6 +7,7 @@ import { performanceMonitor } from "../services/performanceService";
 import { compression } from "../middleware/cache";
 import { globalErrorHandler } from "../utils/errors";
 import { UserService } from "../services/userService";
+import { apiHeadersMiddleware } from "../middleware/apiHeaders";
 
 // Import modular routes
 import authRoutes from "./auth.routes";
@@ -28,6 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(generalRateLimit);
   app.use(performanceMonitor.middleware());
   app.use(compression);
+  app.use(apiHeadersMiddleware);
 
   // Initialize administrators
   try {
@@ -36,13 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.error('Failed to initialize administrator:', error);
   }
 
-  // Ensure API routes always return JSON
-  app.use('/api/*', (req, res, next) => {
-    res.setHeader('Content-Type', 'application/json');
-    next();
-  });
-
-  // Register modular routes
+  // Register modular routes BEFORE Vite setup
   app.use('/api/auth', authRoutes);
   app.use('/api/users', usersRoutes);
   app.use('/api/properties', propertiesRoutes);
@@ -62,6 +58,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString(),
       uptime: process.uptime()
     });
+  });
+
+  // Ensure API routes always return JSON (after routes registration)
+  app.use('/api/*', (req, res, next) => {
+    if (!res.headersSent) {
+      res.status(404).json({ success: false, error: { message: 'API endpoint not found' } });
+    }
   });
 
   const server = createServer(app);
