@@ -443,9 +443,7 @@ export default function Landing() {
               rel="noopener noreferrer"
               className="inline-block w-full"
             >
-              <Button variant="secondary" size="lg" className="w-full px-8 py-4 text-lg font-semibold mb-4">
-                Получить промокод в Telegram
-              </Button>
+              <Button variant="secondary" size="lg" className="w-full px-8 py-4 text-lg font-semibold mb-4">Получить промокод</Button>
             </a>
             
             <div className="flex items-center justify-center space-x-2 text-sm text-blue-100">
