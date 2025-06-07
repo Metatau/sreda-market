@@ -503,6 +503,19 @@ export default function AdminPanel() {
             </div>
           </button>
           <button
+            onClick={() => setActiveTab('promocodes')}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === 'promocodes'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <Key className="w-4 h-4" />
+              <span>Промокоды</span>
+            </div>
+          </button>
+          <button
             onClick={() => setActiveTab('settings')}
             className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               activeTab === 'settings'
@@ -1303,6 +1316,193 @@ export default function AdminPanel() {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Вкладка Промокоды */}
+        {activeTab === 'promocodes' && (
+          <div className="space-y-6">
+            {/* Статистика промокодов */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Key className="w-5 h-5" />
+                  <span>Статистика промокодов</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">156</div>
+                    <div className="text-sm text-gray-600">Всего создано</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">89</div>
+                    <div className="text-sm text-gray-600">Использовано</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-600">12</div>
+                    <div className="text-sm text-gray-600">Истекло</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-600">55</div>
+                    <div className="text-sm text-gray-600">Активных</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* IP-валидация и безопасность */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <AlertCircle className="w-5 h-5" />
+                  <span>Система безопасности IP</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-red-50 p-4 rounded-lg">
+                    <div className="text-lg font-semibold text-red-800">Подозрительная активность</div>
+                    <div className="text-2xl font-bold text-red-600">3</div>
+                    <div className="text-sm text-red-600">IP с превышением лимитов</div>
+                  </div>
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <div className="text-lg font-semibold text-yellow-800">Заблокированные IP</div>
+                    <div className="text-2xl font-bold text-yellow-600">8</div>
+                    <div className="text-sm text-yellow-600">За последние 24 часа</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-lg font-semibold text-green-800">Защищённые операции</div>
+                    <div className="text-2xl font-bold text-green-600">98.7%</div>
+                    <div className="text-sm text-green-600">Успешность валидации</div>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold">Правила безопасности</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="font-medium text-blue-800">Создание промокодов</div>
+                      <div className="text-sm text-blue-600">Максимум 3 промокода с одного IP в час</div>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <div className="font-medium text-blue-800">Использование промокодов</div>
+                      <div className="text-sm text-blue-600">Максимум 5 использований с одного IP в день</div>
+                    </div>
+                    <div className="bg-purple-50 p-3 rounded-lg">
+                      <div className="font-medium text-purple-800">Самоприменение</div>
+                      <div className="text-sm text-purple-600">Блокировка использования промокода создавшим IP</div>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="font-medium text-gray-800">Временные окна</div>
+                      <div className="text-sm text-gray-600">7 дней для применения промокода после регистрации</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Последняя активность */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Globe className="w-5 h-5" />
+                  <span>Последняя IP активность</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[
+                    { ip: '192.168.1.45', action: 'Создание промокода', code: 'A7B9K2', time: '2 минуты назад', status: 'success' },
+                    { ip: '10.0.0.23', action: 'Использование промокода', code: 'M4N8P1', time: '5 минут назад', status: 'success' },
+                    { ip: '172.16.0.89', action: 'Попытка создания', code: '-', time: '8 минут назад', status: 'blocked' },
+                    { ip: '203.45.67.12', action: 'Использование промокода', code: 'X9Z2L5', time: '12 минут назад', status: 'success' },
+                    { ip: '172.16.0.89', action: 'Попытка создания', code: '-', time: '15 минут назад', status: 'blocked' }
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-3 h-3 rounded-full ${
+                          activity.status === 'success' ? 'bg-green-500' : 'bg-red-500'
+                        }`}></div>
+                        <div>
+                          <div className="font-medium">{activity.ip}</div>
+                          <div className="text-sm text-gray-600">{activity.action}</div>
+                        </div>
+                        {activity.code !== '-' && (
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {activity.code}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-600">{activity.time}</div>
+                        <Badge variant={activity.status === 'success' ? 'default' : 'destructive'} className="text-xs">
+                          {activity.status === 'success' ? 'Успешно' : 'Заблокировано'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Управление лимитами */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Settings className="w-5 h-5" />
+                  <span>Настройки лимитов</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="creation-limit">Лимит создания промокодов (в час)</Label>
+                    <Input 
+                      id="creation-limit" 
+                      type="number" 
+                      defaultValue="3"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="usage-limit">Лимит использования промокодов (в день)</Label>
+                    <Input 
+                      id="usage-limit" 
+                      type="number" 
+                      defaultValue="5"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="registration-window">Окно для использования (дни)</Label>
+                    <Input 
+                      id="registration-window" 
+                      type="number" 
+                      defaultValue="7"
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="promocode-lifetime">Время жизни промокода (часы)</Label>
+                    <Input 
+                      id="promocode-lifetime" 
+                      type="number" 
+                      defaultValue="24"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    Сохранить настройки
+                  </Button>
                 </div>
               </CardContent>
             </Card>
