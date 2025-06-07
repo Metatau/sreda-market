@@ -56,6 +56,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Direct regions endpoints to bypass routing conflicts
+  const { RegionController } = await import('../controllers/RegionController');
+  const regionController = new RegionController();
+  
+  app.get('/api/regions', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    regionController.getRegions(req, res, next);
+  });
+  
+  app.get('/api/regions/:id', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    regionController.getRegion(req, res, next);
+  });
+
   // Global error handler (must be last middleware)
   app.use(globalErrorHandler);
 
