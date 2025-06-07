@@ -250,7 +250,7 @@ export default function Landing() {
                       readOnly={!searchValue}
                     />
                     <div className="flex items-center ml-4">
-                      <span className="text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300">
+                      <span className="text-sm font-quantum font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 tracking-wider">
                         AI SREDA
                       </span>
                     </div>
