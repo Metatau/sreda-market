@@ -4,12 +4,25 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail, Database, BarChart3 } from 'lucide-react';
+import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail, Database, BarChart3, Search } from 'lucide-react';
 
 export default function Landing() {
   const [email, setEmail] = useState('');
   const [timeLeft, setTimeLeft] = useState('07:59:32');
   const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
+
+  const searchQueries = [
+    'Выгодные квартиры в Москве с высокой доходностью',
+    'Инвестиции в недвижимость Санкт-Петербурга',
+    'Доходная недвижимость в Казани под инвестиции',
+    'Квартиры с высоким ROI в Перми',
+    'Инвестиционные объекты в Екатеринбурге',
+    'Недвижимость в Тюмени для инвестора',
+    'Выгодные вложения в квартиры Уфы',
+    'Инвестиции в недвижимость Сочи'
+  ];
 
   const metrics = [
     { value: '+12.5%', label: 'ROI' },
@@ -55,6 +68,15 @@ export default function Landing() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Анимация вращающихся поисковых запросов
+  useEffect(() => {
+    const searchInterval = setInterval(() => {
+      setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
+    }, 3000);
+
+    return () => clearInterval(searchInterval);
+  }, [searchQueries.length]);
 
   // Таймер обратного отсчета
   useEffect(() => {
@@ -198,6 +220,25 @@ export default function Landing() {
           {/* 3D визуализация тепловой карты */}
           <div className="relative max-w-4xl mx-auto">
             <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+              
+              {/* Поисковая строка поверх карты */}
+              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[30%] z-10">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 p-[2px]">
+                    <div className="h-full w-full rounded-lg bg-white flex items-center">
+                      <Search className="h-4 w-4 text-gray-500 ml-3" />
+                      <input
+                        type="text"
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        placeholder={searchQueries[currentSearchIndex]}
+                        className="flex-1 px-3 py-2 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 placeholder:transition-all placeholder:duration-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-6 gap-2 h-64">
                 {Array.from({ length: 24 }).map((_, i) => (
                   <div
