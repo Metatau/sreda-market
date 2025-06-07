@@ -1,24 +1,47 @@
-// Import types from shared schema to eliminate duplication
-export type {
+/**
+ * Frontend type definitions with proper null/undefined handling
+ */
+
+import type { 
+  Property as BaseProperty,
+  PropertyWithRelations as BasePropertyWithRelations,
+  InvestmentAnalytics as BaseInvestmentAnalytics,
   Region,
   PropertyClass,
-  Property,
   PropertyAnalytics,
-  InvestmentAnalytics,
-  User,
-  PriceHistory,
-  InfrastructureProject,
-  InsertRegion,
-  InsertPropertyClass,
-  InsertProperty,
-  InsertPropertyAnalytics,
-  InsertInvestmentAnalytics,
-  InsertChatMessage,
-  InsertUser,
-  ChatMessage
+  ChatMessage as BaseChatMessage
 } from '@shared/schema';
 
-export interface SearchFilters {
+// Frontend-compatible Property type
+export interface Property extends Omit<BaseProperty, 'externalId' | 'pricePerSqm' | 'area' | 'coordinates'> {
+  externalId: string | null;
+  pricePerSqm: number | undefined;
+  area: string | undefined;
+  coordinates: string | null;
+}
+
+// Frontend-compatible PropertyWithRelations type
+export interface PropertyWithRelations extends Property {
+  region?: Region;
+  propertyClass?: PropertyClass;
+  analytics?: PropertyAnalytics;
+  investmentAnalytics?: InvestmentAnalytics;
+}
+
+// Frontend-compatible InvestmentAnalytics type
+export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'propertyId'> {
+  propertyId: number | undefined;
+  roi?: number;
+  investmentScore?: number;
+}
+
+// Frontend-compatible ChatMessage type
+export interface ChatMessage extends Omit<BaseChatMessage, 'createdAt'> {
+  createdAt: Date | string;
+}
+
+// Property filters for search
+export interface PropertyFilters {
   regionId?: number;
   propertyClassId?: number;
   minPrice?: number;
@@ -27,126 +50,23 @@ export interface SearchFilters {
   minArea?: number;
   maxArea?: number;
   propertyType?: string;
-  marketType?: 'secondary' | 'new_construction';
   query?: string;
 }
 
-// Alias for backward compatibility
-export type PropertyFilters = SearchFilters;
-
-export interface Pagination {
-  page: number;
-  perPage: number;
-  total?: number;
-  pages?: number;
-  hasNext?: boolean;
-  hasPrev?: boolean;
-}
-
+// API Response types
 export interface PropertiesResponse {
   properties: PropertyWithRelations[];
-  pagination: Pagination;
-  total: number;
-}
-
-// Enhanced property interface that includes relations  
-export interface PropertyWithRelations {
-  id: number;
-  externalId?: string | null;
-  regionId?: number | null;
-  propertyClassId?: number | null;
-  title: string;
-  description?: string | null;
-  price: number;
-  pricePerSqm?: number;
-  area?: string | null;
-  rooms?: number | null;
-  floor?: number | null;
-  totalFloors?: number | null;
-  address: string;
-  district?: string | null;
-  metroStation?: string | null;
-  coordinates?: string | null;
-  propertyType?: string;
-  marketType?: 'secondary' | 'new_construction' | null;
-  source?: string;
-  url?: string | null;
-  phone?: string | null;
-  imageUrl?: string | null;
-  images?: string[] | null;
-  totalArea?: string | null;
-  livingArea?: string | null;
-  kitchenArea?: string | null;
-  floorsTotal?: number | null;
-  metroDistance?: number | null;
-  autoClassified?: boolean;
-  manualOverride?: boolean;
-  isActive?: boolean;
-  createdAt?: Date | null;
-  updatedAt?: Date | null;
-  region?: {
-    id: number;
-    name: string;
-    regionType: string;
-    coordinates?: string | null;
-    timezone: string;
-    isActive: boolean | null;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-  };
-  propertyClass?: {
-    id: number;
-    name: string;
-    minPricePerSqm: number;
-    maxPricePerSqm: number;
-    description?: string | null;
-    criteria?: any;
-    createdAt: Date | null;
-  };
-  analytics?: {
-    id: number;
-    propertyId: number;
-    regionId?: number | null;
-    roi?: string | null;
-    rentalYield?: string | null;
-    appreciation?: string | null;
-    liquidityScore?: number | null;
-    investmentScore?: number | null;
-    investmentRating?: string | null;
-    priceGrowthRate?: string | null;
-    marketTrend?: string | null;
-    calculatedAt: Date | null;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-  };
-  investmentAnalytics?: {
-    id: number;
-    propertyId: number;
-    priceChange1y?: string | null;
-    priceChange3m?: string | null;
-    priceVolatility?: string | null;
-    rentalYield?: string | null;
-    rentalIncomeMonthly?: number | null;
-    rentalRoiAnnual?: string | null;
-    rentalPaybackYears?: string | null;
-    flipPotentialProfit?: number | null;
-    flipRoi?: string | null;
-    flipTimeframeMonths?: number | null;
-    renovationCostEstimate?: number | null;
-    safeHavenScore?: number | null;
-    capitalPreservationIndex?: string | null;
-    liquidityScore?: number | null;
-    priceForecast3y?: string | null;
-    infrastructureImpactScore?: string | null;
-    developmentRiskScore?: string | null;
-    investmentRating?: string | null;
-    riskLevel?: string | null;
-    recommendedStrategy?: string | null;
-    calculatedAt?: Date | null;
-    expiresAt?: Date | null;
+  pagination?: {
+    page: number;
+    perPage: number;
+    total: number;
+    pages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }
 
+// Map data types
 export interface MapDataPoint {
   type: "Feature";
   geometry: {
@@ -165,24 +85,27 @@ export interface MapDataPoint {
     roi?: string;
     liquidityScore?: number;
     investmentRating?: string;
+    address?: string;
   };
 }
 
-export interface MapBounds {
-  north: number;
-  south: number;
-  east: number;
-  west: number;
-}
-
-export interface HeatmapData {
-  lat: number;
-  lng: number;
-  intensity: number;
-}
-
+// Chat types
 export interface ChatResponse {
-  response: string;
+  message: string;
   sessionId: string;
-  entities?: any;
+  suggestions?: string[];
 }
+
+// Investment metrics
+export interface InvestmentMetrics {
+  roi: number;
+  liquidityScore: number;
+  investmentRating: string;
+  riskLevel: string;
+  recommendedStrategy: string;
+  potentialReturn: number;
+  paybackPeriod: number;
+}
+
+// Export shared types that don't need modification
+export type { Region, PropertyClass, PropertyAnalytics } from '@shared/schema';

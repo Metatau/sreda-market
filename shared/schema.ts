@@ -508,3 +508,11 @@ export const dataSources = pgTable("data_sources", {
 
 export type DataSource = typeof dataSources.$inferSelect;
 export type InsertDataSource = typeof dataSources.$inferInsert;
+
+// Composite types with relations
+export type PropertyWithRelations = Property & {
+  region?: Region;
+  propertyClass?: PropertyClass;
+  analytics?: PropertyAnalytics;
+  investmentAnalytics?: InvestmentAnalytics;
+};
