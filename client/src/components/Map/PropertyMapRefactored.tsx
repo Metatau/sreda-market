@@ -164,7 +164,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           return;
         }
 
-      const heatmapData = properties
+        const heatmapData = properties
         .filter(p => p.coordinates)
         .map(property => {
           const [lat, lng] = property.coordinates!.split(',').map(Number);
