@@ -34,6 +34,8 @@ export default function Home() {
   const allProperties = allPropertiesData?.properties || []; // Все объекты для карты
   const pagination = propertiesData?.pagination;
 
+
+
   const calculateAnalytics = useMutation({
     mutationFn: async (propertyId: number): Promise<InvestmentAnalytics> => {
       const response = await fetch(`/api/investment-analytics/${propertyId}/calculate`, {

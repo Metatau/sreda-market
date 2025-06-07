@@ -43,7 +43,7 @@ export function useAllProperties() {
     queryKey: ["allProperties"],
     queryFn: () => propertyApi.getProperties({ 
       page: 1, 
-      per_page: 10000 // Загрузить все объекты для карты
+      per_page: 100 // Загрузить больше объектов для карты
     }),
     staleTime: 5 * 60 * 1000, // Кешировать на 5 минут
   });
