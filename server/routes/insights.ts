@@ -62,34 +62,7 @@ router.get('/', async (req: any, res: any) => {
   }
 });
 
-// Get single insight
-router.get('/:id', async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    
-    const insight = await storage.getInsight(parseInt(id));
-    
-    if (!insight) {
-      return res.status(404).json({
-        success: false,
-        error: 'Аналитическая заметка не найдена'
-      });
-    }
-    
-    res.json({
-      success: true,
-      data: insight
-    });
-  } catch (error) {
-    console.error('Error fetching insight:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Ошибка получения аналитической заметки'
-    });
-  }
-});
-
-// Get available tags
+// Get available tags (must come before /:id route)
 router.get('/tags', async (req: any, res: any) => {
   try {
     const tags = await storage.getInsightTags();

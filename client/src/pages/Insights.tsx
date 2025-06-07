@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Navigation } from '@/components/Navigation';
 import { CalendarIcon, SearchIcon, TagIcon, ClockIcon, ExternalLinkIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -55,9 +56,9 @@ export default function Insights() {
     enabled: true
   });
 
-  const insights = insightsData?.data?.insights || [];
-  const totalPages = insightsData?.data?.totalPages || 1;
-  const availableTags = tagsData?.data || [];
+  const insights = (insightsData as any)?.data?.insights || [];
+  const totalPages = (insightsData as any)?.data?.totalPages || 1;
+  const availableTags = (tagsData as any)?.data || [];
 
   const handleSearch = (searchTerm: string) => {
     setFilters(prev => ({ ...prev, search: searchTerm }));
@@ -158,6 +159,7 @@ export default function Insights() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <Navigation />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
