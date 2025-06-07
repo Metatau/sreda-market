@@ -226,14 +226,14 @@ export default function Landing() {
       {/* Hero секция */}
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             AI платформа для поиска{' '}
             <span className="text-blue-600">инвестиционной недвижимости</span>
           </h1>
           
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
             AI-анализ 15,000+ объектов в реальном времени. 
-            Находите выгодные инвестиции за минуты, а не месяцы.
+            Находите выгодные объекты за минуты.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -247,19 +247,19 @@ export default function Landing() {
             <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
               
               {/* Поисковая строка поверх карты */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[70%] z-10">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-[80%] md:w-[70%] z-10">
                 <div className="relative">
-                  <div className="bg-white rounded-full shadow-2xl border border-gray-200 flex items-center px-6 py-4 hover:shadow-3xl transition-shadow duration-300">
-                    <Search className="h-5 w-5 text-gray-400 mr-4 flex-shrink-0" />
+                  <div className="bg-white rounded-full shadow-2xl border border-gray-200 flex items-center px-3 sm:px-4 md:px-6 py-3 md:py-4 hover:shadow-3xl transition-shadow duration-300">
+                    <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 mr-2 sm:mr-3 md:mr-4 flex-shrink-0" />
                     <input
                       type="text"
                       value={typedText}
                       readOnly
-                      className="flex-1 text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 cursor-default"
+                      className="flex-1 text-sm sm:text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 cursor-default"
                       placeholder=""
                     />
-                    <div className="flex items-center ml-4">
-                      <span className="text-sm font-quantum font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 tracking-wider">
+                    <div className="flex items-center ml-2 sm:ml-3 md:ml-4">
+                      <span className="text-xs sm:text-sm font-quantum font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 tracking-wider">
                         AI SREDA
                       </span>
                     </div>
