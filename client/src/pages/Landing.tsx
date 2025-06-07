@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +9,55 @@ import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail, Dat
 export default function Landing() {
   const [email, setEmail] = useState('');
   const [timeLeft, setTimeLeft] = useState('07:59:32');
+  const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
+
+  const metrics = [
+    { value: '+12.5%', label: 'ROI' },
+    { value: '₽8.2M', label: 'Средняя цена' },
+    { value: '95%', label: 'Ликвидность' },
+    { value: '+5.8%', label: 'Рост цен' },
+    { value: '3.2 года', label: 'Окупаемость' },
+    { value: '₽125K/м²', label: 'Цена за м²' },
+    { value: '89%', label: 'Заполняемость' },
+    { value: '+15.3%', label: 'Доходность' },
+    { value: '42 дня', label: 'Время продажи' },
+    { value: '₽35K', label: 'Аренда/мес' },
+  ];
+
+  // Анимация всплывающих метрик
+  useEffect(() => {
+    const addMetric = () => {
+      const metric = metrics[Math.floor(Math.random() * metrics.length)];
+      const newMetric = {
+        id: Date.now() + Math.random(),
+        value: metric.value,
+        label: metric.label,
+        x: Math.random() * 80 + 10, // 10% to 90% width
+        y: Math.random() * 80 + 10, // 10% to 90% height
+        visible: true,
+      };
+
+      setAnimatedMetrics(prev => [...prev, newMetric]);
+
+      // Удаляем метрику через 3 секунды
+      setTimeout(() => {
+        setAnimatedMetrics(prev => prev.filter(m => m.id !== newMetric.id));
+      }, 3000);
+    };
+
+    // Добавляем новую метрику каждые 2-4 секунды
+    const interval = setInterval(() => {
+      addMetric();
+    }, 2000 + Math.random() * 2000);
+
+    // Добавляем первую метрику сразу
+    addMetric();
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Таймер обратного отсчета
-  useState(() => {
+  useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
       const endTime = now + (7 * 60 + 59) * 1000; // 7:59
@@ -25,7 +71,7 @@ export default function Landing() {
     }, 1000);
 
     return () => clearInterval(timer);
-  });
+  }, []);
 
   const features = [
     {
@@ -151,23 +197,43 @@ export default function Landing() {
 
           {/* 3D визуализация тепловой карты */}
           <div className="relative max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 rounded-2xl p-8 shadow-2xl">
+            <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
               <div className="grid grid-cols-6 gap-2 h-64">
                 {Array.from({ length: 24 }).map((_, i) => (
                   <div
                     key={i}
-                    className={`rounded-lg opacity-80 hover:opacity-100 transition-all cursor-pointer transform hover:scale-105 ${
+                    className={`rounded-lg opacity-80 hover:opacity-100 transition-all cursor-pointer transform hover:scale-105 animate-pulse ${
                       i % 4 === 0 ? 'bg-red-400' :
                       i % 4 === 1 ? 'bg-yellow-400' :
                       i % 4 === 2 ? 'bg-green-400' : 'bg-blue-400'
                     }`}
                     style={{
                       height: `${Math.random() * 60 + 40}%`,
-                      marginTop: `${Math.random() * 20}%`
+                      marginTop: `${Math.random() * 20}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      animationDuration: `${2 + Math.random() * 2}s`
                     }}
                   />
                 ))}
               </div>
+              
+              {/* Всплывающие метрики */}
+              {animatedMetrics.map((metric) => (
+                <div
+                  key={metric.id}
+                  className="absolute bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-lg border border-white/50 pointer-events-none animate-bounce"
+                  style={{
+                    left: `${metric.x}%`,
+                    top: `${metric.y}%`,
+                    animationDuration: '0.6s',
+                    animationIterationCount: '3'
+                  }}
+                >
+                  <div className="text-xs font-bold text-gray-800">{metric.value}</div>
+                  <div className="text-xs text-gray-600">{metric.label}</div>
+                </div>
+              ))}
+              
               <div className="mt-4 text-sm text-gray-600">
                 Интерактивная тепловая карта цен по районам Москвы
               </div>
