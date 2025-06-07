@@ -49,7 +49,13 @@ class ApiClient {
     }
     
     const url = `${API_BASE}${endpoint}${searchParams.toString() ? `?${searchParams}` : ''}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     return this.handleResponse<T>(response);
   }
 
