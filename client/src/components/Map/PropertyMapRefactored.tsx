@@ -320,7 +320,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
       <div 
         ref={mapContainer} 
         className="w-full h-full rounded-lg"
-        style={{ minHeight: '400px' }}
+        style={{ minHeight: '520px' }}
       />
       
       {/* Map Controls Panel */}

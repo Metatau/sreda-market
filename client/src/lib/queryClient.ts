@@ -3,7 +3,9 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    const error = new Error(`Failed fetch, not 2xx response`);
+    error.cause = { status: res.status, statusText: res.statusText, body: text };
+    throw error;
   }
 }
 

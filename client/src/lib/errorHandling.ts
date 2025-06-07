@@ -75,10 +75,14 @@ export class GlobalErrorHandler {
     const safePatterns = [
       /Network error/i,
       /Failed to fetch/i,
+      /Failed fetch, not 2xx response/i,
       /Load failed/i,
       /Mapbox/i,
       /tileset/i,
-      /access.*token/i
+      /access.*token/i,
+      /304/i, // Cached responses
+      /401/i, // Unauthorized (expected)
+      /404/i  // Not found (expected in some cases)
     ];
 
     return safePatterns.some(pattern => 

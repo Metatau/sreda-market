@@ -98,7 +98,7 @@ export function PropertyMap({ filters, onPropertySelect }: PropertyMapProps) {
           {/* Map Container */}
           <div 
             ref={mapRef}
-            className="h-96 bg-gradient-to-br from-blue-100 to-purple-100 relative overflow-hidden"
+            className="h-[500px] bg-gradient-to-br from-blue-100 to-purple-100 relative overflow-hidden"
             style={{
               backgroundImage: `url('https://images.unsplash.com/photo-1542044896530-05d85be9b11a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=800')`,
               backgroundSize: 'cover',
