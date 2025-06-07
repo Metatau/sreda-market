@@ -213,6 +213,20 @@ export default function AdminPanel() {
     }
   };
 
+  const handleViewSource = (source: DataSource) => {
+    toast({
+      title: `Источник: ${source.name}`,
+      description: `Тип: ${getSourceTypeLabel(source.type)}, Статус: ${source.isActive ? 'Активен' : 'Неактивен'}`,
+    });
+  };
+
+  const handleEditSource = (source: DataSource) => {
+    toast({
+      title: 'Редактирование источника',
+      description: 'Функция редактирования будет добавлена в следующих обновлениях',
+    });
+  };
+
   const getSourceTypeIcon = (type: string) => {
     const icons = {
       telegram_channel: MessageSquare,
@@ -1054,11 +1068,19 @@ export default function AdminPanel() {
                               )}
                             </Button>
                             
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewSource(source)}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                             
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleEditSource(source)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                             
