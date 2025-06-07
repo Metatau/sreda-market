@@ -806,6 +806,26 @@ export class DatabaseStorage implements IStorage {
       return false;
     }
 
+    // Проверка на повторное использование промокодов пользователем
+    const userPromocodeUsage = await this.getUserPromocodeUsage(userId);
+    if (userPromocodeUsage >= 1) { // Максимум 1 промокод на пользователя
+      return false;
+    }
+
+    // Проверка активной подписки - нельзя использовать промокод при активной подписке
+    const user = await this.getUser(userId);
+    if (user && user.subscriptionType && user.subscriptionExpiresAt && new Date(user.subscriptionExpiresAt) > new Date()) {
+      return false;
+    }
+
+    // Проверка времени регистрации - промокод можно использовать только в первые 7 дней
+    if (user && user.createdAt) {
+      const daysSinceRegistration = (new Date().getTime() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceRegistration > 7) {
+        return false;
+      }
+    }
+
     // Устанавливаем промокод как использованный и привязываем к пользователю
     await db
       .update(promocodes)
@@ -823,6 +843,16 @@ export class DatabaseStorage implements IStorage {
     await this.updateSubscription(userId, 'promo', expiresAt);
     
     return true;
+  }
+
+  // Вспомогательный метод для проверки использования промокодов
+  async getUserPromocodeUsage(userId: number): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(promocodes)
+      .where(eq(promocodes.userId, userId));
+    
+    return result[0]?.count || 0;
   }
 
   isPromocodeExpired(promocode: Promocode): boolean {
