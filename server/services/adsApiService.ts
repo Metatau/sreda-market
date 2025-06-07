@@ -345,13 +345,13 @@ export class AdsApiService {
 
     // Проверяем цену - слишком низкая для продажи квартир
     const price = adsProperty.price || 0;
-    const tooLowForSale = price < 1500000; // Минимум 1.5 млн для квартир на продажу
+    const tooLowForSale = price < 500000; // Снижаем минимум до 500k
 
-    // Проверяем метрику цены - если указана "в месяц", это аренда
+    // Проверяем метрику цены - если указана "в месяц", это точно аренда
     const priceMetric = (adsProperty.price_metric || '').toLowerCase();
     const hasMonthlyMetric = priceMetric.includes('месяц') || priceMetric.includes('мес');
 
-    // Проверяем тип недвижимости в данных API
+    // Проверяем тип недвижимости в данных API - самый надежный индикатор
     const nedvigimostType = (adsProperty.nedvigimost_type || '').toLowerCase();
     const isRentalType = nedvigimostType.includes('сдам') || nedvigimostType.includes('аренда');
 
@@ -359,12 +359,17 @@ export class AdsApiService {
     const saleKeywords = ['продам', 'продается', 'продажа', 'купить', 'приобрести', 'собственность', 'млн'];
     const hasSaleKeywords = saleKeywords.some(keyword => fullText.includes(keyword));
 
+    // Для высоких цен (>5млн) игнорируем некоторые признаки аренды
+    const highPrice = price > 5000000;
+
     // Это аренда если:
-    // 1. Есть ключевые слова аренды
-    // 2. Тип недвижимости указывает на аренду  
-    // 3. Метрика цены "в месяц"
+    // 1. Тип недвижимости указывает на аренду (самый надежный)
+    // 2. Метрика цены "в месяц" (очень надежный) 
+    // 3. Есть ключевые слова аренды И цена не очень высокая
     // 4. Цена слишком низкая для продажи без явных признаков продажи
-    return hasRentalKeywords || isRentalType || hasMonthlyMetric || (tooLowForSale && !hasSaleKeywords);
+    return isRentalType || hasMonthlyMetric || 
+           (hasRentalKeywords && !highPrice) || 
+           (tooLowForSale && !hasSaleKeywords);
   }
 
   determineMarketType(adsProperty: AdsApiProperty): 'secondary' | 'new_construction' {
@@ -698,11 +703,10 @@ export class AdsApiService {
             continue;
           }
 
-          // ОБЯЗАТЕЛЬНАЯ ПРОВЕРКА: наличие изображений
+          // ПРОВЕРКА: изображения (необязательная для первоначальной загрузки)
           const hasValidImages = this.extractValidImages(adsProperty).length > 0;
           if (!hasValidImages) {
-            console.log(`Skipping property ${adsProperty.id}: no valid images found`);
-            continue;
+            console.log(`Property ${adsProperty.id}: no images found, but proceeding anyway`);
           }
 
           console.log(`Region "${propertyRegion}" is allowed, processing property`);
