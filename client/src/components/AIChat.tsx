@@ -121,7 +121,7 @@ export function AIChat({ isOpen: externalIsOpen, onToggle: externalOnToggle }: A
                       onClick={onToggle}
                       className="text-gray-400 hover:text-gray-600"
                     >
-                      <i className="fas fa-times text-lg"></i>
+                      <X className="h-5 w-5" />
                     </Button>
                   </div>
                   <p className="text-sm text-gray-600">SMART-анализ рынка и персональные рекомендации</p>
