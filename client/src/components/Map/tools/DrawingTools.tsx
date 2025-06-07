@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Square, Circle, Polygon, Ruler, Trash2, Play, Square as Rectangle } from 'lucide-react';
+import { Square, Circle, Ruler, Trash2, Pentagon, Square as Rectangle } from 'lucide-react';
 import { DrawingTool, MeasurementResult } from '../types/geospatial';
 
 interface DrawingToolsProps {
@@ -22,7 +22,7 @@ export function DrawingTools({
   const tools = [
     {
       type: 'polygon' as const,
-      icon: Polygon,
+      icon: Pentagon,
       label: 'Полигон',
       description: 'Выделить произвольную область'
     },

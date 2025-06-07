@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Navigation } from "@/components/Navigation";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
@@ -9,11 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProperties, useRegions } from "@/hooks/useProperties";
 import { useNewProperties } from "@/hooks/useNewProperties";
 import { useInvestmentAnalytics, useCalculateInvestmentAnalytics } from "@/hooks/useInvestmentAnalytics";
-import { TrendingUp, BarChart3, Building2, Clock } from "lucide-react";
-import type { SearchFilters, Property } from "@/types";
+import { TrendingUp, BarChart3, Building2, Clock, Map, Grid3x3, Layers } from "lucide-react";
+import type { SearchFilters, Property, PropertyWithRelations } from "@/types";
+
+// Enhanced Map Components
+import { AdvancedHeatmapControls } from "@/components/Map/analytics/AdvancedHeatmapControls";
+import { StatisticsPanel } from "@/components/Map/analytics/StatisticsPanel";
+import { DrawingTools } from "@/components/Map/tools/DrawingTools";
+import { GeospatialService } from "@/components/Map/services/GeospatialService";
+import { AdvancedHeatmapMode, DrawingTool, GeospatialStats, MeasurementResult, HeatmapDataPoint } from "@/components/Map/types/geospatial";
 
 export default function Home() {
   const [filters, setFilters] = useState<SearchFilters>({});
@@ -24,6 +33,15 @@ export default function Home() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
 
+  // Enhanced Map Analytics State
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [heatmapMode, setHeatmapMode] = useState<AdvancedHeatmapMode>('none');
+  const [heatmapIntensity, setHeatmapIntensity] = useState(1.0);
+  const [activeTool, setActiveTool] = useState<DrawingTool | null>(null);
+  const [measurementResult, setMeasurementResult] = useState<MeasurementResult | null>(null);
+  const [geospatialStats, setGeospatialStats] = useState<GeospatialStats | null>(null);
+  const [showStatistics, setShowStatistics] = useState(false);
+
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
@@ -32,6 +50,35 @@ export default function Home() {
 
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
+
+  // Computed heatmap data for map analytics
+  const heatmapData = useMemo(() => {
+    if (heatmapMode === 'none' || !properties.length) return [];
+    return GeospatialService.generateHeatmapData(properties as PropertyWithRelations[], heatmapMode);
+  }, [properties, heatmapMode]);
+
+  // Analytics handlers
+  const handleToolSelect = (tool: DrawingTool) => {
+    setActiveTool(tool.isActive ? tool : null);
+    if (!tool.isActive) {
+      setMeasurementResult(null);
+      setGeospatialStats(null);
+      setShowStatistics(false);
+    }
+  };
+
+  const handleClearAll = () => {
+    setActiveTool(null);
+    setMeasurementResult(null);
+    setGeospatialStats(null);
+    setShowStatistics(false);
+  };
+
+  const handleAreaSelection = (bounds: any) => {
+    const stats = GeospatialService.calculateAreaStats(properties as PropertyWithRelations[], bounds);
+    setGeospatialStats(stats);
+    setShowStatistics(true);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,8 +200,6 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-
-
             {/* Property Section Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-bold text-gray-900 text-[20px]">
@@ -179,57 +224,206 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Property Grid */}
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
+            {/* Enhanced View Mode Tabs */}
+            <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'map')} className="mb-6">
+              <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsTrigger value="grid" className="flex items-center gap-2">
+                  <Grid3x3 className="h-4 w-4" />
+                  Список объектов
+                </TabsTrigger>
+                <TabsTrigger value="map" className="flex items-center gap-2">
+                  <Map className="h-4 w-4" />
+                  Аналитическая карта
+                  <Badge variant="secondary" className="ml-1">Новинка</Badge>
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Grid View Content */}
+              <TabsContent value="grid" className="mt-6">
+                {/* Property Grid */}
+                {isLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, i) => (
+                      <Card key={i} className="animate-pulse">
+                        <CardContent className="p-4">
+                          <div className="h-40 bg-gray-200 rounded mb-4"></div>
+                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {properties.map((property) => (
+                      <PropertyCard
+                        key={property.id}
+                        property={property}
+                        onSelect={handlePropertySelect}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {pagination && pagination.pages && pagination.pages > 1 && (
+                  <div className="flex justify-center space-x-2 mt-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Назад
+                    </Button>
+                    
+                    <span className="flex items-center px-3 text-sm text-gray-600">
+                      {currentPage} из {pagination.pages}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(pagination.pages || 1, currentPage + 1))}
+                      disabled={currentPage === pagination.pages}
+                    >
+                      Далее
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* Enhanced Map Analytics View */}
+              <TabsContent value="map" className="mt-6">
+                <div className="relative">
+                  {/* Map Container with Enhanced Analytics */}
+                  <div className="bg-white rounded-lg border shadow-lg overflow-hidden">
+                    <div className="h-[600px] relative bg-gray-100 flex items-center justify-center">
+                      <div className="text-center space-y-4">
+                        <Layers className="h-12 w-12 text-blue-600 mx-auto" />
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                            Интерактивная аналитическая карта
+                          </h3>
+                          <p className="text-gray-600 max-w-md">
+                            Расширенная визуализация недвижимости с тепловыми картами, 
+                            геоаналитикой и инструментами измерения областей
+                          </p>
+                          <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                              <span>10+ режимов тепловой карты</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-green-500 rounded"></div>
+                              <span>Инструменты измерения</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                              <span>Статистика по областям</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 bg-purple-500 rounded"></div>
+                              <span>Геопространственный анализ</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Heatmap Controls - Left Panel */}
+                  <div className="absolute top-4 left-4 z-10">
+                    <AdvancedHeatmapControls
+                      mode={heatmapMode}
+                      onModeChange={setHeatmapMode}
+                      intensity={heatmapIntensity}
+                      onIntensityChange={setHeatmapIntensity}
+                      propertyCount={properties.length}
+                    />
+                  </div>
+
+                  {/* Drawing Tools - Right Panel */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <DrawingTools
+                      activeTool={activeTool}
+                      onToolSelect={handleToolSelect}
+                      onClearAll={handleClearAll}
+                      measurementResult={measurementResult}
+                      isDrawing={false}
+                    />
+                  </div>
+
+                  {/* Statistics Panel */}
+                  <StatisticsPanel
+                    stats={geospatialStats}
+                    isVisible={showStatistics}
+                    onClose={() => setShowStatistics(false)}
+                  />
+
+                  {/* Heatmap Data Summary */}
+                  {heatmapMode !== 'none' && heatmapData.length > 0 && (
+                    <div className="absolute bottom-4 left-4 z-10">
+                      <Card className="bg-white/95 backdrop-blur-sm border shadow-lg">
+                        <CardContent className="p-3">
+                          <div className="flex items-center gap-2 text-sm">
+                            <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-red-600 rounded"></div>
+                            <span className="font-medium">
+                              Обработано {heatmapData.length} точек данных
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </div>
+
+                {/* Map Analytics Features Info */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
                     <CardContent className="p-4">
-                      <div className="h-40 bg-gray-200 rounded mb-4"></div>
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <BarChart3 className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Тепловые карты</h4>
+                          <p className="text-sm text-gray-600">10+ режимов аналитики</p>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {properties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    onSelect={handlePropertySelect}
-                  />
-                ))}
-              </div>
-            )}
 
-            {/* Pagination */}
-            {pagination && pagination.pages > 1 && (
-              <div className="flex justify-center space-x-2 mt-8">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Назад
-                </Button>
-                
-                <span className="flex items-center px-3 text-sm text-gray-600">
-                  {currentPage} из {pagination.pages}
-                </span>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.min(pagination.pages, currentPage + 1))}
-                  disabled={currentPage === pagination.pages}
-                >
-                  Далее
-                </Button>
-              </div>
-            )}
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Map className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Геоанализ</h4>
+                          <p className="text-sm text-gray-600">Измерения и статистика</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <TrendingUp className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Инвест-аналитика</h4>
+                          <p className="text-sm text-gray-600">ROI и прогнозы</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </div>
