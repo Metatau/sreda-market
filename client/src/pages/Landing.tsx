@@ -249,15 +249,11 @@ export default function Landing() {
                       className="flex-1 text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400"
                       readOnly={!searchValue}
                     />
-                    <div className="flex items-center space-x-2 ml-4">
-                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer hover:bg-blue-200 transition-colors">
-                        <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9M19 9H14V4H19V9Z"/>
-                        </svg>
-                      </div>
-                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
-                        <svg className="w-3 h-3 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8L6,11L4,9M4,19H8L6,17L4,19M4,14H8L6,12L4,14Z"/>
+                    <div className="flex items-center ml-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2L13.09 6.26L18 4.5L16.23 9.41L21 10.5L16.74 12L21 13.5L16.23 14.59L18 19.5L13.09 17.74L12 22L10.91 17.74L6 19.5L7.77 14.59L3 13.5L7.26 12L3 10.5L7.77 9.41L6 4.5L10.91 6.26L12 2Z"/>
+                          <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.5"/>
                         </svg>
                       </div>
                     </div>
