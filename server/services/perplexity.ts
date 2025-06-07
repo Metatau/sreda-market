@@ -117,9 +117,11 @@ export async function generatePropertyRecommendations(preferences: {
     - Регион: ${preferences.region || "любой"}
     - Количество комнат: ${preferences.rooms || "любое"}
     
+    Используйте актуальную информацию о рынке недвижимости России для анализа.
+    
     Ответьте в JSON формате:
     {
-      "recommendations": "подробные рекомендации",
+      "recommendations": "подробные рекомендации с учетом текущего состояния рынка",
       "filters": {
         "regionId": номер_региона_или_null,
         "propertyClassId": номер_класса_или_null,
@@ -127,14 +129,14 @@ export async function generatePropertyRecommendations(preferences: {
         "maxPrice": максимальная_цена_или_null,
         "rooms": количество_комнат_или_null
       },
-      "reasoning": "объяснение выбора"
+      "reasoning": "объяснение выбора на основе актуальных рыночных данных"
     }
     `;
 
     const messages: PerplexityMessage[] = [
       {
         role: "system",
-        content: "Вы - эксперт по российской недвижимости с доступом к актуальной информации. Отвечайте только в JSON формате, используя самую свежую информацию о рынке недвижимости."
+        content: "Вы - эксперт по российской недвижимости с доступом к актуальным рыночным данным. Отвечайте только в JSON формате, используя самую свежую информацию о рынке недвижимости."
       },
       {
         role: "user",
@@ -224,7 +226,63 @@ export async function analyzePropertyInvestment(property: {
       analysis: result.analysis || "Анализ недоступен"
     };
   } catch (error) {
-    console.error("OpenAI investment analysis error:", error);
+    console.error("Perplexity investment analysis error:", error);
     throw new Error("Ошибка при анализе инвестиций");
+  }
+}
+
+export async function generateInsightFromDataSources(sourceData: any[]): Promise<{
+  title: string;
+  content: string;
+  tags: string[];
+  insights: string[];
+}> {
+  try {
+    const prompt = `
+    Проанализируйте данные из источников информации о недвижимости и создайте аналитический инсайт:
+    
+    Данные источников:
+    ${JSON.stringify(sourceData, null, 2)}
+    
+    Используйте актуальную информацию о рынке недвижимости России для создания инсайта.
+    
+    Ответьте в JSON формате:
+    {
+      "title": "Заголовок инсайта",
+      "content": "Подробное содержание аналитической заметки с выводами и рекомендациями",
+      "tags": ["тег1", "тег2", "тег3"],
+      "insights": ["ключевой вывод 1", "ключевой вывод 2", "ключевой вывод 3"]
+    }
+    `;
+
+    const messages: PerplexityMessage[] = [
+      {
+        role: "system",
+        content: "Вы - аналитик рынка недвижимости России с доступом к актуальной информации. Создавайте инсайты на основе реальных рыночных данных и трендов. Отвечайте только в JSON формате."
+      },
+      {
+        role: "user",
+        content: prompt
+      }
+    ];
+
+    const responseText = await callPerplexityAPI(messages, 0.4, 2000);
+    
+    // Extract JSON from the response
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Invalid JSON response from AI");
+    }
+    
+    const result = JSON.parse(jsonMatch[0]);
+    return {
+      title: result.title || "Аналитический инсайт",
+      content: result.content || "Контент недоступен",
+      tags: result.tags || ["недвижимость", "анализ"],
+      insights: result.insights || ["Данные обрабатываются"]
+    };
+  } catch (error) {
+    console.error("Perplexity insight generation error:", error);
+    throw new Error("Ошибка при генерации инсайта");
   }
 }
