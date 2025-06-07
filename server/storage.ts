@@ -203,6 +203,7 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(properties.propertyType, filters.propertyType));
       }
       if (filters.marketType) {
+        console.log('🔧 Storage: Adding marketType filter:', filters.marketType);
         conditions.push(eq(properties.marketType, filters.marketType));
       }
     }
