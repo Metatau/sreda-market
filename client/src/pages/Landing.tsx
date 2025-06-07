@@ -287,8 +287,8 @@ export default function Landing() {
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto px-4">
-            AI-анализ 15,000+ объектов в реальном времени.<br />
-            Находите выгодные объекты за минуты.
+            AI-анализ 15,000+ объектов в реальном времени<br />
+            Находите выгодные объекты за минуты
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
