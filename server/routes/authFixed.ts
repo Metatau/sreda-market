@@ -35,10 +35,14 @@ router.post('/login', async (req: any, res: any) => {
       });
     }
 
-    // Set session
-    if (req.session) {
-      req.session.userId = user.id;
-    }
+    // Set session and save it
+    req.session.userId = user.id;
+    await new Promise((resolve, reject) => {
+      req.session.save((err: any) => {
+        if (err) reject(err);
+        else resolve(undefined);
+      });
+    });
     
     res.json({
       success: true,
@@ -76,10 +80,14 @@ router.post('/register', async (req: any, res: any) => {
 
     const user = await AuthService.register(data);
     
-    // Set session
-    if (req.session) {
-      req.session.userId = user.id;
-    }
+    // Set session and save it
+    req.session.userId = user.id;
+    await new Promise((resolve, reject) => {
+      req.session.save((err: any) => {
+        if (err) reject(err);
+        else resolve(undefined);
+      });
+    });
     
     res.status(201).json({
       success: true,

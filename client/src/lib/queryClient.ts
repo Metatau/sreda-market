@@ -14,10 +14,8 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const userEmail = localStorage.getItem('userEmail');
   const headers: Record<string, string> = {
     ...(data ? { "Content-Type": "application/json" } : {}),
-    ...(userEmail ? { "x-user-email": userEmail } : {}),
   };
 
   const res = await fetch(url, {
@@ -37,13 +35,7 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const userEmail = localStorage.getItem('userEmail');
-    const headers: Record<string, string> = {
-      ...(userEmail ? { "x-user-email": userEmail } : {}),
-    };
-
     const res = await fetch(queryKey[0] as string, {
-      headers,
       credentials: "include",
     });
 
