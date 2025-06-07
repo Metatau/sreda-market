@@ -8,7 +8,8 @@ import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail, Dat
 
 export default function Landing() {
 
-  const [timeLeft, setTimeLeft] = useState('07:59:32');
+  const [timeLeft, setTimeLeft] = useState('01:00:59');
+  const [seconds, setSeconds] = useState(3659); // 1 час 59 секунд
   const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
 
@@ -109,15 +110,17 @@ export default function Landing() {
   // Таймер обратного отсчета
   useEffect(() => {
     const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const endTime = now + (7 * 60 + 59) * 1000; // 7:59
-      const distance = endTime - now;
-      
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-      
-      setTimeLeft(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      setSeconds(prevSeconds => {
+        if (prevSeconds <= 0) return 0;
+        
+        const newSeconds = prevSeconds - 1;
+        const hours = Math.floor(newSeconds / 3600);
+        const minutes = Math.floor((newSeconds % 3600) / 60);
+        const secs = newSeconds % 60;
+        
+        setTimeLeft(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
+        return newSeconds;
+      });
     }, 1000);
 
     return () => clearInterval(timer);
