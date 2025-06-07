@@ -52,19 +52,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Global error handler
-  app.use(globalErrorHandler);
-
-  const server = createServer(app);
-
-  // Setup Vite for frontend routing (must be after API routes and server creation)
+  // Setup Vite for frontend routing (must be after API routes)
   if (process.env.NODE_ENV === "development") {
     const { setupVite } = await import("../vite");
-    await setupVite(app, server);
+    await setupVite(app);
   } else {
     const { serveStatic } = await import("../vite");
     serveStatic(app);
   }
 
+  // Global error handler
+  app.use(globalErrorHandler);
+
+  const server = createServer(app);
   return server;
 }
