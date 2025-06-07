@@ -95,8 +95,6 @@ export class AdsApiService {
         // Добавляем обязательные параметры для получения объявлений о недвижимости
         if (endpoint === '/api') {
           url.searchParams.set('category_id', '1'); // Недвижимость
-          url.searchParams.set('type', 'sell'); // Только продажа
-          url.searchParams.set('object_type', 'apartment'); // Только квартиры
         }
         
         // Добавляем дополнительные параметры
@@ -178,13 +176,11 @@ export class AdsApiService {
   }, credentials?: { email: string; password: string }): Promise<AdsApiResponse> {
     const params: Record<string, any> = {
       is_actual: '1', // Только актуальные объявления
-      limit: Math.min(filters?.limit || 100, 1000), // API ограничение
+      limit: Math.min(filters?.limit || 50, 1000), // Уменьшаем лимит для более качественной фильтрации
     };
 
     // Добавляем поддерживаемые фильтры согласно документации ads-api.ru
     if (filters?.city) params.city = filters.city;
-    if (filters?.minPrice) params.price_min = filters.minPrice;
-    if (filters?.maxPrice) params.price_max = filters.maxPrice;
 
     return this.makeRequest<AdsApiResponse>('/api', params, credentials);
   }
