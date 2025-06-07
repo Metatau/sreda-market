@@ -64,6 +64,40 @@ export default function AdminPanel() {
     }
   });
 
+  // Состояние для управления тарифными планами
+  const [pricingPlans, setPricingPlans] = useState([
+    {
+      id: 'basic',
+      name: 'Базовый',
+      price: 2990,
+      period: 'месяц',
+      features: [
+        { name: 'AI-запросов/день', value: '10' },
+        { name: 'Глубина анализа', value: '1 год' },
+        { name: 'Экспорт в PDF', enabled: false },
+        { name: 'Инсайты рынка', enabled: false },
+        { name: 'Поддержка 24/7', enabled: false }
+      ]
+    },
+    {
+      id: 'premium',
+      name: 'Премиум',
+      price: 7990,
+      period: 'месяц',
+      popular: true,
+      features: [
+        { name: 'AI-запросов/день', value: '∞' },
+        { name: 'Глубина анализа', value: '3 года' },
+        { name: 'Экспорт в PDF', enabled: true },
+        { name: 'Инсайты рынка', enabled: true },
+        { name: 'Поддержка 24/7', enabled: true }
+      ]
+    }
+  ]);
+
+  const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [isEditPlanDialogOpen, setIsEditPlanDialogOpen] = useState(false);
+
   // Debug form state
   console.log('Form state:', newSourceForm);
   const { toast } = useToast();
@@ -453,6 +487,19 @@ export default function AdminPanel() {
             <div className="flex items-center justify-center space-x-2">
               <Users className="w-4 h-4" />
               <span>Пользователи</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('pricing')}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === 'pricing'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <Settings className="w-4 h-4" />
+              <span>Тарифы</span>
             </div>
           </button>
           <button
@@ -1196,6 +1243,72 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {/* Вкладка Тарифы */}
+        {activeTab === 'pricing' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Settings className="w-5 h-5" />
+                  <span>Управление тарифными планами</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {pricingPlans.map((plan, index) => (
+                    <Card key={plan.id} className={`relative ${plan.popular ? 'border-blue-500 border-2' : 'border-gray-200'}`}>
+                      {plan.popular && (
+                        <Badge className="absolute -top-2 left-4 bg-blue-500 text-white">
+                          Популярный
+                        </Badge>
+                      )}
+                      <CardHeader className="text-center">
+                        <Badge className={`mx-auto w-fit ${plan.id === 'basic' ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-blue-100 text-blue-700 border-blue-200'} font-medium border`}>
+                          {plan.name}
+                        </Badge>
+                        <div className="mt-4">
+                          <div className="text-3xl font-bold text-gray-900">₽{plan.price.toLocaleString()}</div>
+                          <div className="text-sm text-gray-600">в {plan.period}</div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <ul className="space-y-3">
+                          {plan.features.map((feature, featureIndex) => (
+                            <li key={featureIndex} className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">{feature.name}:</span>
+                              {feature.value ? (
+                                <span className="font-medium text-gray-900">{feature.value}</span>
+                              ) : (
+                                <span className={`text-sm ${feature.enabled ? 'text-green-600' : 'text-gray-400'}`}>
+                                  {feature.enabled ? '✓' : '✗'}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="flex space-x-2 pt-4">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => {
+                              setEditingPlan(plan);
+                              setIsEditPlanDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Редактировать
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Вкладка Настройки */}
         {activeTab === 'settings' && (
           <div className="space-y-6">
@@ -1409,6 +1522,114 @@ export default function AdminPanel() {
         )}
       </div>
 
+      {/* Диалог редактирования тарифного плана */}
+      <Dialog open={isEditPlanDialogOpen} onOpenChange={setIsEditPlanDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Редактировать тарифный план</DialogTitle>
+            <DialogDescription>
+              Измените параметры тарифного плана "{editingPlan?.name}"
+            </DialogDescription>
+          </DialogHeader>
+          {editingPlan && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="plan-name">Название плана</Label>
+                <Input
+                  id="plan-name"
+                  value={editingPlan.name}
+                  onChange={(e) => setEditingPlan({...editingPlan, name: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="plan-price">Цена (руб.)</Label>
+                <Input
+                  id="plan-price"
+                  type="number"
+                  value={editingPlan.price}
+                  onChange={(e) => setEditingPlan({...editingPlan, price: parseInt(e.target.value)})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="plan-period">Период</Label>
+                <Select 
+                  value={editingPlan.period} 
+                  onValueChange={(value) => setEditingPlan({...editingPlan, period: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="день">день</SelectItem>
+                    <SelectItem value="неделю">неделю</SelectItem>
+                    <SelectItem value="месяц">месяц</SelectItem>
+                    <SelectItem value="год">год</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Функции плана</Label>
+                {editingPlan.features.map((feature, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <span className="text-sm font-medium">{feature.name}</span>
+                    {feature.value !== undefined ? (
+                      <Input
+                        className="w-20 text-right"
+                        value={feature.value}
+                        onChange={(e) => {
+                          const updatedFeatures = [...editingPlan.features];
+                          updatedFeatures[index] = {...feature, value: e.target.value};
+                          setEditingPlan({...editingPlan, features: updatedFeatures});
+                        }}
+                      />
+                    ) : (
+                      <Button
+                        variant={feature.enabled ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          const updatedFeatures = [...editingPlan.features];
+                          updatedFeatures[index] = {...feature, enabled: !feature.enabled};
+                          setEditingPlan({...editingPlan, features: updatedFeatures});
+                        }}
+                      >
+                        {feature.enabled ? "Включено" : "Отключено"}
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex space-x-2 pt-4">
+                <Button
+                  onClick={() => {
+                    const updatedPlans = pricingPlans.map(plan => 
+                      plan.id === editingPlan.id ? editingPlan : plan
+                    );
+                    setPricingPlans(updatedPlans);
+                    setIsEditPlanDialogOpen(false);
+                    toast({
+                      title: "Успешно",
+                      description: `Тарифный план "${editingPlan.name}" обновлен`
+                    });
+                  }}
+                  className="flex-1"
+                >
+                  Сохранить изменения
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditPlanDialogOpen(false)}
+                >
+                  Отмена
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
