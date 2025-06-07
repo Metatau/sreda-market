@@ -1,119 +1,145 @@
-import { useState, useMemo } from "react";
-import { Navigation } from "@/components/Navigation";
-import { PropertyFilters } from "@/components/PropertyFilters";
-import { PropertyCard } from "@/components/PropertyCard";
-import { Footer } from "@/components/Footer";
-
-import { InvestmentAnalyticsModal } from "@/components/InvestmentAnalyticsModal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProperties, useRegions } from "@/hooks/useProperties";
-import { useNewProperties } from "@/hooks/useNewProperties";
-import { useInvestmentAnalytics, useCalculateInvestmentAnalytics } from "@/hooks/useInvestmentAnalytics";
-import { TrendingUp, BarChart3, Building2, Clock, Map, Grid3x3, Layers } from "lucide-react";
-import type { SearchFilters, Property, PropertyWithRelations } from "@/types";
-
-// Enhanced Map Components
-import { PropertyMap } from "@/components/Map/PropertyMapRefactored";
-import { MapAnalyticsDemo } from "@/components/Map/MapAnalyticsDemo";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { PropertyCard } from '@/components/PropertyCard';
+import { PropertyFilters } from '@/components/PropertyFilters';
+import { Navigation } from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
+import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
+import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
+import { MapAnalyticsDemo } from '@/components/MapAnalyticsDemo';
+import { useProperties, useRegions, useNewProperties } from '@/hooks/api';
+import type { Property, PropertyFilters as FilterType } from '@/types';
+import { TrendingUp, BarChart3, Clock, Grid3X3, Map, Layers } from 'lucide-react';
 
 export default function Home() {
-  const [filters, setFilters] = useState<SearchFilters>({});
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState<string>("moscow");
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [filters, setFilters] = useState<FilterType>({});
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
-
-  // Enhanced Map Analytics State
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
-  const { data: analyticsData } = useInvestmentAnalytics(selectedProperty?.id || 0);
-  const calculateAnalytics = useCalculateInvestmentAnalytics();
 
   const properties = propertiesData?.properties || [];
   const pagination = propertiesData?.pagination;
+  const analyticsData = null;
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFilters({ ...filters, query: searchQuery });
+  const handlePropertySelect = (property: Property) => {
+    setSelectedProperty(property);
+    setIsAnalyticsModalOpen(true);
+  };
+
+  const handleFilterChange = (newFilters: FilterType) => {
+    setFilters(newFilters);
     setCurrentPage(1);
   };
 
-  const handlePropertySelect = async (property: PropertyWithRelations | Property) => {
-    console.log('Property selected:', property.id);
-    setSelectedProperty(property as Property);
-    setIsAnalyticsModalOpen(true);
-    
-    // Calculate analytics if not available
-    if (!analyticsData) {
-      try {
-        console.log('Calculating analytics for property:', property.id);
-        await calculateAnalytics.mutateAsync(property.id);
-      } catch (error) {
-        console.error('Failed to calculate analytics:', error);
-      }
-    }
-  };
-
-  // Динамически определяем название региона на основе фильтров с правильными падежами
-  const getRegionNameInPrepositionalCase = (regionName: string) => {
-    const prepositionalCases: Record<string, string> = {
-      "Москва": "Москве",
-      "Санкт-Петербург": "Санкт-Петербурге", 
-      "Екатеринбург": "Екатеринбурге",
-      "Новосибирск": "Новосибирске",
-      "Нижний Новгород": "Нижнем Новгороде",
-      "Казань": "Казани",
-      "Челябинск": "Челябинске",
-      "Омск": "Омске",
-      "Самара": "Самаре",
-      "Ростов-на-Дону": "Ростове-на-Дону",
-      "Уфа": "Уфе",
-      "Красноярск": "Красноярске",
-      "Пермь": "Перми",
-      "Воронеж": "Воронеже",
-      "Волгоград": "Волгограде",
-      "Краснодар": "Краснодаре",
-      "Саратов": "Саратове",
-      "Тюмень": "Тюмени",
-      "Тольятти": "Тольятти",
-      "Ижевск": "Ижевске"
-    };
-    
-    return prepositionalCases[regionName] || regionName;
-  };
-
-  const selectedRegionName = filters.regionId 
-    ? getRegionNameInPrepositionalCase(regions.find(r => r.id === filters.regionId)?.name || "выбранном регионе")
-    : "России";
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
       <Navigation />
 
+      {/* Map Section - Full Width Always Active */}
+      <div className="w-full">
+        <div className="relative h-[500px] bg-white border-b">
+          <PropertyMap 
+            properties={properties as any}
+            selectedProperty={selectedProperty}
+            onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
+          />
+          
+          {/* Map Overlay Info */}
+          <div className="absolute top-4 left-4 z-10">
+            <Card className="bg-white/95 backdrop-blur-sm border shadow-lg">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Layers className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium">Интерактивная карта недвижимости</span>
+                </div>
+                <div className="text-xs text-gray-600 mt-1">
+                  Отображено {properties.length} объектов
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
 
+      {/* Map Analytics Tools */}
+      <div className="w-full bg-white border-b shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <BarChart3 className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Тепловые карты</h4>
+                    <p className="text-sm text-gray-600">Анализ цены, плотности, инвестиций</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Map className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Геоанализ</h4>
+                    <p className="text-sm text-gray-600">Измерения и региональная статистика</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Инвест-аналитика</h4>
+                    <p className="text-sm text-gray-600">ROI, доходность и прогнозы</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                Фильтры поиска
+              </h2>
+              <p className="text-sm text-gray-600">
+                Настройте параметры для поиска недвижимости
+              </p>
+            </div>
+            
             <PropertyFilters 
               filters={filters} 
-              onFiltersChange={setFilters}
+              onFiltersChange={handleFilterChange}
+              regions={regions}
             />
             
             {/* Analytics Overview Cards */}
-            <div className="mt-6 space-y-4">
+            <div className="mt-8 space-y-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Средняя доходность</CardTitle>
@@ -151,11 +177,6 @@ export default function Home() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     За последние 24 часа
-                    {newPropertiesData?.timestamp && (
-                      <span className="block mt-1 text-green-600">
-                        ● Обновлено {new Date(newPropertiesData.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    )}
                   </p>
                 </CardContent>
               </Card>
@@ -164,38 +185,39 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Header with View Mode Tabs */}
+            {/* Header */}
             <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Недвижимость России
+              </h1>
+              <p className="text-gray-600">
+                Найдите идеальную недвижимость с помощью ИИ-аналитики и интерактивной карты
+              </p>
+            </div>
+
+            {/* Controls */}
+            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <h2 className="font-bold text-gray-900 text-[20px]">
-                    Объекты недвижимости
-                  </h2>
-                  
-                  {/* View Mode Switcher */}
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'outline'}
+                      size="sm"
                       onClick={() => setViewMode('grid')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                        viewMode === 'grid' 
-                          ? 'bg-white text-gray-900 shadow-sm' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
+                      className="flex items-center gap-2"
                     >
-                      <Grid3x3 className="h-4 w-4" />
-                      Список
-                    </button>
-                    <button
-                      onClick={() => setViewMode('map')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                        viewMode === 'map' 
-                          ? 'bg-white text-gray-900 shadow-sm' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
+                      <Grid3X3 className="h-4 w-4" />
+                      Список объектов
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled
+                      className="flex items-center gap-2 opacity-75"
                     >
                       <Map className="h-4 w-4" />
-                      Карта
-                    </button>
+                      Карта активна
+                    </Button>
                   </div>
                 </div>
                 
@@ -218,143 +240,59 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Content based on view mode */}
-            {viewMode === 'grid' ? (
-              <div className="mt-6">
-                {/* Property Grid */}
-                {isLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <Card key={i} className="animate-pulse">
-                        <CardContent className="p-4">
-                          <div className="h-40 bg-gray-200 rounded mb-4"></div>
-                          <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {properties.map((property) => (
-                      <PropertyCard
-                        key={property.id}
-                        property={property}
-                        onSelect={handlePropertySelect}
-                      />
-                    ))}
-                  </div>
-                )}
+            {/* Property Grid */}
+            <div className="mt-6">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardContent className="p-4">
+                        <div className="h-40 bg-gray-200 rounded mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {properties.map((property) => (
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                      onSelect={handlePropertySelect}
+                    />
+                  ))}
+                </div>
+              )}
 
-                {/* Pagination */}
-                {pagination && pagination.pages && pagination.pages > 1 && (
-                  <div className="flex justify-center space-x-2 mt-8">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Назад
-                    </Button>
-                    
-                    <span className="flex items-center px-3 text-sm text-gray-600">
-                      {currentPage} из {pagination.pages}
-                    </span>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(Math.min(pagination.pages || 1, currentPage + 1))}
-                      disabled={currentPage === pagination.pages}
-                    >
-                      Далее
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* Enhanced Map Analytics View */
-              <div className="mt-6">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  {/* Main Map - Using existing PropertyMap component */}
-                  <div className="lg:col-span-3">
-                    <div className="relative h-[600px] rounded-lg border shadow-lg overflow-hidden">
-                      <PropertyMap 
-                        properties={properties as any}
-                        selectedProperty={selectedProperty}
-                        onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
-                      />
-                      
-                      {/* Enhanced Analytics Overlay */}
-                      <div className="absolute top-4 left-4 z-10">
-                        <Card className="bg-white/95 backdrop-blur-sm border shadow-lg">
-                          <CardContent className="p-3">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Layers className="h-4 w-4 text-blue-600" />
-                              <span className="font-medium">Аналитическая карта активна</span>
-                            </div>
-                            <div className="text-xs text-gray-600 mt-1">
-                              Отображено {properties.length} объектов
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </div>
-                  </div>
+              {/* Pagination */}
+              {pagination && pagination.pages && pagination.pages > 1 && (
+                <div className="flex justify-center space-x-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Назад
+                  </Button>
                   
-                  {/* Demo Panel */}
-                  <div className="lg:col-span-1">
-                    <MapAnalyticsDemo />
-                  </div>
+                  <span className="flex items-center px-3 text-sm text-gray-600">
+                    {currentPage} из {pagination.pages}
+                  </span>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(pagination.pages || 1, currentPage + 1))}
+                    disabled={currentPage === pagination.pages}
+                  >
+                    Далее
+                  </Button>
                 </div>
-
-                {/* Map Analytics Features Info */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <BarChart3 className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Тепловые карты</h4>
-                          <p className="text-sm text-gray-600">10+ режимов аналитики</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                          <Map className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Геоанализ</h4>
-                          <p className="text-sm text-gray-600">Измерения и статистика</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <TrendingUp className="h-5 w-5 text-orange-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Инвест-аналитика</h4>
-                          <p className="text-sm text-gray-600">ROI и прогнозы</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
