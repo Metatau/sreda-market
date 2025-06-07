@@ -117,26 +117,33 @@ export default function AdminPanel() {
 
   const createSourceMutation = useMutation({
     mutationFn: async (sourceData: any) => {
+      console.log('Sending request to create source:', sourceData);
       const response = await fetch('/api/admin/sources', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sourceData)
       });
+      
+      console.log('Response status:', response.status);
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create source');
+        throw new Error(responseData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
-      return response.json();
+      return responseData;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Source created successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
       toast({ title: 'Успешно', description: 'Источник создан' });
       setIsAddSourceDialogOpen(false);
       resetForm();
     },
     onError: (error: Error) => {
+      console.error('Error creating source:', error);
       toast({ 
-        title: 'Ошибка', 
+        title: 'Ошибка создания источника', 
         description: error.message,
         variant: 'destructive'
       });

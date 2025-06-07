@@ -113,13 +113,18 @@ router.get('/:id', requireAdmin, async (req: AuthenticatedRequest, res: any) => 
 // Create new data source
 router.post('/', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
   try {
+    console.log('Creating data source - request body:', JSON.stringify(req.body, null, 2));
+    
     const validatedData = createSourceSchema.parse(req.body);
+    console.log('Validated data:', JSON.stringify(validatedData, null, 2));
     
     const source = await storage.createDataSource({
       ...validatedData,
       isActive: true,
       lastUpdated: null
     });
+    
+    console.log('Created source:', JSON.stringify(source, null, 2));
     
     res.status(201).json({
       success: true,
@@ -129,6 +134,7 @@ router.post('/', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
     console.error('Error creating data source:', error);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
       return res.status(400).json({
         success: false,
         error: 'Ошибка валидации данных',
