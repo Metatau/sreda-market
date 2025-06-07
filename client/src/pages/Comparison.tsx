@@ -146,9 +146,9 @@ export function Comparison() {
                       </div>
                     </div>
                     
-                    {property.propertyClass && (
-                      <Badge className={`${getPropertyClassColor(property.propertyClass.name)} font-medium border`}>
-                        {property.propertyClass.name}
+                    {property.propertyClassId && (
+                      <Badge className="bg-blue-500 font-medium border">
+                        Класс {property.propertyClassId}
                       </Badge>
                     )}
                   </CardContent>

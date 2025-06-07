@@ -60,15 +60,22 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       });
 
       if (!response.ok) {
-        setUser(null);
-        setIsLoading(false);
-        return;
+        // Silent fail for 401 - user is not authenticated
+        if (response.status === 401) {
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       const userData = await response.json();
       setUser(userData);
     } catch (error) {
-      console.error('Failed to fetch user profile:', error);
+      // Only log errors that aren't 401 authentication failures
+      if (error instanceof Error && !error.message.includes('401')) {
+        console.error('Failed to fetch user profile:', error);
+      }
       setUser(null);
       localStorage.removeItem('userEmail');
     } finally {

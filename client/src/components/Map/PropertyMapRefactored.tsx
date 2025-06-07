@@ -218,8 +218,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
     const updateHeatmap = async () => {
       try {
         if (heatmapMode === 'none') {
-          if (typeof leafletMapService.removeHeatmap === 'function') {
+          try {
             leafletMapService.removeHeatmap(mapId);
+          } catch (error) {
+            console.warn('Error removing heatmap:', error);
           }
           return;
         }
