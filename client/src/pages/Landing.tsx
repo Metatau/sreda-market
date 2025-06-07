@@ -12,6 +12,7 @@ export default function Landing() {
   const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [searchValue, setSearchValue] = useState('');
+  const [typedText, setTypedText] = useState('');
 
   const searchQueries = [
     'Выгодные квартиры в Москве с высокой доходностью',
@@ -69,14 +70,29 @@ export default function Landing() {
     return () => clearInterval(interval);
   }, []);
 
-  // Анимация вращающихся поисковых запросов
+  // Анимация набора текста
   useEffect(() => {
-    const searchInterval = setInterval(() => {
-      setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
-    }, 3000);
+    const currentQuery = searchQueries[currentSearchIndex];
+    let currentChar = 0;
+    
+    // Очищаем текст перед началом нового
+    setTypedText('');
+    
+    const typingInterval = setInterval(() => {
+      if (currentChar < currentQuery.length) {
+        setTypedText(currentQuery.slice(0, currentChar + 1));
+        currentChar++;
+      } else {
+        clearInterval(typingInterval);
+        // Переходим к следующему запросу через 2 секунды после завершения набора
+        setTimeout(() => {
+          setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
+        }, 2000);
+      }
+    }, 80); // Скорость набора: 80мс на символ
 
-    return () => clearInterval(searchInterval);
-  }, [searchQueries.length]);
+    return () => clearInterval(typingInterval);
+  }, [currentSearchIndex, searchQueries]);
 
   // Таймер обратного отсчета
   useEffect(() => {
@@ -229,10 +245,10 @@ export default function Landing() {
                       <Search className="h-4 w-4 text-gray-500 ml-3" />
                       <input
                         type="text"
-                        value={searchValue}
+                        value={searchValue || typedText}
                         onChange={(e) => setSearchValue(e.target.value)}
-                        placeholder={searchQueries[currentSearchIndex]}
-                        className="flex-1 px-3 py-2 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 placeholder:transition-all placeholder:duration-500"
+                        className="flex-1 px-3 py-2 text-sm text-gray-700 bg-transparent border-none outline-none"
+                        readOnly={!searchValue}
                       />
                     </div>
                   </div>
