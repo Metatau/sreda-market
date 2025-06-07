@@ -250,12 +250,9 @@ export default function Landing() {
                       readOnly={!searchValue}
                     />
                     <div className="flex items-center ml-4">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2L13.09 6.26L18 4.5L16.23 9.41L21 10.5L16.74 12L21 13.5L16.23 14.59L18 19.5L13.09 17.74L12 22L10.91 17.74L6 19.5L7.77 14.59L3 13.5L7.26 12L3 10.5L7.77 9.41L6 4.5L10.91 6.26L12 2Z"/>
-                          <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.5"/>
-                        </svg>
-                      </div>
+                      <span className="text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300">
+                        AI SREDA
+                      </span>
                     </div>
                   </div>
                 </div>
