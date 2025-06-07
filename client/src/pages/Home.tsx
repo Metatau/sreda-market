@@ -9,7 +9,8 @@ import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
 import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
-import { useProperties, useRegions, useNewProperties } from '@/hooks/api';
+import { useProperties, useRegions } from '@/hooks/useProperties';
+import { useNewProperties } from '@/hooks/useNewProperties';
 import type { Property, PropertyFilters as FilterType } from '@/types';
 import { TrendingUp, BarChart3, Clock, Grid3X3, Map, Layers } from 'lucide-react';
 
@@ -122,19 +123,11 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Фильтры поиска
-              </h2>
-              <p className="text-sm text-gray-600">
-                Настройте параметры для поиска недвижимости
-              </p>
-            </div>
+
             
             <PropertyFilters 
               filters={filters} 
               onFiltersChange={handleFilterChange}
-              regions={regions}
             />
             
             {/* Analytics Overview Cards */}
@@ -255,7 +248,7 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {properties.map((property) => (
+                  {properties.map((property: any) => (
                     <PropertyCard
                       key={property.id}
                       property={property}
@@ -304,7 +297,7 @@ export default function Home() {
             setIsAnalyticsModalOpen(false);
             setSelectedProperty(null);
           }}
-          property={selectedProperty}
+          property={selectedProperty as any}
           analytics={analyticsData || {}}
         />
       )}
