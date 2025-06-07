@@ -76,21 +76,21 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
         </div>
 
         {/* Теги рейтинга, типа и класса недвижимости */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex gap-1.5 mb-4 overflow-hidden">
           <Badge 
-            className={`text-xs font-medium px-3 py-1.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 ${getRatingColor(rating)}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getRatingColor(rating)}`}
           >
             <Star className="w-3 h-3 mr-1 drop-shadow-sm" />
             <span className="font-semibold">{rating}</span>
           </Badge>
           <Badge 
-            className={`text-xs font-medium px-3 py-1.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 ${getPropertyTypeColor(propertyType)}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getPropertyTypeColor(propertyType)}`}
           >
             <Building2 className="w-3 h-3 mr-1 drop-shadow-sm" />
             <span className="font-semibold">{propertyType}</span>
           </Badge>
           <Badge 
-            className={`text-xs font-medium px-3 py-1.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 ${getPropertyClassColor(propertyClassName)}`}
+            className={`text-xs font-medium px-2 py-1 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getPropertyClassColor(propertyClassName)}`}
           >
             <Home className="w-3 h-3 mr-1 drop-shadow-sm" />
             <span className="font-semibold">{propertyClassName}</span>
