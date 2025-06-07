@@ -71,6 +71,7 @@ export default function Home() {
   };
 
   const handleFilterChange = (newFilters: FilterType) => {
+    console.log('Filter change detected:', newFilters);
     setFilters(newFilters);
     setCurrentPage(1);
   };

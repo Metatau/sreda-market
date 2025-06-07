@@ -218,9 +218,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
     const updateHeatmap = async () => {
       try {
         if (heatmapMode === 'none') {
-          if (typeof leafletMapService.removeHeatmap === 'function') {
-            leafletMapService.removeHeatmap(mapId);
-          }
+          leafletMapService.removeHeatmap(mapId);
           return;
         }
 
@@ -285,14 +283,12 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
         })
         .filter(Boolean) as Array<{lat: number, lng: number, intensity: number}>;
 
-        if (typeof leafletMapService.addHeatmap === 'function') {
-          leafletMapService.addHeatmap(mapId, heatmapData, {
-            radius: 25,
-            blur: 15,
-            maxZoom: 17,
-            mode: heatmapMode
-          });
-        }
+        leafletMapService.addHeatmap(mapId, heatmapData, {
+          radius: 25,
+          blur: 15,
+          maxZoom: 17,
+          mode: heatmapMode
+        });
       } catch (error) {
         console.warn('Error updating heatmap:', error);
       }
