@@ -90,12 +90,7 @@ export default function AdminPanel() {
   // Мутации для источников данных
   const toggleSourceMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/admin/sources/${id}/toggle`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!response.ok) throw new Error('Failed to toggle source');
-      return response.json();
+      return await apiRequest('POST', `/api/admin/sources/${id}/toggle`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
@@ -105,12 +100,7 @@ export default function AdminPanel() {
 
   const deleteSourceMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/admin/sources/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!response.ok) throw new Error('Failed to delete source');
-      return response.json();
+      return await apiRequest('DELETE', `/api/admin/sources/${id}`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
