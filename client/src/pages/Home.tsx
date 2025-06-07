@@ -162,21 +162,39 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Enhanced View Mode Tabs - Moved to top */}
-            <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'map')} className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <TabsList className="grid w-full grid-cols-2 max-w-md">
-                  <TabsTrigger value="grid" className="flex items-center gap-2">
-                    <Grid3x3 className="h-4 w-4" />
-                    Список объектов
-                  </TabsTrigger>
-                  <TabsTrigger value="map" className="flex items-center gap-2">
-                    <Map className="h-4 w-4" />
-                    Аналитическая карта
-                    <Badge variant="secondary" className="ml-1">Новинка</Badge>
-                  </TabsTrigger>
-                </TabsList>
+            {/* Enhanced View Mode Tabs */}
+            <div className="mb-6">
+              <div className="flex bg-gray-100 rounded-lg p-1 w-fit mb-4">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Grid3x3 className="h-4 w-4" />
+                  Список объектов
+                </button>
+                <button
+                  onClick={() => setViewMode('map')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    viewMode === 'map' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Map className="h-4 w-4" />
+                  Аналитическая карта
+                  <Badge variant="secondary" className="ml-1">Новинка</Badge>
+                </button>
+              </div>
 
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-bold text-gray-900 text-[20px]">
+                  Недвижимость в {selectedRegionName}
+                </h2>
+                
                 <div className="flex items-center space-x-4">
                   <p className="text-sm text-gray-600">
                     Найдено {pagination?.total || 0} объектов
@@ -194,16 +212,11 @@ export default function Home() {
                   </Select>
                 </div>
               </div>
+            </div>
 
-              {/* Property Section Header */}
-              <div className="mb-6">
-                <h2 className="font-bold text-gray-900 text-[20px]">
-                  Недвижимость в {selectedRegionName}
-                </h2>
-              </div>
-
-              {/* Grid View Content */}
-              <TabsContent value="grid" className="mt-6">
+            {/* Content based on view mode */}
+            {viewMode === 'grid' ? (
+              <div className="mt-6">
                 {/* Property Grid */}
                 {isLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -255,10 +268,10 @@ export default function Home() {
                     </Button>
                   </div>
                 )}
-              </TabsContent>
-
-              {/* Enhanced Map Analytics View */}
-              <TabsContent value="map" className="mt-6">
+              </div>
+            ) : (
+              /* Enhanced Map Analytics View */
+              <div className="mt-6">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                   {/* Main Map - Using existing PropertyMap component */}
                   <div className="lg:col-span-3">
@@ -336,8 +349,8 @@ export default function Home() {
                     </CardContent>
                   </Card>
                 </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+            )}
           </div>
         </div>
       </div>
