@@ -292,7 +292,7 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link href="/register">
+            <Link href="/login">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
                 Начать поиск
               </Button>
@@ -459,7 +459,7 @@ export default function Landing() {
                     ))}
                   </div>
 
-                  <Link href="/register" className="w-full">
+                  <Link href="/login" className="w-full">
                     <Button 
                       className={`w-full ${
                         plan.popular 
