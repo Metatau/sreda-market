@@ -1,0 +1,147 @@
+# Промпт для Replit Agent: Диагностика и исправление фильтров на frontend
+
+## Задача
+API фильтры работают корректно (проверено), но фильтры в UI не обновляют отображение. Нужно найти и исправить проблему на frontend.
+
+## План диагностики:
+
+### 1. Найти компоненты фильтров
+Найди файлы, отвечающие за фильтры:
+- Компоненты с названиями типа `Filter`, `PropertyFilter`, `MarketTypeFilter`
+- Файлы в папках `components`, `filters`, `ui`
+- Поиск по ключевым словам: `marketType`, `filter`, `useState`, `onChange`
+
+### 2. Проверить состояние и обработчики событий
+В компонентах фильтров проверь:
+```javascript
+// Есть ли состояние для фильтров?
+const [marketType, setMarketType] = useState('');
+const [filters, setFilters] = useState({});
+
+// Есть ли обработчики изменений?
+const handleFilterChange = (filterName, value) => {
+  // Обновляется ли состояние?
+  setFilters(prev => ({ ...prev, [filterName]: value }));
+};
+
+// Вызываются ли API запросы при изменении фильтров?
+useEffect(() => {
+  fetchProperties(filters);
+}, [filters]);
+```
+
+### 3. Найти компонент списка/карты недвижимости
+Найди компонент, который отображает свойства:
+- Файлы с названиями `PropertyList`, `PropertyMap`, `Properties`
+- Проверь, использует ли он отфильтрованные данные
+
+### 4. Проверить поток данных
+Убедись, что:
+- Фильтры передают свое состояние в родительский компонент
+- Родительский компонент делает API запрос с фильтрами
+- Результат API запроса обновляет отображаемые свойства
+
+### 5. Типичные проблемы для исправления:
+
+#### A. Состояние фильтров не связано с API запросами
+```javascript
+// ПРОБЛЕМА: useEffect не зависит от фильтров
+useEffect(() => {
+  fetchProperties();
+}, []); // ← пустой массив зависимостей
+
+// ИСПРАВЛЕНИЕ:
+useEffect(() => {
+  fetchProperties(filters);
+}, [filters]); // ← добавить filters в зависимости
+```
+
+#### B. Фильтры не обновляют родительское состояние
+```javascript
+// ПРОБЛЕМА: состояние фильтра локальное
+const FilterComponent = () => {
+  const [value, setValue] = useState('');
+  // изменения не передаются наверх
+};
+
+// ИСПРАВЛЕНИЕ: добавить callback
+const FilterComponent = ({ onFilterChange }) => {
+  const handleChange = (newValue) => {
+    setValue(newValue);
+    onFilterChange('marketType', newValue); // ← передать в родитель
+  };
+};
+```
+
+#### C. API запрос не использует параметры фильтров
+```javascript
+// ПРОБЛЕМА: параметры не передаются в запрос
+const fetchProperties = async () => {
+  const response = await fetch('/api/properties'); // ← без параметров
+};
+
+// ИСПРАВЛЕНИЕ:
+const fetchProperties = async (filters) => {
+  const params = new URLSearchParams(filters);
+  const response = await fetch(`/api/properties?${params}`);
+};
+```
+
+### 6. Создать тестовый компонент (если нужно)
+Если проблему сложно найти, создай простой тестовый компонент:
+```javascript
+// test-filter-component.jsx
+import { useState, useEffect } from 'react';
+
+export const TestFilter = () => {
+  const [marketType, setMarketType] = useState('');
+  const [properties, setProperties] = useState([]);
+
+  useEffect(() => {
+    console.log('Filter changed:', marketType);
+    fetch(`/api/properties?marketType=${marketType}`)
+      .then(res => res.json())
+      .then(data => {
+        console.log('Properties received:', data.length);
+        setProperties(data);
+      });
+  }, [marketType]);
+
+  return (
+    <div>
+      <select value={marketType} onChange={(e) => setMarketType(e.target.value)}>
+        <option value="">All</option>
+        <option value="new_construction">New Construction</option>
+        <option value="secondary">Secondary</option>
+      </select>
+      <p>Properties count: {properties.length}</p>
+    </div>
+  );
+};
+```
+
+### 7. Проверить Network вкладку
+Добавь логирование для проверки API вызовов:
+```javascript
+// В компоненте, который делает API запросы
+const fetchProperties = async (filters) => {
+  console.log('Making API request with filters:', filters);
+  const params = new URLSearchParams(filters);
+  const url = `/api/properties?${params}`;
+  console.log('Request URL:', url);
+  
+  const response = await fetch(url);
+  const data = await response.json();
+  console.log('API response:', data.length, 'properties');
+  
+  return data;
+};
+```
+
+## Ожидаемый результат:
+1. Фильтры должны обновлять URL запроса к API
+2. Список/карта недвижимости должна обновляться при изменении фильтров
+3. В консоли должны быть видны логи изменения фильтров и API запросов
+4. Количество отображаемых объектов должно соответствовать API ответу
+
+## Начни с поиска файлов компонентов фильтров и проверки их связи с API запросами.
