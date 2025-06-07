@@ -176,7 +176,7 @@ export default function Landing() {
         { name: "Экспорт в PDF", basic: false, premium: false },
         { name: "Инсайты рынка", basic: false, premium: false },
         { name: "Поддержка 24/7", basic: true, premium: false },
-        { name: "Мобильное приложение", basic: true, premium: false }
+
       ]
     },
     {
@@ -190,7 +190,7 @@ export default function Landing() {
         { name: "Экспорт в PDF", basic: false, premium: true },
         { name: "Инсайты рынка", basic: false, premium: true },
         { name: "Поддержка 24/7", basic: true, premium: true },
-        { name: "Мобильное приложение", basic: true, premium: true }
+
       ]
     }
   ];
