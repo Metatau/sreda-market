@@ -101,6 +101,11 @@ export default function Home() {
       {/* Navigation */}
       <Navigation />
 
+      {/* DEBUG: Test if content is visible */}
+      <div className="w-full bg-red-500 text-white text-center py-2 text-lg font-bold">
+        🔍 ОТЛАДКА: Если вы видите эту красную полосу, значит контент загружается правильно
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
