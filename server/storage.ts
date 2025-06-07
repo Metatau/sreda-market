@@ -527,36 +527,8 @@ export class DatabaseStorage implements IStorage {
       throw new Error("User not found");
     }
 
-    // Администратор имеет неограниченный доступ
-    if (user.role === 'administrator') {
-      return { canUse: true, dailyLimit: -1, used: 0 };
-    }
-
-    // Сброс счетчика если прошел день
-    const now = new Date();
-    const lastReset = user.lastAiQueryReset ? new Date(user.lastAiQueryReset) : new Date(0);
-    const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (daysSinceReset >= 1) {
-      await db
-        .update(users)
-        .set({ 
-          aiQueriesUsed: 0, 
-          lastAiQueryReset: now 
-        })
-        .where(eq(users.id, userId));
-      
-      return { canUse: true, dailyLimit: this.getDailyLimit(user.subscriptionType), used: 0 };
-    }
-
-    const dailyLimit = this.getDailyLimit(user.subscriptionType);
-    const used = user.aiQueriesUsed || 0;
-    
-    return {
-      canUse: used < dailyLimit,
-      dailyLimit,
-      used
-    };
+    // Всем пользователям предоставляется неограниченный доступ к AI
+    return { canUse: true, dailyLimit: -1, used: 0 };
   }
 
   private getDailyLimit(subscriptionType: string | null): number {
@@ -569,12 +541,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async incrementAIUsage(userId: number): Promise<void> {
-    await db
-      .update(users)
-      .set({ 
-        aiQueriesUsed: sql`${users.aiQueriesUsed} + 1`
-      })
-      .where(eq(users.id, userId));
+    // No longer tracking AI usage - unlimited access for all users
+    return;
   }
 
   async updateSubscription(userId: number, type: string, expiresAt: Date): Promise<void> {
