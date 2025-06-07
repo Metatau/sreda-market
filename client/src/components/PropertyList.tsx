@@ -29,7 +29,7 @@ export function PropertyList({
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['/api/properties', { ...filters, page, limit, sortBy }],
-    queryFn: () => propertyApi.getAll({ ...filters, page, limit }),
+    queryFn: () => propertyApi.getProperties({ ...filters, page, limit }),
   });
 
   const handleFavoriteToggle = (propertyId: number, isFavorited: boolean) => {
@@ -72,7 +72,7 @@ export function PropertyList({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">
-                {data ? `Найдено объектов: ${data.total.toLocaleString()}` : 'Загрузка...'}
+                {data ? `Найдено объектов: ${data.pagination?.total?.toLocaleString() || 0}` : 'Загрузка...'}
               </h2>
               {Object.keys(filters).length > 0 && (
                 <p className="text-sm text-gray-600 mt-1">
@@ -169,12 +169,12 @@ export function PropertyList({
           </div>
 
           {/* Pagination */}
-          {data.totalPages > 1 && (
+          {data.pagination && data.pagination.pages > 1 && (
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">
-                    Показано {((page - 1) * limit) + 1}-{Math.min(page * limit, data.total)} из {data.total.toLocaleString()} объектов
+                    Показано {((page - 1) * limit) + 1}-{Math.min(page * limit, data.pagination?.total || 0)} из {data.pagination?.total?.toLocaleString() || 0} объектов
                   </p>
                   
                   <div className="flex items-center space-x-2">
@@ -204,11 +204,11 @@ export function PropertyList({
                       )}
                       
                       {/* Show pages around current */}
-                      {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
-                        const pageNum = Math.max(1, Math.min(page - 2 + i, data.totalPages));
-                        if (pageNum < 1 || pageNum > data.totalPages) return null;
+                      {Array.from({ length: Math.min(5, data.pagination?.pages || 1) }, (_, i) => {
+                        const pageNum = Math.max(1, Math.min(page - 2 + i, data.pagination?.pages || 1));
+                        if (pageNum < 1 || pageNum > (data.pagination?.pages || 1)) return null;
                         if (page > 3 && pageNum === 1) return null;
-                        if (page < data.totalPages - 2 && pageNum === data.totalPages) return null;
+                        if (page < (data.pagination?.pages || 1) - 2 && pageNum === (data.pagination?.pages || 1)) return null;
                         
                         return (
                           <Button
@@ -223,15 +223,15 @@ export function PropertyList({
                       })}
                       
                       {/* Show last page */}
-                      {page < data.totalPages - 2 && (
+                      {page < (data.pagination?.pages || 1) - 2 && (
                         <>
-                          {page < data.totalPages - 3 && <span className="px-2">...</span>}
+                          {page < (data.pagination?.pages || 1) - 3 && <span className="px-2">...</span>}
                           <Button
-                            variant={data.totalPages === page ? "default" : "outline"}
+                            variant={(data.pagination?.pages || 1) === page ? "default" : "outline"}
                             size="sm"
-                            onClick={() => handlePageChange(data.totalPages)}
+                            onClick={() => handlePageChange(data.pagination?.pages || 1)}
                           >
-                            {data.totalPages}
+                            {data.pagination?.pages || 1}
                           </Button>
                         </>
                       )}
@@ -241,7 +241,7 @@ export function PropertyList({
                       variant="outline"
                       size="sm"
                       onClick={() => handlePageChange(page + 1)}
-                      disabled={page === data.totalPages}
+                      disabled={page === (data.pagination?.pages || 1)}
                     >
                       Далее
                       <ChevronRight className="h-4 w-4 ml-1" />

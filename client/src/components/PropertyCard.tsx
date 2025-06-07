@@ -8,6 +8,8 @@ import { PropertyWithRelations } from "@/types";
 interface PropertyCardProps {
   property: PropertyWithRelations;
   onSelect?: (property: PropertyWithRelations) => void;
+  onFavoriteToggle?: (propertyId: number, isFavorited: boolean) => void;
+  isFavorited?: boolean;
 }
 
 export function PropertyCard({ property, onSelect }: PropertyCardProps) {
