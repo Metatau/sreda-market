@@ -62,6 +62,9 @@ export default function AdminPanel() {
       keywords: ''
     }
   });
+
+  // Debug form state
+  console.log('Form state:', newSourceForm);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -842,33 +845,34 @@ export default function AdminPanel() {
 
                           <div>
                             <Label htmlFor="type">Тип источника *</Label>
-                            <Select value={newSourceForm.type} onValueChange={(value) => setNewSourceForm(prev => ({ ...prev, type: value }))}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Выберите тип источника" />
-                              </SelectTrigger>
-                              <SelectContent className="z-[100]" style={{ zIndex: 100 }}>
-                                <SelectItem value="website">Веб-сайт</SelectItem>
-                                <SelectItem value="telegram_channel">Telegram канал</SelectItem>
-                                <SelectItem value="rss_feed">RSS лента</SelectItem>
-                                <SelectItem value="uploaded_file">Загруженный файл</SelectItem>
-                                <SelectItem value="spreadsheet">Таблица</SelectItem>
-                                <SelectItem value="pdf_document">PDF документ</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select
+                              id="type"
+                              value={newSourceForm.type}
+                              onChange={(e) => setNewSourceForm(prev => ({ ...prev, type: e.target.value }))}
+                              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <option value="">Выберите тип источника</option>
+                              <option value="website">Веб-сайт</option>
+                              <option value="telegram_channel">Telegram канал</option>
+                              <option value="rss_feed">RSS лента</option>
+                              <option value="uploaded_file">Загруженный файл</option>
+                              <option value="spreadsheet">Таблица</option>
+                              <option value="pdf_document">PDF документ</option>
+                            </select>
                           </div>
 
                           <div>
                             <Label htmlFor="frequency">Частота обновления</Label>
-                            <Select value={newSourceForm.frequency} onValueChange={(value) => setNewSourceForm(prev => ({ ...prev, frequency: value }))}>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent className="z-[100]" style={{ zIndex: 100 }}>
-                                <SelectItem value="hourly">Ежечасно</SelectItem>
-                                <SelectItem value="daily">Ежедневно</SelectItem>
-                                <SelectItem value="weekly">Еженедельно</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select
+                              id="frequency"
+                              value={newSourceForm.frequency}
+                              onChange={(e) => setNewSourceForm(prev => ({ ...prev, frequency: e.target.value }))}
+                              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <option value="hourly">Ежечасно</option>
+                              <option value="daily">Ежедневно</option>
+                              <option value="weekly">Еженедельно</option>
+                            </select>
                           </div>
 
                           <div>
