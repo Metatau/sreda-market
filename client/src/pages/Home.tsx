@@ -93,146 +93,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Content Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-
-            
-            <PropertyFilters 
-              filters={filters} 
-              onFiltersChange={handleFilterChange}
-            />
-            
-            {/* Analytics Overview Cards */}
-            <div className="mt-8 space-y-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Средняя доходность</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">12.4%</div>
-                  <p className="text-xs text-muted-foreground">
-                    +2.1% к прошлому месяцу
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Рыночный тренд</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">↗ Рост</div>
-                  <p className="text-xs text-muted-foreground">
-                    Рынок показывает стабильный рост
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Новые объекты</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {isLoadingNewProperties ? "..." : newPropertiesData?.count || 0}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    За последние 24 часа
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-
-
-            {/* Controls */}
-            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600">
-                  Найдено {pagination?.total || 0} объектов
-                </p>
-                <Select defaultValue="price_asc">
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Сортировка" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
-                    <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
-                    <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
-                    <SelectItem value="area">По площади</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Property Grid */}
-            <div className="mt-6">
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, i) => (
-                    <Card key={i} className="animate-pulse">
-                      <CardContent className="p-4">
-                        <div className="h-40 bg-gray-200 rounded mb-4"></div>
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {properties.map((property: any) => (
-                    <PropertyCard
-                      key={property.id}
-                      property={property}
-                      onSelect={handlePropertySelect}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Pagination */}
-              {pagination && pagination.pages && pagination.pages > 1 && (
-                <div className="flex justify-center space-x-2 mt-8">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Назад
-                  </Button>
-                  
-                  <span className="flex items-center px-3 text-sm text-gray-600">
-                    {currentPage} из {pagination.pages}
-                  </span>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.min(pagination.pages || 1, currentPage + 1))}
-                    disabled={currentPage === pagination.pages}
-                  >
-                    Далее
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Map Analytics Tools */}
-      <div className="w-full bg-white border-b shadow-sm mt-8">
+      <div className="w-full bg-white border-b shadow-sm mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card 
@@ -390,6 +252,144 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Content Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:col-span-1">
+
+            
+            <PropertyFilters 
+              filters={filters} 
+              onFiltersChange={handleFilterChange}
+            />
+            
+            {/* Analytics Overview Cards */}
+            <div className="mt-8 space-y-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Средняя доходность</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">12.4%</div>
+                  <p className="text-xs text-muted-foreground">
+                    +2.1% к прошлому месяцу
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Рыночный тренд</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">↗ Рост</div>
+                  <p className="text-xs text-muted-foreground">
+                    Рынок показывает стабильный рост
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Новые объекты</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {isLoadingNewProperties ? "..." : newPropertiesData?.count || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    За последние 24 часа
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+
+
+            {/* Controls */}
+            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Найдено {pagination?.total || 0} объектов
+                </p>
+                <Select defaultValue="price_asc">
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Сортировка" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="price_asc">По цене: сначала дешевые</SelectItem>
+                    <SelectItem value="price_desc">По цене: сначала дорогие</SelectItem>
+                    <SelectItem value="date_desc">По дате: сначала новые</SelectItem>
+                    <SelectItem value="area">По площади</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Property Grid */}
+            <div className="mt-6">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardContent className="p-4">
+                        <div className="h-40 bg-gray-200 rounded mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {properties.map((property: any) => (
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                      onSelect={handlePropertySelect}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Pagination */}
+              {pagination && pagination.pages && pagination.pages > 1 && (
+                <div className="flex justify-center space-x-2 mt-8">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Назад
+                  </Button>
+                  
+                  <span className="flex items-center px-3 text-sm text-gray-600">
+                    {currentPage} из {pagination.pages}
+                  </span>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(pagination.pages || 1, currentPage + 1))}
+                    disabled={currentPage === pagination.pages}
+                  >
+                    Далее
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Investment Analytics Modal */}
       {selectedProperty && (
