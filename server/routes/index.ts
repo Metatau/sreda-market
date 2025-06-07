@@ -14,6 +14,7 @@ import usersRoutes from "./users.routes";
 import propertiesRoutes from "./properties.routes";
 import analyticsRoutes from "./analytics.routes";
 import promocodesRoutes from "./promocodes.routes";
+import regionsRoutes from "./regions.routes";
 import { imageRoutes } from "./imageRoutes";
 import mapRoutes from "./mapRoutes";
 import insightsRoutes from "./insights";
@@ -38,6 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/auth', authRoutes);
   app.use('/api/users', usersRoutes);
   app.use('/api/properties', propertiesRoutes);
+  app.use('/api/regions', regionsRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/promocodes', promocodesRoutes);
   app.use('/api/images', imageRoutes);
