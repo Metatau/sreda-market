@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle, Key, BarChart, Users, Settings } from "lucide-react";
+import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle, Key, BarChart, Users, Settings, Globe, MessageSquare, FileText, Plus, Search, ToggleLeft, ToggleRight, Eye, Edit, Trash2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Navigation } from "@/components/Navigation";
 
@@ -23,16 +23,77 @@ interface SyncResult {
   errors: string[];
 }
 
+interface DataSource {
+  id: number;
+  name: string;
+  description?: string;
+  type: string;
+  config: any;
+  tags: string[];
+  isActive: boolean;
+  frequency: string;
+  lastUpdated?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function AdminPanel() {
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [showCredentials, setShowCredentials] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [sourcesSearchTerm, setSourcesSearchTerm] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: adsApiStatus, isLoading: statusLoading } = useQuery<AdsApiStatus>({
     queryKey: ['/api/admin/ads-api/status'],
     refetchInterval: 30000, // Обновляем каждые 30 секунд
+  });
+
+  const { data: sourcesData, isLoading: sourcesLoading } = useQuery({
+    queryKey: ['/api/admin/sources'],
+    enabled: activeTab === 'sources'
+  });
+
+  const sources = (sourcesData as any)?.data || [];
+
+  // Фильтрация источников данных
+  const filteredSources = sources.filter((source: DataSource) =>
+    source.name.toLowerCase().includes(sourcesSearchTerm.toLowerCase()) ||
+    source.description?.toLowerCase().includes(sourcesSearchTerm.toLowerCase()) ||
+    source.tags.some(tag => tag.toLowerCase().includes(sourcesSearchTerm.toLowerCase()))
+  );
+
+  // Мутации для источников данных
+  const toggleSourceMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/sources/${id}/toggle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to toggle source');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
+      toast({ title: 'Успешно', description: 'Статус источника изменен' });
+    }
+  });
+
+  const deleteSourceMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/sources/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Failed to delete source');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
+      toast({ title: 'Успешно', description: 'Источник удален' });
+    }
   });
 
   const syncMutation = useMutation({
@@ -107,6 +168,42 @@ export default function AdminPanel() {
     syncMutation.mutate({ regions: selectedRegions, credentials });
   };
 
+  // Функции для источников данных
+  const handleToggleSource = (source: DataSource) => {
+    toggleSourceMutation.mutate(source.id);
+  };
+
+  const handleDeleteSource = (source: DataSource) => {
+    if (confirm('Вы уверены, что хотите удалить этот источник данных?')) {
+      deleteSourceMutation.mutate(source.id);
+    }
+  };
+
+  const getSourceTypeIcon = (type: string) => {
+    const icons = {
+      telegram_channel: MessageSquare,
+      website: Globe,
+      rss_feed: Database,
+      uploaded_file: FileText,
+      spreadsheet: FileText,
+      pdf_document: FileText
+    };
+    const IconComponent = icons[type as keyof typeof icons] || Database;
+    return <IconComponent className="h-4 w-4" />;
+  };
+
+  const getSourceTypeLabel = (type: string) => {
+    const labels = {
+      telegram_channel: 'Telegram канал',
+      website: 'Веб-сайт',
+      rss_feed: 'RSS лента',
+      uploaded_file: 'Загруженный файл',
+      spreadsheet: 'Таблица',
+      pdf_document: 'PDF документ'
+    };
+    return labels[type as keyof typeof labels] || type;
+  };
+
   if (statusLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -126,6 +223,66 @@ export default function AdminPanel() {
           <Database className="w-8 h-8 text-primary" />
           <h1 className="text-3xl font-bold">Административная панель</h1>
         </div>
+
+        {/* Табы навигации */}
+        <div className="flex space-x-1 bg-white rounded-lg p-1 shadow">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === 'overview'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <BarChart className="w-4 h-4" />
+              <span>Обзор</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('sources')}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === 'sources'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <Database className="w-4 h-4" />
+              <span>Источники данных</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === 'users'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <Users className="w-4 h-4" />
+              <span>Пользователи</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              activeTab === 'settings'
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <Settings className="w-4 h-4" />
+              <span>Настройки</span>
+            </div>
+          </button>
+        </div>
+
+        {/* Контент вкладок */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
 
         {/* Статус ADS API */}
         <Card>
