@@ -446,10 +446,7 @@ export default function Landing() {
               <Button variant="secondary" size="lg" className="w-full px-8 py-4 text-lg font-semibold mb-4">Получить промокод</Button>
             </a>
             
-            <div className="flex items-center justify-center space-x-2 text-sm text-blue-100">
-              <Shield className="h-4 w-4" />
-              <span>30 дней возврата средств</span>
-            </div>
+
           </div>
         </div>
       </section>
