@@ -16,14 +16,16 @@ export class PropertyController extends BaseController {
       req.query.per_page as string
     );
 
+    console.log('Raw query params:', req.query);
     const filters = validateFilters(req.query);
-    const result = await this.propertyService.getProperties(filters, { page, perPage });
+    console.log('Validated filters:', filters);
+    const result = await this.propertyService.getProperties(filters, { page, limit: perPage });
     
     this.sendSuccess(res, {
       properties: result.properties,
       pagination: {
         page,
-        perPage,
+        limit: perPage,
         total: result.total,
         pages: Math.ceil(result.total / perPage),
         hasNext: page < Math.ceil(result.total / perPage),
