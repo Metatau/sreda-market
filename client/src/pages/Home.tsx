@@ -51,21 +51,7 @@ export default function Home() {
             selectedProperty={selectedProperty}
             onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
           />
-          
-          {/* Map Overlay Info */}
-          <div className="absolute top-4 left-4 z-10">
-            <Card className="bg-white/95 backdrop-blur-sm border shadow-lg">
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <Layers className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium">Интерактивная карта недвижимости</span>
-                </div>
-                <div className="text-xs text-gray-600 mt-1">
-                  Отображено {properties.length} объектов
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+
         </div>
       </div>
 
