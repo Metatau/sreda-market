@@ -132,21 +132,21 @@ export function PropertyCard({ property, onSelect, onFavorite, isFavorite = fals
         {/* Investment Metrics */}
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
           <div className="flex items-center space-x-4">
-            {property.analytics?.roi && (
+            {property.investmentAnalytics?.rentalRoiAnnual && (
               <div className="flex items-center space-x-1">
                 <i className="fas fa-chart-line text-green-600"></i>
                 <span className="text-xs text-gray-600">ROI:</span>
-                <span className={`text-xs font-semibold ${getRoiColor(property.analytics.roi)}`}>
-                  {property.analytics.roi}%
+                <span className={`text-xs font-semibold ${getRoiColor(Number(property.investmentAnalytics.rentalRoiAnnual))}`}>
+                  {parseFloat(property.investmentAnalytics.rentalRoiAnnual).toFixed(1)}%
                 </span>
               </div>
             )}
-            {property.analytics?.liquidityScore && (
+            {property.investmentAnalytics?.liquidityScore && (
               <div className="flex items-center space-x-1">
                 <i className="fas fa-tachometer-alt text-orange-600"></i>
                 <span className="text-xs text-gray-600">Ликв:</span>
-                <span className={`text-xs font-semibold ${getLiquidityColor(property.analytics.liquidityScore)}`}>
-                  {property.analytics.liquidityScore}/10
+                <span className={`text-xs font-semibold ${getLiquidityColor(property.investmentAnalytics.liquidityScore)}`}>
+                  {property.investmentAnalytics.liquidityScore}/10
                 </span>
               </div>
             )}
