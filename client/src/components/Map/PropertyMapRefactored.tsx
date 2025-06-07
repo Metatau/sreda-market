@@ -149,13 +149,33 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
 
   // Update properties on map
   useEffect(() => {
+    console.log('PropertyMap: mapId:', mapId, 'mapLoaded:', mapLoaded, 'properties count:', properties.length);
+    
     if (!mapId || !mapLoaded || !properties.length) return;
 
     const updateProperties = async () => {
       const propertyMarkers = properties
         .filter(p => p.coordinates)
         .map(property => {
-          const [lat, lng] = property.coordinates!.split(',').map(Number);
+          let lat: number, lng: number;
+          
+          // Парсинг координат в зависимости от формата
+          if (property.coordinates!.startsWith('POINT(')) {
+            // Формат: POINT(longitude latitude)
+            const coords = property.coordinates!.match(/POINT\(([^)]+)\)/)?.[1];
+            if (coords) {
+              const [longitude, latitude] = coords.split(' ').map(Number);
+              lng = longitude;
+              lat = latitude;
+            } else {
+              return null; // Пропускаем некорректные координаты
+            }
+          } else {
+            // Формат: "latitude,longitude"
+            const [latitude, longitude] = property.coordinates!.split(',').map(Number);
+            lat = latitude;
+            lng = longitude;
+          }
           
           return {
             id: property.id,
@@ -164,7 +184,17 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
             className: 'default',
             price: property.price
           };
-        });
+        })
+        .filter(Boolean) as Array<{
+          id: number;
+          coordinates: [number, number];
+          popup: any;
+          className: string;
+          price: number;
+        }>; // Убираем null значения и исправляем типизацию
+
+      console.log('PropertyMap: Processing', propertyMarkers.length, 'markers');
+      console.log('PropertyMap: Sample marker:', propertyMarkers[0]);
 
       const result = leafletMapService.addPropertyMarkers(mapId, propertyMarkers, {
         onMarkerClick: (property: any) => {

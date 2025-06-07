@@ -27,7 +27,7 @@ export default function Home() {
   const queryClient = useQueryClient();
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
-  const { data: allPropertiesData } = useAllProperties(); // Все объекты для карты
+  const { data: allPropertiesData, isLoading: isLoadingAllProperties } = useAllProperties(); // Все объекты для карты
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
 
   const properties = propertiesData?.properties || [];
