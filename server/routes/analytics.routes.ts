@@ -7,7 +7,7 @@ import {
   investmentAnalytics,
   propertyAnalytics 
 } from '@shared/schema';
-import { requireAuth, requireAdmin } from '../middleware/unifiedAuth';
+import { requireAuth, requireAdmin } from '../middleware/unified-auth';
 import { generalRateLimit } from '../middleware/rateLimiting';
 import { responseCacheMiddleware } from '../middleware/cache';
 import { eq, desc, count, sql, gte } from 'drizzle-orm';
@@ -50,7 +50,7 @@ router.get('/new-properties',
 router.get('/market-trends',
   generalRateLimit,
   responseCacheMiddleware(1800),
-  requireRoleAuth,
+  requireAuth,
   async (req, res) => {
     try {
       const trends = await db
@@ -89,7 +89,7 @@ router.get('/market-trends',
 router.get('/investment-metrics',
   generalRateLimit,
   responseCacheMiddleware(900),
-  requireRoleAuth,
+  requireAuth,
   async (req, res) => {
     try {
       const metrics = await db

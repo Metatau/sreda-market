@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { OptimizedPropertyService } from '../services/OptimizedPropertyService';
-import { requireAuth, requireAdmin } from '../middleware/unifiedAuth';
+import { requireAuth, requireAdmin } from '../middleware/unified-auth';
 import { validateQuery, validateBody, propertyFiltersSchema } from '../validation/schemas';
 import { generalRateLimit } from '../middleware/rateLimiting';
 import { responseCacheMiddleware } from '../middleware/cache';
@@ -148,7 +148,7 @@ router.get('/map/data',
 router.get('/analytics/region/:regionId',
   generalRateLimit,
   responseCacheMiddleware(1800), // 30 минут кеша
-  requireRoleAuth,
+  requireAuth,
   async (req, res) => {
     try {
       const regionId = parseInt(req.params.regionId);
@@ -187,7 +187,7 @@ router.get('/analytics/region/:regionId',
 router.get('/dashboard/stats',
   generalRateLimit,
   responseCacheMiddleware(900), // 15 минут кеша
-  requireRoleAuth,
+  requireAuth,
   async (req, res) => {
     try {
       const stats = await OptimizedPropertyService.getDashboardStats();
