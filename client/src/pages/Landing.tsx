@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail, Database, BarChart3, Search } from 'lucide-react';
 
 export default function Landing() {
-  const [email, setEmail] = useState('');
+
   const [timeLeft, setTimeLeft] = useState('07:59:32');
   const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
@@ -435,20 +435,18 @@ export default function Landing() {
             <div className="text-3xl font-bold font-mono">{timeLeft}</div>
           </div>
 
-          {/* Форма */}
+          {/* Кнопка перехода в Telegram */}
           <div className="max-w-md mx-auto">
-            <div className="flex gap-2 mb-4">
-              <Input
-                type="email"
-                placeholder="Ваш email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white text-gray-900"
-              />
-              <Button variant="secondary" size="lg" className="px-8">
-                Получить
+            <a 
+              href="https://t.me/sreda_market_bot" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block w-full"
+            >
+              <Button variant="secondary" size="lg" className="w-full px-8 py-4 text-lg font-semibold mb-4">
+                Получить промокод в Telegram
               </Button>
-            </div>
+            </a>
             
             <div className="flex items-center justify-center space-x-2 text-sm text-blue-100">
               <Shield className="h-4 w-4" />
