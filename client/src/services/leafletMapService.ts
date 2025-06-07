@@ -219,7 +219,7 @@ export class LeafletMapService {
       return false;
     }
 
-    mapInstance.leafletMap.setView([center[1], center[0]], zoom);
+    mapInstance.leafletMap.setView([center[0], center[1]], zoom);
     return true;
   }
 
