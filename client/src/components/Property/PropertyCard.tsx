@@ -2,11 +2,11 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { Property } from "@/types";
+import type { PropertyWithRelations } from "@/types";
 
 interface PropertyCardProps {
-  property: Property;
-  onSelect?: (property: Property) => void;
+  property: PropertyWithRelations;
+  onSelect?: (property: PropertyWithRelations) => void;
   onFavorite?: (propertyId: number) => void;
   isFavorite?: boolean;
 }

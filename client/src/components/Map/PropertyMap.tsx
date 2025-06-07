@@ -167,12 +167,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect }: 
                     ${property.propertyClassId ? `<p style="margin: 0;"><span style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px; font-size: 12px;">Класс ${property.propertyClassId}</span></p>` : ''}
                   </div>
                 `,
-                clickable: true,
-                onClick: () => {
-                  if (onPropertySelect) {
-                    onPropertySelect(property);
-                  }
-                }
+                clickable: true
               });
             }
           }

@@ -1,6 +1,7 @@
 import { db } from './server/db';
 import { properties, investmentAnalytics } from './shared/schema';
 import { SimpleInvestmentAnalyticsService } from './server/services/simpleInvestmentAnalytics';
+import { eq } from 'drizzle-orm';
 
 async function calculateAnalyticsForAllProperties() {
   try {
@@ -9,7 +10,7 @@ async function calculateAnalyticsForAllProperties() {
     const analyticsService = new SimpleInvestmentAnalyticsService();
     
     // Получаем все активные объекты недвижимости
-    const allProperties = await db.select().from(properties).where(properties.isActive);
+    const allProperties = await db.select().from(properties).where(eq(properties.isActive, true));
     
     console.log(`Найдено ${allProperties.length} активных объектов для расчета аналитики`);
     
@@ -24,7 +25,7 @@ async function calculateAnalyticsForAllProperties() {
         const existingAnalytics = await db
           .select()
           .from(investmentAnalytics)
-          .where(investmentAnalytics.propertyId.eq(property.id))
+          .where(eq(investmentAnalytics.propertyId, property.id))
           .limit(1);
         
         if (existingAnalytics.length === 0) {
