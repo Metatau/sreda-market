@@ -204,7 +204,7 @@ export function Profile() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-8">
         {/* Профиль Header */}
         <Card className="mb-8">
           <CardContent className="pt-6">
