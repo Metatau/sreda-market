@@ -9,6 +9,7 @@ import { ReferralService } from "./services/referralService";
 import { adsApiService } from "./services/adsApiService";
 import { schedulerService } from "./services/schedulerService";
 import { requireAuth, requireRoleAuth, requireAdmin, optionalAuth, checkAIQuota, type AuthenticatedRequest } from "./middleware/unifiedAuth";
+import { sessionConfig, requireSessionAuth, type SessionAuthenticatedRequest } from "./middleware/sessionAuth";
 import { UserService } from "./services/userService";
 import { TelegramAuthService } from "./services/telegramAuthService";
 import { RegionController } from "./controllers/RegionController";
@@ -31,6 +32,7 @@ import { AuthService } from "./auth";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Global middleware
   app.use(corsMiddleware);
+  app.use(sessionConfig); // Add session support
   app.use(generalRateLimit);
   app.use(performanceMonitor.middleware());
   app.use(compression);
@@ -1088,7 +1090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Применение промокода (требует авторизации)
-  app.post("/api/promocodes/use", requireAuth, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/promocodes/use", requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
     try {
       const { code } = req.body;
       
