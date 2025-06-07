@@ -239,10 +239,7 @@ export default function Landing() {
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-sm animate-ping"></div>
                 </div>
               ))}
-              
-              <div className="mt-4 text-sm text-gray-600">
-                Интерактивная тепловая карта цен по районам Москвы
-              </div>
+
             </div>
           </div>
         </div>
