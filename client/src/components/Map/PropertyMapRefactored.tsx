@@ -289,7 +289,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           leafletMapService.addHeatmap(mapId, heatmapData, {
             radius: 25,
             blur: 15,
-            maxZoom: 17
+            maxZoom: 17,
+            mode: heatmapMode
           });
         }
       } catch (error) {
