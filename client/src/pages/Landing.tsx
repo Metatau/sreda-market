@@ -255,7 +255,7 @@ export default function Landing() {
                       type="text"
                       value={typedText}
                       readOnly
-                      className="flex-1 text-sm sm:text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 cursor-default"
+                      className="flex-1 text-xs sm:text-sm md:text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400 cursor-default"
                       placeholder=""
                     />
                     <div className="flex items-center ml-2 sm:ml-3 md:ml-4">
