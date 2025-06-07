@@ -182,36 +182,28 @@ export class DatabaseStorage implements IStorage {
   async getProperties(filters?: PropertyFilters, pagination?: Pagination): Promise<{ properties: PropertyWithRelations[]; total: number }> {
     const conditions = [eq(properties.isActive, true)];
 
-    // Apply filters with debug logging
+    // Apply filters
     if (filters) {
-      console.log('Applied filters:', filters);
       if (filters.regionId) {
         conditions.push(eq(properties.regionId, filters.regionId));
-        console.log('Added regionId filter:', filters.regionId);
       }
       if (filters.propertyClassId) {
         conditions.push(eq(properties.propertyClassId, filters.propertyClassId));
-        console.log('Added propertyClassId filter:', filters.propertyClassId);
       }
       if (filters.minPrice) {
         conditions.push(gte(properties.price, filters.minPrice));
-        console.log('Added minPrice filter:', filters.minPrice);
       }
       if (filters.maxPrice) {
         conditions.push(lte(properties.price, filters.maxPrice));
-        console.log('Added maxPrice filter:', filters.maxPrice);
       }
       if (filters.rooms) {
         conditions.push(eq(properties.rooms, filters.rooms));
-        console.log('Added rooms filter:', filters.rooms);
       }
       if (filters.propertyType) {
         conditions.push(eq(properties.propertyType, filters.propertyType));
-        console.log('Added propertyType filter:', filters.propertyType);
       }
       if (filters.marketType) {
         conditions.push(eq(properties.marketType, filters.marketType));
-        console.log('Added marketType filter:', filters.marketType);
       }
     }
 
