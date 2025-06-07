@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AuthService } from '../auth';
-import { requireAuth } from '../middleware/unifiedAuth';
+import { requireAuth } from '../middleware/unified-auth';
 import { validateBody } from '../validation/schemas';
 import { loginSchema, registerSchema, changePasswordSchema } from '../validation/auth.schemas';
 import { generalRateLimit, authRateLimit } from '../middleware/rateLimiting';

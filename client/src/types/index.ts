@@ -13,7 +13,7 @@ import type {
 } from '@shared/schema';
 
 // Frontend-compatible Property type
-export interface Property extends Omit<BaseProperty, 'externalId' | 'pricePerSqm' | 'area' | 'coordinates' | 'rooms' | 'floor' | 'totalFloors'> {
+export interface Property extends Omit<BaseProperty, 'externalId' | 'pricePerSqm' | 'area' | 'coordinates' | 'rooms' | 'floor' | 'totalFloors' | 'propertyType' | 'district' | 'metroStation' | 'phone' | 'imageUrl' | 'url'> {
   externalId: string | null;
   pricePerSqm: number | undefined;
   area: string | undefined;
@@ -21,6 +21,12 @@ export interface Property extends Omit<BaseProperty, 'externalId' | 'pricePerSqm
   rooms: number | undefined;
   floor: number | undefined;
   totalFloors: number | undefined;
+  propertyType: string | undefined;
+  district: string | undefined;
+  metroStation: string | undefined;
+  phone: string | undefined;
+  imageUrl: string | undefined;
+  url: string | undefined;
 }
 
 // Frontend-compatible PropertyWithRelations type
@@ -32,7 +38,7 @@ export interface PropertyWithRelations extends Property {
 }
 
 // Frontend-compatible InvestmentAnalytics type
-export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'propertyId' | 'priceChange1y' | 'priceChange3m' | 'priceVolatility' | 'rentalYield'> {
+export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'propertyId' | 'priceChange1y' | 'priceChange3m' | 'priceVolatility' | 'rentalYield' | 'rentalIncomeMonthly' | 'rentalRoiAnnual' | 'rentalPaybackYears' | 'flipRoi' | 'priceForecast3y' | 'flipPotentialProfit' | 'flipTimeframeMonths' | 'renovationCostEstimate'> {
   propertyId: number | undefined;
   roi?: number;
   investmentScore?: number;
@@ -40,6 +46,14 @@ export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'prop
   priceChange3m: string | undefined;
   priceVolatility: string | undefined;
   rentalYield: string | undefined;
+  rentalIncomeMonthly: number | undefined;
+  rentalRoiAnnual: string | undefined;
+  rentalPaybackYears: string | undefined;
+  flipRoi: string | undefined;
+  priceForecast3y: string | undefined;
+  flipPotentialProfit: number | undefined;
+  flipTimeframeMonths: number | undefined;
+  renovationCostEstimate: number | undefined;
 }
 
 // Frontend-compatible ChatMessage type
