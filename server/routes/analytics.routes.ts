@@ -94,17 +94,17 @@ router.get('/investment-metrics',
     try {
       const metrics = await db
         .select({
-          avgRoi: sql<number>`AVG(${investmentAnalytics.averageRoi})`,
+          avgRoi: sql<number>`AVG(${investmentAnalytics.roi})`,
           avgLiquidityScore: sql<number>`AVG(${investmentAnalytics.liquidityScore})`,
           topPerformingRegions: sql<any[]>`
             json_agg(
               json_build_object(
                 'regionName', ${regions.name},
-                'roi', AVG(${investmentAnalytics.averageRoi}),
+                'roi', AVG(${investmentAnalytics.roi}),
                 'propertyCount', COUNT(${properties.id})
               )
-              ORDER BY AVG(${investmentAnalytics.averageRoi}) DESC
-            ) FILTER (WHERE ${investmentAnalytics.averageRoi} IS NOT NULL)
+              ORDER BY AVG(${investmentAnalytics.roi}) DESC
+            ) FILTER (WHERE ${investmentAnalytics.roi} IS NOT NULL)
           `
         })
         .from(investmentAnalytics)

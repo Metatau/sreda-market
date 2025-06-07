@@ -171,6 +171,8 @@ export const investmentAnalytics = pgTable("investment_analytics", {
   developmentRiskScore: decimal("development_risk_score", { precision: 3, scale: 2 }), // Риск новой застройки
   
   // Комплексные метрики
+  roi: decimal("roi", { precision: 8, scale: 2 }), // Общий ROI
+  investmentScore: integer("investment_score"), // Общий инвестиционный рейтинг 1-100
   investmentRating: varchar("investment_rating", { length: 10 }), // A+, A, B+, B, C+, C
   riskLevel: varchar("risk_level", { length: 20 }), // low, moderate, high
   recommendedStrategy: varchar("recommended_strategy", { length: 50 }), // rental, flip, hold
