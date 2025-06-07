@@ -316,7 +316,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
   }, [mapId, selectedProperty]);
 
   return (
-    <div className="relative w-full h-full mb-6">
+    <div className="relative w-full h-full mb-9">
       <div 
         ref={mapContainer} 
         className="w-full h-full rounded-lg"
