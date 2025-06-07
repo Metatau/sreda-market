@@ -174,7 +174,7 @@ export default function Landing() {
         { name: "AI-запросов/день", basic: "10", premium: false },
         { name: "Глубина анализа", basic: "1 год", premium: false },
         { name: "Экспорт в PDF", basic: false, premium: false },
-        { name: "API доступ", basic: false, premium: false },
+        { name: "Инсайты рынка", basic: false, premium: false },
         { name: "Поддержка 24/7", basic: true, premium: false },
         { name: "Мобильное приложение", basic: true, premium: false }
       ]
@@ -188,7 +188,7 @@ export default function Landing() {
         { name: "AI-запросов/день", basic: "10", premium: "∞" },
         { name: "Глубина анализа", basic: "1 год", premium: "3 года" },
         { name: "Экспорт в PDF", basic: false, premium: true },
-        { name: "API доступ", basic: false, premium: true },
+        { name: "Инсайты рынка", basic: false, premium: true },
         { name: "Поддержка 24/7", basic: true, premium: true },
         { name: "Мобильное приложение", basic: true, premium: true }
       ]
