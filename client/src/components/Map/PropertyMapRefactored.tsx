@@ -126,27 +126,23 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
       case 'heatmap':
         // Активируем тепловую карту по умолчанию (цены)
         setHeatmapMode('price');
-        leafletMapService.toggleHeatmap(mapId, 'price', properties, heatmapIntensity);
         break;
       
       case 'geoanalysis':
         // Очищаем тепловые карты и подготавливаем для геоанализа
         setHeatmapMode('none');
-        leafletMapService.clearHeatmap(mapId);
         // Здесь можно добавить специальные слои для геоанализа
         break;
       
       case 'investment':
         // Активируем инвестиционную тепловую карту
         setHeatmapMode('investment');
-        leafletMapService.toggleHeatmap(mapId, 'investment', properties, heatmapIntensity);
         break;
       
       case 'none':
       default:
         // Очищаем все дополнительные слои
         setHeatmapMode('none');
-        leafletMapService.clearHeatmap(mapId);
         break;
     }
   }, [activeMapTool, mapId, mapLoaded, properties, heatmapIntensity]);
