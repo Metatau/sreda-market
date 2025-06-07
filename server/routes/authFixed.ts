@@ -101,6 +101,62 @@ router.post('/register', async (req: any, res: any) => {
   }
 });
 
+// Session-based profile endpoint
+router.get('/profile', async (req: any, res: any) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Not authenticated'
+      });
+    }
+
+    const user = await storage.getUser(req.session.userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    // Get subscription info
+    const subscription = {
+      isActive: user.subscriptionType !== null && user.subscriptionExpiresAt && new Date(user.subscriptionExpiresAt) > new Date(),
+      type: user.subscriptionType,
+      expiresAt: user.subscriptionExpiresAt,
+      daysLeft: user.subscriptionExpiresAt ? Math.max(0, Math.ceil((new Date(user.subscriptionExpiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))) : 0
+    };
+
+    // Get AI limits
+    const aiLimits = {
+      dailyLimit: user.role === 'administrator' ? 1000 : 10,
+      used: 0, // TODO: Get actual usage from database
+      canUse: true,
+      resetTime: new Date(new Date().setHours(24, 0, 0, 0))
+    };
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      telegramHandle: user.telegramHandle,
+      profileImageUrl: user.profileImageUrl,
+      bonusBalance: user.bonusBalance || '0',
+      subscription,
+      aiLimits
+    });
+  } catch (error) {
+    console.error('Profile error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get profile'
+    });
+  }
+});
+
 // Telegram authentication endpoint
 router.post('/telegram', async (req: any, res: any) => {
   try {

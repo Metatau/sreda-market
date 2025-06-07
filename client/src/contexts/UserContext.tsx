@@ -55,21 +55,14 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const refreshUser = async () => {
     try {
-      const currentEmail = localStorage.getItem('userEmail');
-      if (!currentEmail) {
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await fetch('/api/users/profile', {
-        headers: {
-          'X-User-Email': currentEmail,
-        },
+      const response = await fetch('/api/auth/profile', {
+        credentials: 'include', // Include cookies for session authentication
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
+        setUser(null);
+        setIsLoading(false);
+        return;
       }
 
       const userData = await response.json();
@@ -85,11 +78,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const login = async (email: string) => {
     try {
-      localStorage.setItem('userEmail', email);
       await refreshUser();
     } catch (error) {
       console.error('Login failed:', error);
-      localStorage.removeItem('userEmail');
       throw error;
     }
   };

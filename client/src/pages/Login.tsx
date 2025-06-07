@@ -41,9 +41,6 @@ export default function Login() {
       const response = await res.json();
 
       if (response.success) {
-        // Store user email for session management
-        localStorage.setItem('userEmail', response.user.email);
-        
         toast({
           title: "Успешный вход",
           description: "Добро пожаловать в SREDA Market",
