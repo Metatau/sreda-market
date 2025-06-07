@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { User, Mail, UserPlus, MessageCircle } from 'lucide-react';
+import { User, Mail, UserPlus, MessageCircle, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { TelegramAuthButton } from '@/components/TelegramAuthButton';
@@ -156,7 +156,12 @@ export default function Login() {
       <div className="w-full max-w-md space-y-6">
         {/* Заголовок */}
         <div className="text-center">
-          <h1 className="text-3xl font-quantum font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 mb-2 tracking-widest uppercase">SREDA Market</h1>
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-white" />
+            </div>
+            <h1 className="text-xl font-quantum font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">SREDA Market</h1>
+          </div>
           <p className="text-gray-600">Smart Real Estate</p>
         </div>
 
