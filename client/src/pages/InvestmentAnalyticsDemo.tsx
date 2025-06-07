@@ -198,7 +198,7 @@ export default function InvestmentAnalyticsDemo() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <div className="max-w-7xl mx-auto p-6 pt-8">
+      <div className="max-w-7xl mx-auto p-6 pt-20">
         {/* Заголовок */}
         <div className="mb-8">
           <h1 className="font-bold text-gray-900 mb-2 text-[24px] text-center">
