@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail, Database, BarChart3, Search, Copy } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Landing() {
@@ -574,11 +574,11 @@ export default function Landing() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center">🎉 Ваш промокод готов!</DialogTitle>
+            <DialogDescription className="text-center">
+              Промокод дает вам полный доступ ко всем функциям на 24 часа
+            </DialogDescription>
           </DialogHeader>
           <div className="text-center space-y-4">
-            <p className="text-gray-600">
-              Промокод дает вам полный доступ ко всем функциям на 24 часа
-            </p>
             
             {promocode && (
               <div className="bg-gray-50 border-2 border-dashed border-blue-300 rounded-lg p-4">

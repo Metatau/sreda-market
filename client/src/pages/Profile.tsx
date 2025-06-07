@@ -485,14 +485,14 @@ export function Profile() {
                     </CardContent>
                   </Card>
 
-                  {/* Стандарт тариф */}
-                  <Card className="relative border-2 border-blue-300 hover:border-blue-400 transition-colors">
+                  {/* Базовый тариф */}
+                  <Card className="relative border-2 border-gray-300 hover:border-gray-400 transition-colors">
                     <CardHeader className="text-center">
-                      <Badge className="mx-auto w-fit bg-blue-100 text-blue-700 border-blue-200 font-medium border">
-                        Стандарт
+                      <Badge className="mx-auto w-fit bg-gray-100 text-gray-700 border-gray-200 font-medium border">
+                        Базовый
                       </Badge>
                       <div className="mt-4">
-                        <div className="text-3xl font-bold text-gray-900">₽990</div>
+                        <div className="text-3xl font-bold text-gray-900">₽2,990</div>
                         <div className="text-sm text-gray-600">в месяц</div>
                       </div>
                     </CardHeader>
@@ -500,46 +500,49 @@ export function Profile() {
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          10 запросов к AI в день
+                          10 AI-запросов в день
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          Расширенный анализ инвестиций
+                          Глубина анализа: 1 год
                         </li>
                         <li className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500" />
-                          Прогнозы цен на недвижимость
+                          <X className="h-4 w-4 text-gray-400" />
+                          Экспорт в PDF
                         </li>
                         <li className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500" />
-                          Неограниченное избранное
+                          <X className="h-4 w-4 text-gray-400" />
+                          Инсайты рынка
                         </li>
                         <li className="flex items-center gap-2">
-                          <Check className="h-4 w-4 text-green-500" />
-                          Сравнение до 5 объектов
+                          <X className="h-4 w-4 text-gray-400" />
+                          Поддержка 24/7
                         </li>
                       </ul>
                       <div>
                         <Button 
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                          onClick={() => handlePayment('standard')}
-                          disabled={paymentLoading === 'standard'}
+                          className="w-full bg-gray-600 hover:bg-gray-700"
+                          onClick={() => handlePayment('basic')}
+                          disabled={paymentLoading === 'basic'}
                         >
                           <CreditCard className="h-4 w-4 mr-2" />
-                          {paymentLoading === 'standard' ? 'Обработка...' : 'Оплатить ₽990'}
+                          {paymentLoading === 'basic' ? 'Обработка...' : 'Оплатить ₽2,990'}
                         </Button>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Профи тариф */}
-                  <Card className="relative border-2 border-purple-300 hover:border-purple-400 transition-colors">
+                  {/* Премиум тариф */}
+                  <Card className="relative border-2 border-blue-300 hover:border-blue-400 transition-colors ring-2 ring-blue-600 shadow-xl">
+                    <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
+                      Популярный
+                    </Badge>
                     <CardHeader className="text-center">
-                      <Badge className="mx-auto w-fit bg-purple-100 text-purple-700 border-purple-200 font-medium border">
-                        Профи
+                      <Badge className="mx-auto w-fit bg-blue-100 text-blue-700 border-blue-200 font-medium border">
+                        Премиум
                       </Badge>
                       <div className="mt-4">
-                        <div className="text-3xl font-bold text-gray-900">₽2490</div>
+                        <div className="text-3xl font-bold text-gray-900">₽7,990</div>
                         <div className="text-sm text-gray-600">в месяц</div>
                       </div>
                     </CardHeader>
@@ -547,33 +550,33 @@ export function Profile() {
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          30 запросов к AI в день
+                          ∞ AI-запросов в день
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          Экспертный анализ инвестиций
+                          Глубина анализа: 3 года
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          Персональные рекомендации
+                          Экспорт в PDF
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          Приоритетная поддержка
+                          Инсайты рынка
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
-                          Неограниченные сравнения
+                          Поддержка 24/7
                         </li>
                       </ul>
                       <div>
                         <Button 
-                          className="w-full bg-purple-600 hover:bg-purple-700"
-                          onClick={() => handlePayment('professional')}
-                          disabled={paymentLoading === 'professional'}
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={() => handlePayment('premium')}
+                          disabled={paymentLoading === 'premium'}
                         >
                           <CreditCard className="h-4 w-4 mr-2" />
-                          {paymentLoading === 'professional' ? 'Обработка...' : 'Оплатить ₽2490'}
+                          {paymentLoading === 'premium' ? 'Обработка...' : 'Оплатить ₽7,990'}
                         </Button>
                       </div>
                     </CardContent>
