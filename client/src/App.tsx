@@ -21,6 +21,7 @@ const Favorites = lazy(() => import("@/pages/Favorites").then(module => ({ defau
 const Profile = lazy(() => import("@/pages/Profile").then(module => ({ default: module.Profile })));
 const Comparison = lazy(() => import("@/pages/Comparison").then(module => ({ default: module.Comparison })));
 const AdminPanel = lazy(() => import("@/pages/AdminPanel"));
+const AdminSources = lazy(() => import("@/pages/AdminSources"));
 const Login = lazy(() => import("@/pages/Login"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
@@ -69,6 +70,7 @@ function Router() {
               <Route path="/profile" component={Profile} />
               <Route path="/comparison" component={Comparison} />
               <Route path="/admin" component={AdminPanel} />
+              <Route path="/admin/sources" component={AdminSources} />
               <AIChat />
             </ErrorBoundary>
           </AuthProvider>

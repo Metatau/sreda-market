@@ -24,6 +24,7 @@ import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, ch
 import { imageRoutes } from "./routes/imageRoutes";
 import mapRoutes from "./routes/mapRoutes";
 import insightsRoutes from "./routes/insights";
+import adminSourcesRoutes from "./routes/adminSources";
 import { z } from "zod";
 import { AuthService } from "./auth";
 
@@ -1063,6 +1064,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Mount insights routes
   app.use("/api/insights", insightsRoutes);
+  
+  // Mount admin sources routes
+  app.use("/api/admin/sources", adminSourcesRoutes);
 
   // Global error handler
   app.use(globalErrorHandler);
