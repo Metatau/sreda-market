@@ -1,6 +1,5 @@
 import { db } from './server/db';
 import { properties, regions, propertyClasses } from './shared/schema';
-import { nanoid } from 'nanoid';
 
 // Координаты центров российских городов
 const CITY_COORDINATES = {
@@ -111,14 +110,13 @@ async function populateTestData() {
           title: `${rooms}-комнатная квартира, ${area} м²`,
           price,
           pricePerSqm: Math.floor(price / area),
-          area,
+          area: area.toString(),
           rooms,
           floor,
           totalFloors,
           address: generateAddress(cityName),
           description: generateDescription(rooms, area, 'secondary'),
-          latitude: lat,
-          longitude: lng,
+          coordinates: `POINT(${lng} ${lat})`,
           regionId: region.id,
           propertyClassId: propertyClass.id,
           propertyType: 'apartment',
@@ -147,19 +145,17 @@ async function populateTestData() {
         const [lat, lng] = generateRandomCoordinates(cityName);
         
         propertiesData.push({
-          id: nanoid(),
           externalId: `test_new_${region.id}_${i}`,
           title: `${rooms}-комнатная квартира в новостройке, ${area} м²`,
           price,
           pricePerSqm: Math.floor(price / area),
-          area,
+          area: area.toString(),
           rooms,
           floor,
           totalFloors,
           address: generateAddress(cityName),
           description: generateDescription(rooms, area, 'new_construction'),
-          latitude: lat,
-          longitude: lng,
+          coordinates: `POINT(${lng} ${lat})`,
           regionId: region.id,
           propertyClassId: propertyClass.id,
           propertyType: 'apartment',
