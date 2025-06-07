@@ -69,6 +69,19 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Все города</SelectItem>
+              <SelectItem value="1">Москва</SelectItem>
+              <SelectItem value="2">Санкт-Петербург</SelectItem>
+              <SelectItem value="3">Новосибирск</SelectItem>
+              <SelectItem value="4">Екатеринбург</SelectItem>
+              <SelectItem value="5">Казань</SelectItem>
+              <SelectItem value="11">Уфа</SelectItem>
+              <SelectItem value="12">Красноярск</SelectItem>
+              <SelectItem value="13">Пермь</SelectItem>
+              <SelectItem value="35">Калининград</SelectItem>
+              <SelectItem value="36">Тюмень</SelectItem>
+              <SelectItem value="37">Сочи</SelectItem></SelectContent>
+          </Select>
+        </div>
               {sortedRegions.map((region) => (
                 <SelectItem key={region.id} value={region.id.toString()}>
                   {region.name}
