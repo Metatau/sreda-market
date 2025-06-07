@@ -19,6 +19,7 @@ import { imageRoutes } from "./imageRoutes";
 import mapRoutes from "./mapRoutes";
 import insightsRoutes from "./insights";
 import adminSourcesRoutes from "./adminSources";
+import promocodesRoutes from "./promocodes.routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Global middleware
@@ -46,6 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/map', mapRoutes);
   app.use('/api/insights', insightsRoutes);
   app.use('/api/admin/sources', adminSourcesRoutes);
+  app.use('/api/promocodes', promocodesRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
