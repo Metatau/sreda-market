@@ -26,7 +26,7 @@ export default function Home() {
 
   const queryClient = useQueryClient();
   const { data: regions = [] } = useRegions();
-  const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
+  const { data: propertiesData, isLoading, refetch } = useProperties(filters, currentPage, 9);
   const { data: allPropertiesData, isLoading: isLoadingAllProperties } = useAllProperties(); // Все объекты для карты
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
 
@@ -73,8 +73,11 @@ export default function Home() {
   const handleFilterChange = (newFilters: FilterType) => {
     setFilters(newFilters);
     setCurrentPage(1);
-    // Инвалидируем кеш для принудительного обновления данных
-    queryClient.invalidateQueries({ queryKey: ["properties"] });
+    // Инвалидируем весь кеш properties для принудительного обновления
+    queryClient.invalidateQueries({ 
+      queryKey: ["properties"],
+      exact: false 
+    });
   };
 
   return (
