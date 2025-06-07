@@ -72,6 +72,9 @@ export default function Landing() {
 
   // Анимация набора текста
   useEffect(() => {
+    // Только если пользователь не вводит текст
+    if (searchValue) return;
+    
     const currentQuery = searchQueries[currentSearchIndex];
     let currentChar = 0;
     
@@ -92,7 +95,7 @@ export default function Landing() {
     }, 80); // Скорость набора: 80мс на символ
 
     return () => clearInterval(typingInterval);
-  }, [currentSearchIndex, searchQueries]);
+  }, [currentSearchIndex, searchQueries, searchValue]);
 
   // Таймер обратного отсчета
   useEffect(() => {
@@ -246,8 +249,9 @@ export default function Landing() {
                       type="text"
                       value={searchValue || typedText}
                       onChange={(e) => setSearchValue(e.target.value)}
+                      onFocus={() => setSearchValue('')}
                       className="flex-1 text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400"
-                      readOnly={!searchValue}
+                      placeholder={searchValue ? '' : ''}
                     />
                     <div className="flex items-center ml-4">
                       <span className="text-sm font-quantum font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 tracking-wider">
