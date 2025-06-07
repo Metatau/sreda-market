@@ -72,6 +72,7 @@ export interface PropertyFilters {
   minArea?: number;
   maxArea?: number;
   propertyType?: string;
+  marketType?: 'secondary' | 'new_construction';
   query?: string;
 }
 

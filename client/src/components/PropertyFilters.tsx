@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRegions, usePropertyClasses } from "@/hooks/useProperties";
-import type { SearchFilters } from "@/types";
+import type { PropertyFilters } from "@/types";
 
 interface PropertyFiltersProps {
-  filters: SearchFilters;
-  onFiltersChange: (filters: SearchFilters) => void;
+  filters: PropertyFilters;
+  onFiltersChange: (filters: PropertyFilters) => void;
 }
 
 const propertyClassColors = {
@@ -32,7 +32,7 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
     return order.indexOf(a.name) - order.indexOf(b.name);
   });
 
-  const handleFilterChange = (key: keyof SearchFilters, value: any) => {
+  const handleFilterChange = (key: keyof PropertyFilters, value: any) => {
     onFiltersChange({
       ...filters,
       [key]: value || undefined,
