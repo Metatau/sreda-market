@@ -222,7 +222,7 @@ export default function Landing() {
             <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
               
               {/* Поисковая строка поверх карты */}
-              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 w-[30%] z-10">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[30%] z-10">
                 <div className="relative">
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 p-[2px]">
                     <div className="h-full w-full rounded-lg bg-white flex items-center">
