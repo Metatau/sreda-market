@@ -287,6 +287,7 @@ export default function AdminPanel() {
   };
 
   const resetForm = () => {
+    setEditingSource(null);
     setNewSourceForm({
       name: '',
       description: '',
@@ -351,8 +352,16 @@ export default function AdminPanel() {
       config: getConfigForType(newSourceForm.type)
     };
 
-    console.log('Creating source with data:', sourceData);
-    createSourceMutation.mutate(sourceData);
+    if (editingSource) {
+      console.log('Updating source with data:', sourceData);
+      updateSourceMutation.mutate({
+        id: editingSource.id,
+        data: sourceData
+      });
+    } else {
+      console.log('Creating source with data:', sourceData);
+      createSourceMutation.mutate(sourceData);
+    }
   };
 
   const getConfigForType = (type: string) => {
