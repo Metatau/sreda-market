@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail } from 'lucide-react';
+import { MapPin, TrendingUp, Bot, Map, Check, X, Clock, Shield, Phone, Mail, Database, BarChart3 } from 'lucide-react';
 
 export default function Landing() {
   const [email, setEmail] = useState('');
@@ -51,6 +51,18 @@ export default function Landing() {
       title: "Геоаналитика",
       description: "Анализ инфраструктуры и потенциала развития",
       details: "Транспорт, школы, больницы, планы застройки"
+    },
+    {
+      icon: <Database className="h-8 w-8 text-indigo-600" />,
+      title: "База объектов",
+      description: "Обширная база недвижимости со всей России",
+      details: "Актуальные данные о ценах, характеристиках и доходности"
+    },
+    {
+      icon: <BarChart3 className="h-8 w-8 text-teal-600" />,
+      title: "Инсайты рынка",
+      description: "Аналитические отчеты и прогнозы развития рынка",
+      details: "Тренды цен, перспективные районы, рыночные сводки"
     }
   ];
 
@@ -176,7 +188,7 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer group">
                 <CardHeader className="text-center">
