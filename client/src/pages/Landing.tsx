@@ -292,9 +292,11 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
-              Начать поиск
-            </Button>
+            <Link href="/register">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
+                Начать поиск
+              </Button>
+            </Link>
           </div>
 
           {/* 3D визуализация тепловой карты */}
@@ -457,16 +459,18 @@ export default function Landing() {
                     ))}
                   </div>
 
-                  <Button 
-                    className={`w-full ${
-                      plan.popular 
-                        ? 'bg-blue-600 hover:bg-blue-700' 
-                        : 'bg-gray-800 hover:bg-gray-900'
-                    }`}
-                    size="lg"
-                  >
-                    Выбрать план
-                  </Button>
+                  <Link href="/register" className="w-full">
+                    <Button 
+                      className={`w-full ${
+                        plan.popular 
+                          ? 'bg-blue-600 hover:bg-blue-700' 
+                          : 'bg-gray-800 hover:bg-gray-900'
+                      }`}
+                      size="lg"
+                    >
+                      Выбрать план
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
