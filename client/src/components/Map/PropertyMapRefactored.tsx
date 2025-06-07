@@ -316,11 +316,11 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
   }, [mapId, selectedProperty]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full mb-6">
       <div 
         ref={mapContainer} 
         className="w-full h-full rounded-lg"
-        style={{ minHeight: '520px' }}
+        style={{ minHeight: '676px' }}
       />
       
       {/* Map Controls Panel */}
