@@ -26,6 +26,7 @@ import {
   Copy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 export function Profile() {
   const { user, isAuthenticated, logout } = useAuth();

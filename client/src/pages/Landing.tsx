@@ -9,8 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 
 export default function Landing() {
-
+  const { toast } = useToast();
   const [timeLeft, setTimeLeft] = useState('01:00:59');
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+  const [promocode, setPromocode] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [seconds, setSeconds] = useState(3659); // 1 час 59 секунд
   const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
@@ -127,6 +130,48 @@ export default function Landing() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Генерация промокода
+  const generatePromocode = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/promocodes/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setPromocode(data.data.code);
+        setIsPromoModalOpen(true);
+        toast({
+          title: "Промокод создан!",
+          description: "Ваш промокод готов к использованию",
+        });
+      } else {
+        throw new Error('Failed to generate promocode');
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось создать промокод. Попробуйте позже.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Копирование промокода в буфер обмена
+  const copyPromocode = () => {
+    if (promocode) {
+      navigator.clipboard.writeText(promocode);
+      toast({
+        title: "Скопировано!",
+        description: "Промокод скопирован в буфер обмена",
+      });
+    }
+  };
 
   const features = [
     {
@@ -440,17 +485,16 @@ export default function Landing() {
             <div className="text-3xl font-bold font-mono">{timeLeft}</div>
           </div>
 
-          {/* Кнопка перехода в Telegram */}
+          {/* Кнопка генерации промокода */}
           <div className="max-w-md mx-auto">
-            <a 
-              href="https://t.me/sreda_market_bot" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-block w-full"
+            <Button 
+              size="lg" 
+              className="w-full px-8 py-4 text-lg font-semibold mb-4 bg-orange-500 hover:bg-orange-600 text-white border-none"
+              onClick={generatePromocode}
+              disabled={isGenerating}
             >
-              <Button size="lg" className="w-full px-8 py-4 text-lg font-semibold mb-4 bg-orange-500 hover:bg-orange-600 text-white border-none">Получить промокод</Button>
-            </a>
-            
+              {isGenerating ? "Генерируем промокод..." : "Получить промокод"}
+            </Button>
 
           </div>
         </div>
@@ -524,6 +568,49 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Модальное окно с промокодом */}
+      <Dialog open={isPromoModalOpen} onOpenChange={setIsPromoModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">🎉 Ваш промокод готов!</DialogTitle>
+          </DialogHeader>
+          <div className="text-center space-y-4">
+            <p className="text-gray-600">
+              Промокод дает вам полный доступ ко всем функциям на 24 часа
+            </p>
+            
+            {promocode && (
+              <div className="bg-gray-50 border-2 border-dashed border-blue-300 rounded-lg p-4">
+                <div className="text-2xl font-mono font-bold text-blue-600 tracking-wider">
+                  {promocode}
+                </div>
+              </div>
+            )}
+            
+            <div className="flex space-x-2">
+              <Button 
+                onClick={copyPromocode}
+                className="flex-1"
+                variant="outline"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Скопировать
+              </Button>
+              
+              <Link href="/register" className="flex-1">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  Зарегистрироваться
+                </Button>
+              </Link>
+            </div>
+            
+            <p className="text-sm text-gray-500">
+              После регистрации введите этот промокод в разделе "Промокоды"
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
