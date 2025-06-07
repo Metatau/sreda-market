@@ -73,6 +73,8 @@ export default function Home() {
   const handleFilterChange = (newFilters: FilterType) => {
     setFilters(newFilters);
     setCurrentPage(1);
+    // Инвалидируем кеш для принудительного обновления данных
+    queryClient.invalidateQueries({ queryKey: ["properties"] });
   };
 
   return (
