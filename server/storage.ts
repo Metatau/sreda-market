@@ -287,6 +287,24 @@ export class DatabaseStorage implements IStorage {
     if (filters?.regionId) {
       conditions.push(eq(properties.regionId, filters.regionId));
     }
+    if (filters?.propertyClassId) {
+      conditions.push(eq(properties.propertyClassId, filters.propertyClassId));
+    }
+    if (filters?.minPrice) {
+      conditions.push(gte(properties.price, filters.minPrice));
+    }
+    if (filters?.maxPrice) {
+      conditions.push(lte(properties.price, filters.maxPrice));
+    }
+    if (filters?.rooms) {
+      conditions.push(eq(properties.rooms, filters.rooms));
+    }
+    if (filters?.propertyType) {
+      conditions.push(eq(properties.propertyType, filters.propertyType));
+    }
+    if (filters?.marketType) {
+      conditions.push(eq(properties.marketType, filters.marketType));
+    }
 
     const baseSearchQuery = db
       .select({
@@ -323,6 +341,21 @@ export class DatabaseStorage implements IStorage {
     }
     if (filters?.propertyClassId) {
       conditions.push(eq(properties.propertyClassId, filters.propertyClassId));
+    }
+    if (filters?.minPrice) {
+      conditions.push(gte(properties.price, filters.minPrice));
+    }
+    if (filters?.maxPrice) {
+      conditions.push(lte(properties.price, filters.maxPrice));
+    }
+    if (filters?.rooms) {
+      conditions.push(eq(properties.rooms, filters.rooms));
+    }
+    if (filters?.propertyType) {
+      conditions.push(eq(properties.propertyType, filters.propertyType));
+    }
+    if (filters?.marketType) {
+      conditions.push(eq(properties.marketType, filters.marketType));
     }
 
     const query = db
