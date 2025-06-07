@@ -95,7 +95,6 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
 
       if (regionId) {
         const regionCoordinates = geolocationService.getRegionCoordinates(regionId);
-        console.log(`Region ID ${regionId} -> coordinates:`, regionCoordinates);
         if (regionCoordinates) {
           center = regionCoordinates;
           zoom = 12;

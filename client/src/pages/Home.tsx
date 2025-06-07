@@ -277,15 +277,7 @@ export default function Home() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Header */}
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Недвижимость России
-              </h1>
-              <p className="text-gray-600">
-                Найдите идеальную недвижимость с помощью ИИ-аналитики и интерактивной карты
-              </p>
-            </div>
+
 
             {/* Controls */}
             <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
