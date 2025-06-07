@@ -250,7 +250,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Навигация */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm border-b z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2">
@@ -279,7 +279,7 @@ export default function Landing() {
         </div>
       </header>
       {/* Hero секция */}
-      <section className="py-20 px-4">
+      <section className="pt-36 pb-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             AI платформа для поиска{' '}
