@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { PropertyCard } from '@/components/PropertyCard';
 import { PropertyFilters } from '@/components/PropertyFilters';
 import { Navigation } from '@/components/Navigation';
-import { Footer } from '@/components/Footer';
+
 import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
 import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
 import { useProperties, useAllProperties, useRegions } from '@/hooks/useProperties';
@@ -266,8 +266,6 @@ export default function Home() {
           analytics={selectedAnalytics || {}}
         />
       )}
-
-      <Footer />
 
       {/* Content Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
