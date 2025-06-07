@@ -38,6 +38,17 @@ export function useProperties(filters?: SearchFilters, page: number = 1, perPage
   });
 }
 
+export function useAllProperties() {
+  return useQuery({
+    queryKey: ["allProperties"],
+    queryFn: () => propertyApi.getProperties({ 
+      page: 1, 
+      per_page: 10000 // Загрузить все объекты для карты
+    }),
+    staleTime: 5 * 60 * 1000, // Кешировать на 5 минут
+  });
+}
+
 export function useProperty(id: number) {
   return useQuery({
     queryKey: ["property", id],

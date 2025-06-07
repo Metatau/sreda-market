@@ -9,7 +9,7 @@ import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
 import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
-import { useProperties, useRegions } from '@/hooks/useProperties';
+import { useProperties, useAllProperties, useRegions } from '@/hooks/useProperties';
 import { useNewProperties } from '@/hooks/useNewProperties';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Property, PropertyFilters as FilterType, InvestmentAnalytics } from '@/types';
@@ -27,9 +27,11 @@ export default function Home() {
   const queryClient = useQueryClient();
   const { data: regions = [] } = useRegions();
   const { data: propertiesData, isLoading } = useProperties(filters, currentPage, 9);
+  const { data: allPropertiesData } = useAllProperties(); // Все объекты для карты
   const { data: newPropertiesData, isLoading: isLoadingNewProperties } = useNewProperties();
 
   const properties = propertiesData?.properties || [];
+  const allProperties = allPropertiesData?.properties || []; // Все объекты для карты
   const pagination = propertiesData?.pagination;
 
   const calculateAnalytics = useMutation({
@@ -79,7 +81,7 @@ export default function Home() {
       <div className="w-full pt-4 px-4">
         <div className="relative h-[500px] bg-white border-b rounded-lg shadow-sm">
           <PropertyMap 
-            properties={properties as any}
+            properties={allProperties as any}
             selectedProperty={selectedProperty}
             onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
             regionId={filters.regionId}
