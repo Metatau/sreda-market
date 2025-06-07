@@ -846,7 +846,7 @@ export default function AdminPanel() {
                               <SelectTrigger>
                                 <SelectValue placeholder="Выберите тип источника" />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="z-[100]" style={{ zIndex: 100 }}>
                                 <SelectItem value="website">Веб-сайт</SelectItem>
                                 <SelectItem value="telegram_channel">Telegram канал</SelectItem>
                                 <SelectItem value="rss_feed">RSS лента</SelectItem>
@@ -863,7 +863,7 @@ export default function AdminPanel() {
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent>
+                              <SelectContent className="z-[100]" style={{ zIndex: 100 }}>
                                 <SelectItem value="hourly">Ежечасно</SelectItem>
                                 <SelectItem value="daily">Ежедневно</SelectItem>
                                 <SelectItem value="weekly">Еженедельно</SelectItem>
