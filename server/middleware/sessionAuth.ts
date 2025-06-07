@@ -1,7 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
+import MemoryStore from 'memorystore';
 import { storage } from '../storage';
 import { config } from '../config';
+
+const MemoryStoreSession = MemoryStore(session);
 
 // Extend Express Request type for session
 declare module 'express-session' {
@@ -26,6 +29,9 @@ export const sessionConfig = session({
   secret: config.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: new MemoryStoreSession({
+    checkPeriod: 86400000, // prune expired entries every 24h
+  }),
   cookie: {
     secure: false, // Set to true in production with HTTPS
     httpOnly: true,
@@ -36,9 +42,17 @@ export const sessionConfig = session({
 // Session-based authentication middleware
 export const requireSessionAuth = async (req: SessionAuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
+    console.log('Session debug:', {
+      sessionId: req.sessionID,
+      session: req.session,
+      userId: req.session?.userId,
+      cookies: req.headers.cookie
+    });
+    
     const userId = req.session?.userId;
     
     if (!userId) {
+      console.log('No userId in session, rejecting request');
       return res.status(401).json({
         success: false,
         error: {
