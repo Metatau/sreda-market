@@ -12,6 +12,7 @@ export default function Landing() {
   const [animatedMetrics, setAnimatedMetrics] = useState<Array<{ id: number; value: string; label: string; x: number; y: number; visible: boolean }>>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [searchValue, setSearchValue] = useState('');
+  const [isUserTyping, setIsUserTyping] = useState(false);
   const [typedText, setTypedText] = useState('');
 
   const searchQueries = [
@@ -73,7 +74,7 @@ export default function Landing() {
   // Анимация набора текста
   useEffect(() => {
     // Только если пользователь не вводит текст
-    if (searchValue) return;
+    if (isUserTyping) return;
     
     const currentQuery = searchQueries[currentSearchIndex];
     let currentChar = 0;
@@ -82,8 +83,9 @@ export default function Landing() {
     setTypedText('');
     
     const typingInterval = setInterval(() => {
-      if (currentChar < currentQuery.length) {
-        setTypedText(currentQuery.slice(0, currentChar + 1));
+      if (currentChar <= currentQuery.length) {
+        const newText = currentQuery.slice(0, currentChar);
+        setTypedText(newText);
         currentChar++;
       } else {
         clearInterval(typingInterval);
@@ -95,7 +97,7 @@ export default function Landing() {
     }, 80); // Скорость набора: 80мс на символ
 
     return () => clearInterval(typingInterval);
-  }, [currentSearchIndex, searchQueries, searchValue]);
+  }, [currentSearchIndex, searchQueries, isUserTyping]);
 
   // Таймер обратного отсчета
   useEffect(() => {
@@ -244,11 +246,22 @@ export default function Landing() {
                     <Search className="h-5 w-5 text-gray-400 mr-4 flex-shrink-0" />
                     <input
                       type="text"
-                      value={searchValue || typedText}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      onFocus={() => setSearchValue('')}
+                      value={isUserTyping ? searchValue : typedText}
+                      onChange={(e) => {
+                        setSearchValue(e.target.value);
+                        setIsUserTyping(true);
+                      }}
+                      onFocus={() => {
+                        setIsUserTyping(true);
+                        setSearchValue('');
+                      }}
+                      onBlur={() => {
+                        if (!searchValue) {
+                          setIsUserTyping(false);
+                        }
+                      }}
                       className="flex-1 text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400"
-                      placeholder={searchValue ? '' : ''}
+                      placeholder=""
                     />
                     <div className="flex items-center ml-4">
                       <span className="text-sm font-quantum font-semibold bg-gradient-to-r from-blue-500 to-blue-600 bg-clip-text text-transparent cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-300 tracking-wider">
