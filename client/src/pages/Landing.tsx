@@ -13,11 +13,7 @@ export default function Landing() {
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
 
   const [typedText, setTypedText] = useState('');
-  
-  // Отладка для проверки состояния
-  useEffect(() => {
-    console.log('typedText state changed:', typedText);
-  }, [typedText]);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const searchQueries = [
     'Выгодные квартиры в Москве с высокой доходностью',
@@ -77,32 +73,42 @@ export default function Landing() {
 
   // Анимация набора текста
   useEffect(() => {
-    const currentQuery = searchQueries[currentSearchIndex];
-    let currentChar = 0;
+    if (isAnimating) return; // Предотвращаем множественные запуски
     
-    console.log('Animation starting for query:', currentQuery);
+    let typingInterval: NodeJS.Timeout;
+    let nextQueryTimeout: NodeJS.Timeout;
     
-    // Очищаем текст перед началом нового
-    setTypedText('');
-    
-    const typingInterval = setInterval(() => {
-      if (currentChar <= currentQuery.length) {
-        const newText = currentQuery.slice(0, currentChar);
-        console.log('Typing character:', currentChar, 'Text:', newText);
-        setTypedText(newText);
-        currentChar++;
-      } else {
-        clearInterval(typingInterval);
-        console.log('Finished typing, switching to next query in 2 seconds');
-        // Переходим к следующему запросу через 2 секунды после завершения набора
-        setTimeout(() => {
-          setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
-        }, 2000);
-      }
-    }, 80); // Скорость набора: 80мс на символ
+    // Задержка для стабилизации после загрузки
+    const startDelay = setTimeout(() => {
+      const currentQuery = searchQueries[currentSearchIndex];
+      let currentChar = 0;
+      
+      setIsAnimating(true);
+      setTypedText('');
+      
+      typingInterval = setInterval(() => {
+        if (currentChar <= currentQuery.length) {
+          const newText = currentQuery.slice(0, currentChar);
+          setTypedText(newText);
+          currentChar++;
+        } else {
+          clearInterval(typingInterval);
+          // Переходим к следующему запросу через 2 секунды после завершения набора
+          nextQueryTimeout = setTimeout(() => {
+            setIsAnimating(false);
+            setCurrentSearchIndex((prev) => (prev + 1) % searchQueries.length);
+          }, 2000);
+        }
+      }, 80); // Скорость набора: 80мс на символ
+    }, 500); // Задержка 500мс перед началом анимации
 
-    return () => clearInterval(typingInterval);
-  }, [currentSearchIndex, searchQueries]);
+    return () => {
+      clearTimeout(startDelay);
+      clearTimeout(nextQueryTimeout);
+      if (typingInterval) clearInterval(typingInterval);
+      setIsAnimating(false);
+    };
+  }, [currentSearchIndex, searchQueries, isAnimating]);
 
   // Таймер обратного отсчета
   useEffect(() => {
