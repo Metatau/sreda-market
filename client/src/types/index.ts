@@ -13,11 +13,14 @@ import type {
 } from '@shared/schema';
 
 // Frontend-compatible Property type
-export interface Property extends Omit<BaseProperty, 'externalId' | 'pricePerSqm' | 'area' | 'coordinates'> {
+export interface Property extends Omit<BaseProperty, 'externalId' | 'pricePerSqm' | 'area' | 'coordinates' | 'rooms' | 'floor' | 'totalFloors'> {
   externalId: string | null;
   pricePerSqm: number | undefined;
   area: string | undefined;
   coordinates: string | null;
+  rooms: number | undefined;
+  floor: number | undefined;
+  totalFloors: number | undefined;
 }
 
 // Frontend-compatible PropertyWithRelations type
@@ -29,15 +32,20 @@ export interface PropertyWithRelations extends Property {
 }
 
 // Frontend-compatible InvestmentAnalytics type
-export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'propertyId'> {
+export interface InvestmentAnalytics extends Omit<BaseInvestmentAnalytics, 'propertyId' | 'priceChange1y' | 'priceChange3m' | 'priceVolatility' | 'rentalYield'> {
   propertyId: number | undefined;
   roi?: number;
   investmentScore?: number;
+  priceChange1y: string | undefined;
+  priceChange3m: string | undefined;
+  priceVolatility: string | undefined;
+  rentalYield: string | undefined;
 }
 
 // Frontend-compatible ChatMessage type
-export interface ChatMessage extends Omit<BaseChatMessage, 'createdAt'> {
+export interface ChatMessage extends Omit<BaseChatMessage, 'createdAt' | 'metadata'> {
   createdAt: Date | string;
+  metadata?: unknown;
 }
 
 // Property filters for search
@@ -52,6 +60,9 @@ export interface PropertyFilters {
   propertyType?: string;
   query?: string;
 }
+
+// Alias for compatibility
+export type SearchFilters = PropertyFilters;
 
 // API Response types
 export interface PropertiesResponse {
