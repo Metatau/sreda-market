@@ -9,7 +9,7 @@ import { Navigation } from '@/components/Navigation';
 
 import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
 import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
-import { FilterTest } from '@/components/FilterTest';
+
 import { useProperties, useAllProperties, useRegions } from '@/hooks/useProperties';
 import { useNewProperties } from '@/hooks/useNewProperties';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -35,10 +35,7 @@ export default function Home() {
   const allProperties = allPropertiesData?.properties || []; // Все объекты для карты
   const pagination = propertiesData?.pagination;
 
-  // Debug logging
-  console.log('Home component - Current filters:', filters);
-  console.log('Home component - Properties count:', properties.length);
-  console.log('Home component - Loading state:', isLoading);
+
 
 
 
@@ -278,10 +275,6 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
-            
-            {/* Test Component for Debugging */}
-            <FilterTest />
-            
             <PropertyFilters 
               filters={filters} 
               onFiltersChange={handleFilterChange}
