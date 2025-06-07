@@ -238,18 +238,28 @@ export default function Landing() {
             <div className="bg-gradient-to-r from-blue-100 via-green-100 to-yellow-100 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
               
               {/* Поисковая строка поверх карты */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[30%] z-10">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[70%] z-10">
                 <div className="relative">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 p-[2px]">
-                    <div className="h-full w-full rounded-lg bg-white flex items-center">
-                      <Search className="h-4 w-4 text-gray-500 ml-3" />
-                      <input
-                        type="text"
-                        value={searchValue || typedText}
-                        onChange={(e) => setSearchValue(e.target.value)}
-                        className="flex-1 px-3 py-2 text-sm text-gray-700 bg-transparent border-none outline-none"
-                        readOnly={!searchValue}
-                      />
+                  <div className="bg-white rounded-full shadow-2xl border border-gray-200 flex items-center px-6 py-4 hover:shadow-3xl transition-shadow duration-300">
+                    <Search className="h-5 w-5 text-gray-400 mr-4 flex-shrink-0" />
+                    <input
+                      type="text"
+                      value={searchValue || typedText}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      className="flex-1 text-base text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-400"
+                      readOnly={!searchValue}
+                    />
+                    <div className="flex items-center space-x-2 ml-4">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer hover:bg-blue-200 transition-colors">
+                        <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9M19 9H14V4H19V9Z"/>
+                        </svg>
+                      </div>
+                      <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                        <svg className="w-3 h-3 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8L6,11L4,9M4,19H8L6,17L4,19M4,14H8L6,12L4,14Z"/>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
