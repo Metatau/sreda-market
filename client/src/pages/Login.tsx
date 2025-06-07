@@ -162,25 +162,7 @@ export default function Login() {
 
 
 
-        {/* Telegram Login */}
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="pt-6">
-            <div className="text-center mb-4">
-              <h3 className="font-semibold text-blue-900 mb-2">Быстрый вход через Telegram</h3>
-            </div>
-            <TelegramAuthButton 
-              onAuth={handleTelegramAuth}
-              className="mb-2"
-            />
-          </CardContent>
-        </Card>
 
-        {/* Разделитель */}
-        <div className="flex items-center justify-center">
-          <div className="border-t border-gray-300 w-full"></div>
-          <span className="px-4 text-gray-500 text-sm">или</span>
-          <div className="border-t border-gray-300 w-full"></div>
-        </div>
 
         {/* Табы для клиентов */}
         <Card>
