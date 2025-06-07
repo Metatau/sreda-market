@@ -156,10 +156,13 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
     if (!mapId || !mapLoaded) return;
 
     const updateHeatmap = async () => {
-      if (heatmapMode === 'none') {
-        leafletMapService.removeHeatmap(mapId);
-        return;
-      }
+      try {
+        if (heatmapMode === 'none') {
+          if (typeof leafletMapService.removeHeatmap === 'function') {
+            leafletMapService.removeHeatmap(mapId);
+          }
+          return;
+        }
 
       const heatmapData = properties
         .filter(p => p.coordinates)
@@ -182,11 +185,16 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           return { lat, lng, intensity: intensity * heatmapIntensity };
         });
 
-      leafletMapService.addHeatmap(mapId, heatmapData, {
-        radius: 25,
-        blur: 15,
-        maxZoom: 17
-      });
+        if (typeof leafletMapService.addHeatmap === 'function') {
+          leafletMapService.addHeatmap(mapId, heatmapData, {
+            radius: 25,
+            blur: 15,
+            maxZoom: 17
+          });
+        }
+      } catch (error) {
+        console.warn('Error updating heatmap:', error);
+      }
     };
 
     updateHeatmap();
