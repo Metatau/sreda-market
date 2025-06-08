@@ -86,24 +86,14 @@ export class OptimizedPropertyService {
     const total = totalCountResult[0]?.count || 0;
     const pages = Math.ceil(total / perPage);
 
-    // Преобразование результатов с обработкой координат
-    const formattedProperties = propertiesData.map(row => {
-      const property = { ...row.property };
-      
-      // Обработка координат PostGIS
-      if (property.coordinates && typeof property.coordinates === 'object') {
-        // Если координаты в бинарном формате PostGIS, конвертируем в текст
-        property.coordinates = this.parsePostGISCoordinates(property.coordinates);
-      }
-      
-      return {
-        ...property,
-        region: row.region,
-        propertyClass: row.propertyClass,
-        analytics: row.analytics,
-        investmentAnalytics: row.investmentAnalytics
-      };
-    });
+    // Преобразование результатов
+    const formattedProperties = propertiesData.map(row => ({
+      ...row.property,
+      region: row.region,
+      propertyClass: row.propertyClass,
+      analytics: row.analytics,
+      investmentAnalytics: row.investmentAnalytics
+    }));
 
     return {
       properties: formattedProperties,
