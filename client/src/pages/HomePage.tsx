@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, List, BarChart3, TrendingUp, Home, DollarSign } from "lucide-react";
 import { useNewProperties } from "@/hooks/useNewProperties";
-import { useRegions } from "@/hooks/useProperties";
+import { useRegions, useProperties } from "@/hooks/useProperties";
 import type { SearchFilters, Property } from "@/types";
 
 export function HomePage() {
@@ -19,6 +19,7 @@ export function HomePage() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const { data: newPropertiesData } = useNewProperties();
   const { data: regionsData } = useRegions();
+  const { data: propertiesData } = useProperties(filters, 1, 50); // Get properties for map
 
   const handleRegionChange = (regionId: number | undefined) => {
     setFilters(prev => ({ ...prev, regionId }));
@@ -158,7 +159,7 @@ export function HomePage() {
               {/* Map View */}
               <TabsContent value="map" className="space-y-6">
                 <AdvancedPropertyMap
-                  properties={[]}
+                  properties={propertiesData?.properties || []}
                   selectedRegion={regionsData?.find(r => r.id === filters.regionId)}
                   onPropertySelect={setSelectedProperty}
                 />
