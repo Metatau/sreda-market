@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calculator, Star, Building2, Home } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { favoritesApi } from '@/lib/favoritesApi';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import { PropertyWithRelations } from "@/types";
 
 interface PropertyCardProps {
@@ -16,7 +16,7 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, onSelect, onCalculateAnalytics, analytics }: PropertyCardProps) {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useUser();
   const queryClient = useQueryClient();
 
   // Check if property is favorited

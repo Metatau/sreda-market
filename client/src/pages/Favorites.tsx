@@ -5,13 +5,13 @@ import { PropertyCard } from '@/components/PropertyCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, Trash2, Grid, List } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoritesApi } from '@/lib/favoritesApi';
 import type { PropertyFilters } from '@/types';
 
 export function Favorites() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useUser();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const queryClient = useQueryClient();
 
