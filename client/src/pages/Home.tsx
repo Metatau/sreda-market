@@ -355,13 +355,13 @@ export default function Home() {
             </div>
 
             {/* Property Grid */}
-            <div className="mt-6">
+            <div className="mt-4 sm:mt-6">
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                   {[...Array(6)].map((_, i) => (
                     <Card key={i} className="animate-pulse">
-                      <CardContent className="p-4">
-                        <div className="h-40 bg-gray-200 rounded mb-4"></div>
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="h-32 sm:h-40 bg-gray-200 rounded mb-3 sm:mb-4"></div>
                         <div className="h-4 bg-gray-200 rounded mb-2"></div>
                         <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                       </CardContent>
@@ -369,7 +369,7 @@ export default function Home() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                   {properties.map((property: any) => (
                     <PropertyCard
                       key={property.id}

@@ -73,11 +73,11 @@ export function Favorites() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
                 <Heart className="h-8 w-8 text-red-500" />
                 Избранное
               </h1>
@@ -86,17 +86,18 @@ export function Favorites() {
               </p>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               {favoritesData.length > 0 && (
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={handleClearAll}
                   disabled={clearAllMutation.isPending}
-                  className="flex items-center gap-2"
+                  className="flex items-center justify-center gap-2 text-xs sm:text-sm"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  Очистить все
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Очистить все</span>
+                  <span className="sm:hidden">Очистить</span>
                 </Button>
               )}
               
@@ -105,15 +106,17 @@ export function Favorites() {
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
+                  className="px-2 sm:px-3"
                 >
-                  <Grid className="h-4 w-4" />
+                  <Grid className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('list')}
+                  className="px-2 sm:px-3"
                 >
-                  <List className="h-4 w-4" />
+                  <List className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>
@@ -140,7 +143,7 @@ export function Favorites() {
             </CardContent>
           </Card>
         ) : (
-          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+          <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
             {favoritesData.map((favorite) => (
               <PropertyCard
                 key={favorite.id}

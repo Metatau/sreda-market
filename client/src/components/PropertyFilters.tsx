@@ -48,21 +48,21 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="pb-3 sm:pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-900">Фильтры</CardTitle>
+          <CardTitle className="text-base sm:text-lg font-semibold text-gray-900">Фильтры</CardTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 px-2 sm:px-3"
           >
             Очистить
           </Button>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4 sm:space-y-6 pt-0">
         {/* City Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Город</label>
