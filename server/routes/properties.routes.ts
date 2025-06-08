@@ -10,7 +10,7 @@ const router = Router();
 // Получение списка объектов с фильтрацией и пагинацией
 router.get('/', 
   generalRateLimit,
-  // responseCacheMiddleware(300), // Disabled cache for debugging
+  responseCacheMiddleware(300), // 5 minutes cache
   validateQuery(propertyFiltersSchema),
   async (req, res) => {
     try {
