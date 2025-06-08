@@ -161,7 +161,7 @@ export function Profile() {
   };
 
   const handleCancel = () => {
-    setEditedName(user.name);
+    setEditedName(user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '');
     setIsEditing(false);
   };
 
@@ -293,7 +293,7 @@ export function Profile() {
             <div className="flex items-center gap-6">
               <Avatar className="h-20 w-20">
                 <AvatarFallback className="text-2xl">
-                  {getInitials(user.name)}
+                  {getInitials(user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : '')}
                 </AvatarFallback>
               </Avatar>
               
@@ -315,7 +315,7 @@ export function Profile() {
                     </div>
                   ) : (
                     <>
-                      <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+                      <h1 className="text-2xl font-bold text-gray-900">{user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'Пользователь'}</h1>
                       <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
