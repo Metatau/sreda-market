@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyList } from "@/components/PropertyList";
-import { AdvancedPropertyMap } from "@/components/Map/AdvancedPropertyMap";
+import { PropertyMap } from "@/components/Map/PropertyMapRefactored";
 import { AIChat } from "@/components/AIChat";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -158,9 +158,9 @@ export function HomePage() {
 
               {/* Map View */}
               <TabsContent value="map" className="space-y-6">
-                <AdvancedPropertyMap
+                <PropertyMap
                   properties={propertiesData?.properties || []}
-                  selectedRegion={regionsData?.find(r => r.id === filters.regionId)}
+                  selectedProperty={selectedProperty}
                   onPropertySelect={setSelectedProperty}
                 />
                 
