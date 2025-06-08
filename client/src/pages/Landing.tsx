@@ -270,7 +270,7 @@ export default function Landing() {
             </nav>
 
             <Link href="/login">
-              <Button className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white font-semibold text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0 overflow-hidden group">
+              <Button className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 hover:from-blue-700 hover:via-purple-700 hover:to-blue-800 text-white font-semibold text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-3 rounded-md shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0 overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative z-10 hidden sm:inline font-quantum tracking-wide">Вход / Регистрация</span>
                 <span className="relative z-10 sm:hidden font-quantum tracking-wide">Вход</span>
