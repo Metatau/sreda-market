@@ -125,19 +125,6 @@ export function PropertyCard({ property, onSelect, onCalculateAnalytics, analyti
               {property.region?.name}
             </p>
           </div>
-          {isAuthenticated && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`p-2 h-8 w-8 hover:bg-gray-100 ${isFavorited ? 'text-yellow-500' : 'text-gray-400'}`}
-              onClick={handleFavoriteToggle}
-              disabled={favoriteMutation.isPending}
-            >
-              <Star 
-                className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`}
-              />
-            </Button>
-          )}
         </div>
 
         {/* Теги рейтинга, типа и класса недвижимости */}
@@ -163,8 +150,23 @@ export function PropertyCard({ property, onSelect, onCalculateAnalytics, analyti
         </div>
 
         <div className="mb-4">
-          <div className="font-bold text-gray-900 text-[24px]">
-            {property.price.toLocaleString('ru-RU')} ₽
+          <div className="flex justify-between items-center">
+            <div className="font-bold text-gray-900 text-[24px]">
+              {property.price.toLocaleString('ru-RU')} ₽
+            </div>
+            {isAuthenticated && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`p-2 h-10 w-10 hover:bg-gray-100 ${isFavorited ? 'text-yellow-500' : 'text-gray-400'}`}
+                onClick={handleFavoriteToggle}
+                disabled={favoriteMutation.isPending}
+              >
+                <Star 
+                  className={`h-5 w-5 ${isFavorited ? 'fill-current' : ''}`}
+                />
+              </Button>
+            )}
           </div>
           {pricePerSqm && (
             <div className="text-sm text-gray-600">
