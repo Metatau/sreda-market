@@ -117,7 +117,7 @@ export class LeafletMapService {
 
     // Создаем карту Leaflet
     const leafletMap = window.L.map(container, {
-      center: [options.center[1], options.center[0]], // Leaflet использует [lat, lng]
+      center: options.center, // Координаты уже в формате [lat, lng]
       zoom: options.zoom,
       maxZoom: options.maxZoom || 18,
       minZoom: options.minZoom || 1
@@ -138,6 +138,7 @@ export class LeafletMapService {
     };
 
     this.maps.set(mapId, mapInstance);
+    console.log(`Map ${mapId} created and stored. Total maps: ${this.maps.size}`);
     return mapId;
   }
 
@@ -388,8 +389,11 @@ export class LeafletMapService {
       getMarkerColor?: (className: string) => string;
     }
   ): boolean {
+    console.log('addPropertyMarkers called with mapId:', mapId, 'properties count:', properties.length);
     const mapInstance = this.maps.get(mapId);
     if (!mapInstance) {
+      console.error('Map instance not found for mapId:', mapId);
+      console.log('Available maps:', Array.from(this.maps.keys()));
       return false;
     }
 
@@ -401,8 +405,9 @@ export class LeafletMapService {
 
     properties.forEach(property => {
       const gradientIcon = this.createGradientPin(property.price, maxPrice);
+      console.log(`Creating marker for property ${property.id} at coordinates:`, property.coordinates);
       const marker = window.L.marker(
-        [property.coordinates[1], property.coordinates[0]], 
+        property.coordinates, 
         { icon: gradientIcon }
       );
       
@@ -444,6 +449,7 @@ export class LeafletMapService {
 
       marker.addTo(mapInstance.leafletMap);
       mapInstance.markers.push(marker);
+      console.log(`Marker ${property.id} added to map. Total markers: ${mapInstance.markers.length}`);
     });
 
     return true;
