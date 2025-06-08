@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -87,17 +88,57 @@ interface InvestmentAnalyticsModalProps {
   isOpen: boolean;
   onClose: () => void;
   property: Property;
-  analytics: InvestmentAnalytics;
+  analytics?: InvestmentAnalytics;
 }
 
 export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> = ({
   isOpen,
   onClose,
   property,
-  analytics
+  analytics: providedAnalytics
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+
+  // Загружаем аналитику если она не была передана
+  const { data: fetchedAnalytics, isLoading: analyticsLoading } = useQuery({
+    queryKey: [`/api/investment-analytics/${property.id}`],
+    enabled: isOpen && !providedAnalytics,
+  });
+
+  const analytics = providedAnalytics || (fetchedAnalytics as any)?.data;
+
+  // Показываем индикатор загрузки если аналитика загружается
+  if (!analytics && analyticsLoading) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Загрузка аналитики...</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Если аналитика не найдена, показываем сообщение
+  if (!analytics) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Аналитика недоступна</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-8">
+            <p className="text-gray-600">Аналитика для этого объекта пока не рассчитана.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const getRatingColor = (rating: string) => {
     const colors = {
