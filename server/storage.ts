@@ -180,33 +180,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProperties(filters?: PropertyFilters, pagination?: Pagination): Promise<{ properties: PropertyWithRelations[]; total: number }> {
+    console.log('🏪 Storage.getProperties called with filters:', JSON.stringify(filters, null, 2));
     const conditions = [eq(properties.isActive, true)];
 
     // Apply filters
     if (filters) {
+      console.log('🔍 Storage: Processing filters...');
       if (filters.regionId) {
+        console.log('🌍 Storage: Adding regionId filter:', filters.regionId);
         conditions.push(eq(properties.regionId, filters.regionId));
       }
       if (filters.propertyClassId) {
+        console.log('🏠 Storage: Adding propertyClassId filter:', filters.propertyClassId);
         conditions.push(eq(properties.propertyClassId, filters.propertyClassId));
       }
       if (filters.minPrice) {
+        console.log('💰 Storage: Adding minPrice filter:', filters.minPrice);
         conditions.push(gte(properties.price, filters.minPrice));
       }
       if (filters.maxPrice) {
+        console.log('💰 Storage: Adding maxPrice filter:', filters.maxPrice);
         conditions.push(lte(properties.price, filters.maxPrice));
       }
       if (filters.rooms) {
+        console.log('🚪 Storage: Adding rooms filter:', filters.rooms);
         conditions.push(eq(properties.rooms, filters.rooms));
       }
       if (filters.propertyType) {
+        console.log('🏢 Storage: Adding propertyType filter:', filters.propertyType);
         conditions.push(eq(properties.propertyType, filters.propertyType));
       }
       if (filters.marketType) {
-        console.log('🔧 Storage: Adding marketType filter:', filters.marketType);
+        console.log('🏪 Storage: Adding marketType filter:', filters.marketType);
         conditions.push(eq(properties.marketType, filters.marketType));
       }
     }
+    console.log('🎯 Storage: Total conditions count:', conditions.length);
 
     // Get total count
     const [{ count }] = await db

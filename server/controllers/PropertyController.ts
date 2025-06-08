@@ -12,15 +12,23 @@ export class PropertyController extends BaseController {
 
   getProperties = handleAsyncError(async (req: Request, res: Response) => {
     console.log('=== PROPERTY CONTROLLER HIT ===');
+    console.log('Full request URL:', req.url);
+    console.log('Raw query params:', req.query);
+    
     const { page, perPage } = validatePagination(
       req.query.page as string,
       req.query.per_page as string
     );
 
-    console.log('Raw query params:', req.query);
     const filters = validateFilters(req.query);
-    console.log('Validated filters:', filters);
+    console.log('📋 Controller - Validated filters:', JSON.stringify(filters, null, 2));
+    
     const result = await this.propertyService.getProperties(filters, { page, limit: perPage });
+    console.log('📊 Controller - Query result:', {
+      propertiesCount: result.properties.length,
+      total: result.total,
+      hasFilters: Object.keys(filters).length > 0
+    });
     
     this.sendSuccess(res, {
       properties: result.properties,
