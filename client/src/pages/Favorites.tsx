@@ -2,17 +2,20 @@
 import React, { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { PropertyCard } from '@/components/PropertyCard';
+import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, Trash2, Grid, List } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { favoritesApi } from '@/lib/favoritesApi';
-import type { PropertyFilters } from '@/types';
+import type { PropertyFilters, PropertyWithRelations } from '@/types';
 
 export function Favorites() {
   const { user, isAuthenticated } = useUser();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedProperty, setSelectedProperty] = useState<PropertyWithRelations | null>(null);
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch user's favorites
@@ -38,6 +41,11 @@ export function Favorites() {
 
   const handleClearAll = () => {
     clearAllMutation.mutate();
+  };
+
+  const handleCalculateAnalytics = (property: PropertyWithRelations) => {
+    setSelectedProperty(property);
+    setShowAnalyticsModal(true);
   };
 
   if (!isAuthenticated) {
@@ -141,11 +149,24 @@ export function Favorites() {
                   // Handle property selection if needed
                   console.log('Selected property:', property);
                 }}
+                onCalculateAnalytics={handleCalculateAnalytics}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Analytics Modal */}
+      {selectedProperty && (
+        <InvestmentAnalyticsModal
+          property={selectedProperty}
+          isOpen={showAnalyticsModal}
+          onClose={() => {
+            setShowAnalyticsModal(false);
+            setSelectedProperty(null);
+          }}
+        />
+      )}
     </div>
   );
 }
