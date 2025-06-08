@@ -481,7 +481,7 @@ export default function Landing() {
       <section className="py-20 bg-blue-600 text-white">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">Получите персональный промокод</h2>
-          <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-8 px-4">на безлимитное тестирование всех возможностей платформы</p>
+          <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-8 px-4">на безлимитное тестирование всех возможностей платформы Smart Real Estate Data Analytics</p>
 
           {/* Таймер */}
           <div className="bg-white/10 rounded-lg p-6 mb-8 max-w-md mx-auto">
