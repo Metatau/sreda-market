@@ -12,6 +12,7 @@ import { UserService } from "../services/userService";
 import authRoutes from "./auth.routes";
 import usersRoutes from "./users.routes";
 import propertiesRoutes from "./properties.routes";
+import propertyClassesRoutes from "./property-classes.routes";
 import analyticsRoutes from "./analytics.routes";
 import investmentAnalyticsRoutes from "./investment-analytics.routes";
 import promocodesRoutes from "./promocodes.routes";
@@ -40,6 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/auth', authRoutes);
   app.use('/api/users', usersRoutes);
   app.use('/api/properties', propertiesRoutes);
+  app.use('/api/property-classes', propertyClassesRoutes);
   app.use('/api/regions', regionsRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/investment-analytics', investmentAnalyticsRoutes);
