@@ -69,19 +69,23 @@ export function validateFilters(query: Record<string, any>) {
   try {
     const filters: any = {};
     
-    if (query.region_id) filters.regionId = parseInt(query.region_id as string);
-    if (query.property_class_id) filters.propertyClassId = parseInt(query.property_class_id as string);
-    if (query.min_price) filters.minPrice = parseFloat(query.min_price as string);
-    if (query.max_price) filters.maxPrice = parseFloat(query.max_price as string);
+    // Handle both snake_case (from URL params) and camelCase (from frontend)
+    if (query.region_id || query.regionId) filters.regionId = parseInt((query.region_id || query.regionId) as string);
+    if (query.property_class_id || query.propertyClassId) filters.propertyClassId = parseInt((query.property_class_id || query.propertyClassId) as string);
+    if (query.min_price || query.minPrice) filters.minPrice = parseFloat((query.min_price || query.minPrice) as string);
+    if (query.max_price || query.maxPrice) filters.maxPrice = parseFloat((query.max_price || query.maxPrice) as string);
     if (query.rooms) filters.rooms = parseInt(query.rooms as string);
-    if (query.min_area) filters.minArea = parseFloat(query.min_area as string);
-    if (query.max_area) filters.maxArea = parseFloat(query.max_area as string);
-    if (query.property_type) filters.propertyType = query.property_type as string;
-    if (query.market_type) filters.marketType = query.market_type as string;
-    if (query.marketType) filters.marketType = query.marketType as string;
+    if (query.min_area || query.minArea) filters.minArea = parseFloat((query.min_area || query.minArea) as string);
+    if (query.max_area || query.maxArea) filters.maxArea = parseFloat((query.max_area || query.maxArea) as string);
+    if (query.property_type || query.propertyType) filters.propertyType = (query.property_type || query.propertyType) as string;
+    if (query.market_type || query.marketType) filters.marketType = (query.market_type || query.marketType) as string;
+
+    console.log('validateFilters input:', query);
+    console.log('validateFilters output:', filters);
 
     return propertyFiltersSchema.parse(filters);
   } catch (error) {
+    console.error('Validation error:', error);
     throw new ValidationError("Invalid filter parameters");
   }
 }
