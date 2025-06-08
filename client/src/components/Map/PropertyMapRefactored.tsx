@@ -155,35 +155,62 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
 
     const updateProperties = async () => {
       const propertyMarkers = properties
-        .filter(p => p.coordinates)
+        .filter(p => p.coordinates && p.coordinates.trim() !== '')
         .map(property => {
           let lat: number, lng: number;
           
-          // Парсинг координат в зависимости от формата
-          if (property.coordinates!.startsWith('POINT(')) {
-            // Формат: POINT(longitude latitude)
-            const coords = property.coordinates!.match(/POINT\(([^)]+)\)/)?.[1];
-            if (coords) {
-              const [longitude, latitude] = coords.split(' ').map(Number);
-              lng = longitude;
-              lat = latitude;
+          try {
+            // Парсинг координат в зависимости от формата
+            if (property.coordinates!.startsWith('POINT(')) {
+              // Формат: POINT(longitude latitude)
+              const coords = property.coordinates!.match(/POINT\(([^)]+)\)/)?.[1];
+              if (coords) {
+                const [longitude, latitude] = coords.split(' ').map(Number);
+                lng = longitude;
+                lat = latitude;
+              } else {
+                console.warn(`Invalid POINT format for property ${property.id}:`, property.coordinates);
+                return null;
+              }
             } else {
-              return null; // Пропускаем некорректные координаты
+              // Формат: "latitude,longitude" или "longitude,latitude"
+              const parts = property.coordinates!.split(',').map(s => parseFloat(s.trim()));
+              if (parts.length !== 2 || parts.some(isNaN)) {
+                console.warn(`Invalid coordinate format for property ${property.id}:`, property.coordinates);
+                return null;
+              }
+              
+              // Проверяем, какой формат используется по диапазону значений
+              // Москва: lat ~55.7, lng ~37.6
+              // Питер: lat ~59.9, lng ~30.4
+              if (Math.abs(parts[0]) > Math.abs(parts[1])) {
+                // Первое значение больше - вероятно longitude, latitude
+                lng = parts[0];
+                lat = parts[1];
+              } else {
+                // Первое значение меньше - вероятно latitude, longitude
+                lat = parts[0];
+                lng = parts[1];
+              }
             }
-          } else {
-            // Формат: "latitude,longitude"
-            const [latitude, longitude] = property.coordinates!.split(',').map(Number);
-            lat = latitude;
-            lng = longitude;
+
+            // Валидация координат (примерные границы России)
+            if (lat < 41 || lat > 82 || lng < 19 || lng > 180) {
+              console.warn(`Coordinates out of bounds for property ${property.id}: lat=${lat}, lng=${lng}`);
+              return null;
+            }
+            
+            return {
+              id: property.id,
+              coordinates: [lat, lng] as [number, number], // Leaflet использует [lat, lng]
+              popup: property,
+              className: 'default',
+              price: property.price
+            };
+          } catch (error) {
+            console.warn(`Error parsing coordinates for property ${property.id}:`, error);
+            return null;
           }
-          
-          return {
-            id: property.id,
-            coordinates: [lat, lng] as [number, number], // Leaflet использует [lat, lng]
-            popup: property,
-            className: 'default',
-            price: property.price
-          };
         })
         .filter(Boolean) as Array<{
           id: number;
@@ -191,10 +218,17 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           popup: any;
           className: string;
           price: number;
-        }>; // Убираем null значения и исправляем типизацию
+        }>;
 
-      console.log('PropertyMap: Processing', propertyMarkers.length, 'markers');
-      console.log('PropertyMap: Sample marker:', propertyMarkers[0]);
+      console.log('PropertyMap: Processing', propertyMarkers.length, 'valid markers from', properties.length, 'properties');
+      if (propertyMarkers.length > 0) {
+        console.log('PropertyMap: Sample marker:', propertyMarkers[0]);
+      }
+
+      if (propertyMarkers.length === 0) {
+        console.warn('No valid property coordinates found');
+        return;
+      }
 
       const result = leafletMapService.addPropertyMarkers(mapId, propertyMarkers, {
         onMarkerClick: (property: any) => {
@@ -205,6 +239,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
       
       if (!result) {
         console.warn('Failed to add property markers to map');
+      } else {
+        console.log('Successfully added', propertyMarkers.length, 'property markers to map');
       }
     };
 
