@@ -376,7 +376,9 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
     const L = (window as any).L;
     const markers: any[] = [];
 
-    properties.forEach(property => {
+    console.log(`AdvancedPropertyMap: Adding ${properties.length} property markers to map`);
+
+    properties.forEach((property, index) => {
       if (!property.coordinates) return;
 
       let lat, lng;
@@ -399,18 +401,35 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
           lat = property.coordinates?.lat || property.coordinates?.[1];
           lng = property.coordinates?.lng || property.coordinates?.[0];
         }
-        if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+          console.warn(`Skipping property ${property.id} - invalid coordinates:`, property.coordinates);
+          return;
+        }
       } catch (e) {
         console.error('Error parsing coordinates for property:', property.id, property.coordinates);
         return;
       }
+
+      // Create a more visible custom icon
+      const customIcon = L.divIcon({
+        html: `<div style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${index + 1}</div>`,
+        className: 'custom-div-icon',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
       
-      const marker = L.marker([lat, lng])
+      const marker = L.marker([lat, lng], { icon: customIcon })
         .bindPopup(`
-          <div class="p-2">
-            <h3 class="font-semibold">${property.title}</h3>
-            <p class="text-sm text-gray-600">${property.price?.toLocaleString()} ₽</p>
-            <p class="text-xs text-gray-500">${property.propertyClass?.name}</p>
+          <div style="font-family: system-ui; padding: 12px; min-width: 200px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">${property.title}</h3>
+            <p style="margin: 4px 0; font-size: 13px; color: #374151;"><strong>Цена:</strong> ${property.price?.toLocaleString() || 'Не указана'} ₽</p>
+            <p style="margin: 4px 0; font-size: 13px; color: #374151;"><strong>Класс:</strong> ${property.propertyClass?.name || 'Не указан'}</p>
+            <p style="margin: 4px 0; font-size: 13px; color: #374151;"><strong>Адрес:</strong> ${property.address || 'Не указан'}</p>
+            <button onclick="window.selectPropertyFromMap && window.selectPropertyFromMap(${property.id})" 
+                    style="margin-top: 8px; padding: 6px 12px; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); 
+                           color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; width: 100%;">
+              Подробнее
+            </button>
           </div>
         `)
         .addTo(mapInstance);
@@ -421,10 +440,28 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
       });
 
       markers.push(marker);
+      console.log(`Added marker ${index + 1} at [${lat}, ${lng}] for property ${property.id}`);
     });
+
+    // Add global function for popup buttons
+    (window as any).selectPropertyFromMap = (propertyId: number) => {
+      const property = properties.find(p => p.id === propertyId);
+      if (property) {
+        setSelectedProperty(property);
+        onPropertySelect?.(property);
+      }
+    };
+
+    // Fit map to show all markers if we have any
+    if (markers.length > 0) {
+      const group = new L.featureGroup(markers);
+      mapInstance.fitBounds(group.getBounds(), { padding: [20, 20] });
+      console.log(`Map fitted to ${markers.length} markers`);
+    }
 
     return () => {
       markers.forEach(marker => mapInstance.removeLayer(marker));
+      console.log(`Cleaned up ${markers.length} markers`);
     };
   }, [mapInstance, properties, onPropertySelect]);
 
