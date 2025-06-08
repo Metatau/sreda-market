@@ -87,7 +87,17 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const logout = async () => {
     try {
-      await apiRequest('POST', '/api/auth/logout');
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Logout failed: ${response.status}`);
+      }
     } catch (error) {
       console.error('Logout error:', error);
     }
