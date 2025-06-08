@@ -714,7 +714,7 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
       <AIStrategyExplainerModal
         isOpen={isAIModalOpen}
         onClose={() => setIsAIModalOpen(false)}
-        property={property}
+        property={property as any}
         analytics={analytics}
       />
     </TooltipProvider>

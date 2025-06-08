@@ -210,7 +210,7 @@ export const AIStrategyExplainerModal: React.FC<AIStrategyExplainerModalProps> =
                   <h3 className="font-semibold text-lg">{property.title}</h3>
                   <p className="text-gray-600">{property.address}</p>
                   <p className="text-2xl font-bold text-blue-600 mt-2">
-                    {property.price?.toLocaleString('ru-RU')} ₽
+                    {property.price.toLocaleString('ru-RU')} ₽
                   </p>
                 </div>
                 <Badge className="bg-blue-100 text-blue-800">
