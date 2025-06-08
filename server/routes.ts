@@ -1150,6 +1150,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const clientIp = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] as string;
+      
+      // Специальная логика для тестового промокода
+      if (code === 'TEST30') {
+        // Обновляем подписку пользователя на 30 дней
+        const subscriptionExpiresAt = new Date();
+        subscriptionExpiresAt.setDate(subscriptionExpiresAt.getDate() + 30);
+        
+        await storage.updateUser(req.user!.id, {
+          subscriptionType: 'professional',
+          subscriptionExpiresAt
+        });
+        
+        // Отмечаем промокод как использованный
+        await storage.usePromocode(code, req.user!.id, clientIp);
+        
+        return res.json({ 
+          success: true, 
+          message: "Тестовый промокод успешно применен! Вы получили полный доступ на 30 дней" 
+        });
+      }
+      
       const success = await storage.usePromocode(code, req.user!.id, clientIp);
       
       if (!success) {
