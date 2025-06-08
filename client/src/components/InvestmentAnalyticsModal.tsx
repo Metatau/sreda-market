@@ -4,7 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AIStrategyExplainerModal } from "./AIStrategyExplainerModal";
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -22,7 +24,9 @@ import {
   Layers,
   Phone,
   ExternalLink,
-  ImageIcon
+  ImageIcon,
+  Brain,
+  Lightbulb
 } from "lucide-react";
 
 interface Property {
@@ -93,6 +97,7 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   analytics
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   const getRatingColor = (rating: string) => {
     const colors = {
@@ -681,8 +686,37 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
             <PropertyDetails />
           </TabsContent>
         </Tabs>
+
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center pt-6 border-t mt-6">
+          <Button variant="outline" onClick={onClose}>
+            Закрыть
+          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => setIsAIModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Brain className="w-4 h-4" />
+              ИИ-объяснение стратегий
+            </Button>
+            <Button>
+              <Lightbulb className="w-4 h-4 mr-2" />
+              Рекомендации
+            </Button>
+          </div>
+        </div>
         </DialogContent>
       </Dialog>
+
+      {/* AI Strategy Explainer Modal */}
+      <AIStrategyExplainerModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        property={property}
+        analytics={analytics}
+      />
     </TooltipProvider>
   );
 };
