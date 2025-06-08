@@ -11,24 +11,36 @@ export const paginationSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20)
 });
 
-// Property filters validation
+// Property filters validation - supports both camelCase and snake_case
 export const propertyFiltersSchema = z.object({
   regionId: z.coerce.number().int().positive().optional(),
+  region_id: z.coerce.number().int().positive().optional(),
   propertyClassId: z.coerce.number().int().positive().optional(),
+  property_class_id: z.coerce.number().int().positive().optional(),
   minPrice: z.coerce.number().int().min(0).optional(),
+  min_price: z.coerce.number().int().min(0).optional(),
   maxPrice: z.coerce.number().int().min(0).optional(),
+  max_price: z.coerce.number().int().min(0).optional(),
   rooms: z.coerce.number().int().min(0).max(10).optional(),
   minArea: z.coerce.number().min(0).optional(),
+  min_area: z.coerce.number().min(0).optional(),
   maxArea: z.coerce.number().min(0).optional(),
+  max_area: z.coerce.number().min(0).optional(),
   propertyType: z.enum(['apartment', 'house', 'studio', 'penthouse']).optional(),
+  property_type: z.enum(['apartment', 'house', 'studio', 'penthouse']).optional(),
   marketType: z.enum(['secondary', 'new_construction']).optional(),
+  market_type: z.enum(['secondary', 'new_construction']).optional(),
   query: z.string().max(500).optional()
 }).refine(data => {
-  if (data.minPrice && data.maxPrice && data.minPrice > data.maxPrice) {
-    return false;
+  if ((data.minPrice || data.min_price) && (data.maxPrice || data.max_price)) {
+    const min = data.minPrice || data.min_price;
+    const max = data.maxPrice || data.max_price;
+    if (min! > max!) return false;
   }
-  if (data.minArea && data.maxArea && data.minArea > data.maxArea) {
-    return false;
+  if ((data.minArea || data.min_area) && (data.maxArea || data.max_area)) {
+    const min = data.minArea || data.min_area;
+    const max = data.maxArea || data.max_area;
+    if (min! > max!) return false;
   }
   return true;
 }, {

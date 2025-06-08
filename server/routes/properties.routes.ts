@@ -10,14 +10,67 @@ const router = Router();
 // Получение списка объектов с фильтрацией и пагинацией
 router.get('/', 
   generalRateLimit,
-  responseCacheMiddleware(300), // 5 минут кеша
+  // responseCacheMiddleware(300), // Disabled cache for debugging
   validateQuery(propertyFiltersSchema),
   async (req, res) => {
     try {
-      const filters = req.query;
+      // Normalize parameters from both snake_case and camelCase
+      const query = req.query;
+      console.log('🔍 Properties route received query params:', query);
+      
+      const filters: any = {};
+      
+      // Handle regionId
+      if (query.regionId || query.region_id) {
+        filters.regionId = Number(query.regionId || query.region_id);
+      }
+      
+      // Handle propertyClassId
+      if (query.propertyClassId || query.property_class_id) {
+        filters.propertyClassId = Number(query.propertyClassId || query.property_class_id);
+      }
+      
+      // Handle price filters
+      if (query.minPrice || query.min_price) {
+        filters.minPrice = Number(query.minPrice || query.min_price);
+      }
+      if (query.maxPrice || query.max_price) {
+        filters.maxPrice = Number(query.maxPrice || query.max_price);
+      }
+      
+      // Handle rooms
+      if (query.rooms) {
+        filters.rooms = Number(query.rooms);
+      }
+      
+      // Handle area filters
+      if (query.minArea || query.min_area) {
+        filters.minArea = Number(query.minArea || query.min_area);
+      }
+      if (query.maxArea || query.max_area) {
+        filters.maxArea = Number(query.maxArea || query.max_area);
+      }
+      
+      // Handle property type
+      if (query.propertyType || query.property_type) {
+        filters.propertyType = String(query.propertyType || query.property_type);
+      }
+      
+      // Handle market type
+      if (query.marketType || query.market_type) {
+        filters.marketType = String(query.marketType || query.market_type);
+      }
+      
+      // Handle search query
+      if (query.query) {
+        filters.query = String(query.query);
+      }
+      
+      console.log('🎯 Normalized filters for OptimizedPropertyService:', filters);
+      
       const pagination = {
         page: parseInt(req.query.page as string) || 1,
-        perPage: parseInt(req.query.perPage as string) || 10
+        perPage: parseInt(req.query.per_page as string) || parseInt(req.query.perPage as string) || 10
       };
 
       const result = await OptimizedPropertyService.getPropertiesWithRelations(filters, pagination);

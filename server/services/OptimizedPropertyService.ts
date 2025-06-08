@@ -280,7 +280,7 @@ export class OptimizedPropertyService {
     }
 
     if (filters.marketType) {
-      conditions.push(eq(properties.marketType, filters.marketType));
+      conditions.push(eq(properties.marketType, filters.marketType as any));
     }
 
     if (filters.minArea && filters.maxArea) {
