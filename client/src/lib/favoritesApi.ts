@@ -40,35 +40,27 @@ export interface FavoriteProperty {
 export const favoritesApi = {
   // Get user's favorites
   getFavorites: async (): Promise<FavoriteProperty[]> => {
-    const response = await fetch('/api/favorites', {
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const result = await response.json();
-    return result.data;
+    const response = await apiRequest('/api/favorites');
+    return response.data;
   },
 
   // Add property to favorites
   addToFavorites: async (propertyId: number): Promise<void> => {
-    await fetch(`/api/favorites/${propertyId}`, {
+    await apiRequest(`/api/favorites/${propertyId}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
     });
   },
 
   // Remove property from favorites
   removeFromFavorites: async (propertyId: number): Promise<void> => {
-    await fetch(`/api/favorites/${propertyId}`, {
+    await apiRequest(`/api/favorites/${propertyId}`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
     });
   },
 
   // Check if property is favorited
   checkFavorite: async (propertyId: number): Promise<boolean> => {
-    const response = await fetch(`/api/favorites/check/${propertyId}`, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const result = await response.json();
-    return result.data.isFavorited;
+    const response = await apiRequest(`/api/favorites/check/${propertyId}`);
+    return response.data.isFavorited;
   },
 };
