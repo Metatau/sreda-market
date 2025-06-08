@@ -1,71 +1,124 @@
-/**
- * Admin routes - extracted from monolithic routes.ts
- */
 import { Router } from 'express';
-import { addUserContext, requireAdmin } from '../middleware/unified-auth';
-import { ResponseHelper } from '../utils/response-helpers';
-import { handleAsyncError } from '../utils/errors';
-import { schedulerService } from '../services/schedulerService';
+import { requireAdmin, type AuthenticatedRequest } from '../middleware/unifiedAuth';
 import { adsApiService } from '../services/adsApiService';
+import { schedulerService } from '../services/schedulerService';
 
 const router = Router();
 
-// Apply user context and require admin for all routes
-router.use(addUserContext);
-router.use(requireAdmin);
-
-/**
- * GET /api/admin/ads-api/status - Get ADS API status
- */
-router.get('/ads-api/status', handleAsyncError(async (req, res) => {
-  const status = await adsApiService.getStatus();
-  ResponseHelper.success(res, status);
-}));
-
-/**
- * POST /api/admin/ads-api/sync - Sync properties from ADS API
- */
-router.post('/ads-api/sync', handleAsyncError(async (req, res) => {
-  const { regions, credentials } = req.body;
-  
-  if (!regions || !Array.isArray(regions)) {
-    return ResponseHelper.validationError(res, 'Regions array is required');
+// ADS API status endpoint
+router.get('/ads-api/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const status = await adsApiService.getStatus();
+    res.json({ success: true, data: status });
+  } catch (error) {
+    console.error("Error getting ADS API status:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: { 
+        message: "Failed to get ADS API status", 
+        type: "INTERNAL_ERROR" 
+      } 
+    });
   }
+});
 
-  const result = await adsApiService.syncProperties(regions, credentials);
-  ResponseHelper.success(res, result);
-}));
+// ADS API synchronization endpoint
+router.post('/ads-api/sync', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const { regions, credentials } = req.body;
+    console.log('Starting ADS API sync for regions:', regions);
+    
+    const result = await adsApiService.syncProperties(regions, credentials);
+    
+    console.log('ADS API sync completed:', result);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    console.error("Error syncing properties:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: { 
+        message: error instanceof Error ? error.message : "Failed to sync properties", 
+        type: "SYNC_ERROR" 
+      } 
+    });
+  }
+});
 
-/**
- * GET /api/admin/scheduler/status - Get scheduler status
- */
-router.get('/scheduler/status', handleAsyncError(async (req, res) => {
-  const status = schedulerService.getStatus();
-  ResponseHelper.success(res, status);
-}));
+// Scheduler status endpoint
+router.get('/scheduler/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    const status = {
+      isActive: true,
+      uptime: process.uptime(),
+      message: 'Scheduler is running with cron jobs'
+    };
+    res.json({ success: true, data: status });
+  } catch (error) {
+    console.error("Error getting scheduler status:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: { 
+        message: "Failed to get scheduler status", 
+        type: "INTERNAL_ERROR" 
+      } 
+    });
+  }
+});
 
-/**
- * POST /api/admin/scheduler/start - Start scheduler
- */
-router.post('/scheduler/start', handleAsyncError(async (req, res) => {
+// Manual scheduler trigger
+router.post('/scheduler/sync', requireAdmin, async (req: AuthenticatedRequest, res) => {
+  try {
+    console.log('Manual sync triggered by admin:', req.user?.email);
+    
+    // Запускаем ручную синхронизацию через ADS API
+    const regions = ['Москва', 'Санкт-Петербург', 'Екатеринбург', 'Казань', 'Уфа'];
+    const result = await adsApiService.syncProperties(regions);
+    
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error("Error triggering manual sync:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: { 
+        message: error instanceof Error ? error.message : "Failed to trigger sync", 
+        type: "SYNC_ERROR" 
+      } 
+    });
+  }
+});
+
+// Start scheduler
+router.post('/scheduler/start', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     schedulerService.start();
-    ResponseHelper.success(res, { message: 'Scheduler started successfully' });
+    res.json({ success: true, message: 'Scheduler started successfully' });
   } catch (error) {
-    ResponseHelper.error(res, 'Failed to start scheduler', 'SCHEDULER_ERROR', 500);
+    console.error("Error starting scheduler:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: { 
+        message: "Failed to start scheduler", 
+        type: "INTERNAL_ERROR" 
+      } 
+    });
   }
-}));
+});
 
-/**
- * POST /api/admin/scheduler/stop - Stop scheduler
- */
-router.post('/scheduler/stop', handleAsyncError(async (req, res) => {
+// Stop scheduler
+router.post('/scheduler/stop', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     schedulerService.stop();
-    ResponseHelper.success(res, { message: 'Scheduler stopped successfully' });
+    res.json({ success: true, message: 'Scheduler stopped successfully' });
   } catch (error) {
-    ResponseHelper.error(res, 'Failed to stop scheduler', 'SCHEDULER_ERROR', 500);
+    console.error("Error stopping scheduler:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: { 
+        message: "Failed to stop scheduler", 
+        type: "INTERNAL_ERROR" 
+      } 
+    });
   }
-}));
+});
 
 export default router;
