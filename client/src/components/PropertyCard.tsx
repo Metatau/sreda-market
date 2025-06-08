@@ -16,8 +16,39 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, onSelect, onCalculateAnalytics, analytics }: PropertyCardProps) {
+  const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Check if property is favorited
+  const { data: isFavorited = false } = useQuery({
+    queryKey: ['favorite', property.id],
+    queryFn: () => favoritesApi.checkFavorite(property.id),
+    enabled: isAuthenticated,
+  });
+
+  // Favorite toggle mutation
+  const favoriteMutation = useMutation({
+    mutationFn: async (shouldAdd: boolean) => {
+      if (shouldAdd) {
+        await favoritesApi.addToFavorites(property.id);
+      } else {
+        await favoritesApi.removeFromFavorites(property.id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['favorite', property.id] });
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+    },
+  });
+
   const handleClick = () => {
     onSelect?.(property);
+  };
+
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) return;
+    favoriteMutation.mutate(!isFavorited);
   };
 
   const handleCalculateAnalytics = (e: React.MouseEvent) => {
@@ -94,6 +125,19 @@ export function PropertyCard({ property, onSelect, onCalculateAnalytics, analyti
               {property.region?.name}
             </p>
           </div>
+          {isAuthenticated && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`p-2 h-8 w-8 hover:bg-gray-100 ${isFavorited ? 'text-yellow-500' : 'text-gray-400'}`}
+              onClick={handleFavoriteToggle}
+              disabled={favoriteMutation.isPending}
+            >
+              <Star 
+                className={`h-4 w-4 ${isFavorited ? 'fill-current' : ''}`}
+              />
+            </Button>
+          )}
         </div>
 
         {/* Теги рейтинга, типа и класса недвижимости */}

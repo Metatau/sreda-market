@@ -1,26 +1,43 @@
 
 import React, { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
-import { PropertyList } from '@/components/Property/PropertyList';
+import { PropertyCard } from '@/components/PropertyCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, Trash2, Grid, List } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import type { Property, PropertyFilters } from '@/types';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { favoritesApi } from '@/lib/favoritesApi';
+import type { PropertyFilters } from '@/types';
 
 export function Favorites() {
   const { isAuthenticated } = useAuth();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [favorites, setFavorites] = useState<Property[]>([]);
-  const [filters, setFilters] = useState<PropertyFilters>({});
+  const queryClient = useQueryClient();
 
-  // В реальном приложении здесь бы загружались избранные из API
-  const handleRemoveFromFavorites = (propertyId: number) => {
-    setFavorites(prev => prev.filter(p => p.id !== propertyId));
-  };
+  // Fetch user's favorites
+  const { data: favoritesData = [], isLoading, error } = useQuery({
+    queryKey: ['favorites'],
+    queryFn: favoritesApi.getFavorites,
+    enabled: isAuthenticated,
+  });
+
+  // Clear all favorites mutation
+  const clearAllMutation = useMutation({
+    mutationFn: async () => {
+      // Remove all favorites one by one
+      await Promise.all(
+        favoritesData.map(fav => favoritesApi.removeFromFavorites(fav.propertyId))
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['favorite'] });
+    },
+  });
 
   const handleClearAll = () => {
-    setFavorites([]);
+    clearAllMutation.mutate();
   };
 
   if (!isAuthenticated) {
@@ -57,16 +74,17 @@ export function Favorites() {
                 Избранное
               </h1>
               <p className="text-gray-600 mt-2">
-                {favorites.length} объектов в избранном
+                {favoritesData.length} объектов в избранном
               </p>
             </div>
             
             <div className="flex items-center gap-4">
-              {favorites.length > 0 && (
+              {favoritesData.length > 0 && (
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={handleClearAll}
+                  disabled={clearAllMutation.isPending}
                   className="flex items-center gap-2"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -94,7 +112,11 @@ export function Favorites() {
           </div>
         </div>
 
-        {favorites.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Загружаем избранное...</p>
+          </div>
+        ) : favoritesData.length === 0 ? (
           <Card className="text-center">
             <CardContent className="pt-12 pb-12">
               <Heart className="h-16 w-16 text-gray-300 mx-auto mb-6" />
@@ -102,7 +124,7 @@ export function Favorites() {
                 Ваше избранное пусто
               </h2>
               <p className="text-gray-600 mb-6">
-                Добавляйте понравившиеся объекты в избранное, нажимая на иконку сердца
+                Добавляйте понравившиеся объекты в избранное, нажимая на иконку звездочки
               </p>
               <Button onClick={() => window.location.href = '/'}>
                 Найти недвижимость
@@ -110,9 +132,18 @@ export function Favorites() {
             </CardContent>
           </Card>
         ) : (
-          <PropertyList
-            data={{ properties: favorites, pagination: { page: 1, perPage: 20, total: favorites.length, pages: 1, hasNext: false, hasPrev: false } }}
-            isLoading={false}
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            {favoritesData.map((favorite) => (
+              <PropertyCard
+                key={favorite.id}
+                property={favorite.property as any}
+                onSelect={(property) => {
+                  // Handle property selection if needed
+                  console.log('Selected property:', property);
+                }}
+              />
+            ))}
+          </div>ng={false}
             filters={filters}
             onFiltersChange={setFilters}
             favorites={favorites.map(p => p.id)}
