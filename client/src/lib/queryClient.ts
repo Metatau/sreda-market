@@ -13,14 +13,18 @@ export async function apiRequest(
   url: string,
   options: RequestInit = {}
 ): Promise<any> {
-  const headers: Record<string, string> = {
+  const defaultHeaders: Record<string, string> = {
     "Content-Type": "application/json",
-    ...options.headers,
+  };
+
+  const mergedHeaders = {
+    ...defaultHeaders,
+    ...(options.headers ? Object.fromEntries(Object.entries(options.headers)) : {}),
   };
 
   const res = await fetch(url, {
     ...options,
-    headers,
+    headers: mergedHeaders,
     credentials: "include",
   });
 

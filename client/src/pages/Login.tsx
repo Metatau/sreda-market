@@ -37,8 +37,10 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await apiRequest('POST', '/api/auth/login', loginForm);
-      const response = await res.json();
+      const response = await apiRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(loginForm),
+      });
 
       if (response.success) {
         toast({
@@ -89,8 +91,10 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const res = await apiRequest('POST', '/api/auth/register', registerForm);
-      const response = await res.json();
+      const response = await apiRequest('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(registerForm),
+      });
 
       if (response.success) {
         // Store user email for session management
