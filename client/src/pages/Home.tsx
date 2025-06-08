@@ -272,7 +272,6 @@ export default function Home() {
             setSelectedAnalytics(null);
           }}
           property={selectedProperty as any}
-          analytics={selectedAnalytics || {}}
         />
       )}
 

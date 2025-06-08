@@ -159,7 +159,7 @@ export function Favorites() {
       {/* Analytics Modal */}
       {selectedProperty && (
         <InvestmentAnalyticsModal
-          property={selectedProperty}
+          property={selectedProperty as any}
           isOpen={showAnalyticsModal}
           onClose={() => {
             setShowAnalyticsModal(false);
