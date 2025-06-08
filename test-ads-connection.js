@@ -17,7 +17,7 @@ async function testAdsConnection() {
     token: apiKey,
     format: 'json',
     category_id: '1', // Недвижимость
-    limit: '10'
+    limit: '50'
   });
   
   const options = {
@@ -42,7 +42,24 @@ async function testAdsConnection() {
       });
       
       res.on('end', () => {
-        console.log('Ответ от API:', data);
+        console.log('Размер ответа:', data.length, 'символов');
+        
+        try {
+          const jsonData = JSON.parse(data);
+          console.log('Структура ответа:', Object.keys(jsonData));
+          
+          if (jsonData.data && Array.isArray(jsonData.data)) {
+            console.log('Найдено объявлений:', jsonData.data.length);
+            if (jsonData.data.length > 0) {
+              console.log('Пример объявления:', JSON.stringify(jsonData.data[0], null, 2));
+            }
+          } else {
+            console.log('Полный ответ:', JSON.stringify(jsonData, null, 2));
+          }
+        } catch (error) {
+          console.log('Не удалось распарсить JSON, сырой ответ:', data.substring(0, 500));
+        }
+        
         resolve(data);
       });
     });
