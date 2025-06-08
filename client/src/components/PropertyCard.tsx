@@ -179,7 +179,7 @@ export function PropertyCard({ property, onSelect, onCalculateAnalytics, analyti
           variant="outline"
         >
           <Calculator className="w-4 h-4 mr-2" />
-          Рассчитать аналитику
+          Подробнее
         </Button>
       </CardContent>
     </Card>
