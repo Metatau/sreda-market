@@ -143,12 +143,7 @@ export function Favorites() {
                 }}
               />
             ))}
-          </div>ng={false}
-            filters={filters}
-            onFiltersChange={setFilters}
-            favorites={favorites.map(p => p.id)}
-            onFavoriteToggle={handleRemoveFromFavorites}
-          />
+          </div>
         )}
       </div>
     </div>
