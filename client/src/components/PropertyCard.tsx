@@ -94,23 +94,23 @@ export function PropertyCard({ property, onSelect, onCalculateAnalytics, analyti
         </div>
 
         {/* Теги рейтинга, типа и класса недвижимости */}
-        <div className="flex gap-1.5 mb-4 overflow-hidden">
+        <div className="flex gap-1 mb-4 overflow-hidden flex-wrap">
           <Badge 
-            className={`text-xs font-medium px-2 py-1 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getRatingColor(rating)}`}
+            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getRatingColor(rating)}`}
           >
-            <Star className="w-3 h-3 mr-1 drop-shadow-sm" />
+            <Star className="w-2.5 h-2.5 mr-0.5 drop-shadow-sm" />
             <span className="font-semibold">{rating}</span>
           </Badge>
           <Badge 
-            className={`text-xs font-medium px-2 py-1 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getPropertyTypeColor(propertyType)}`}
+            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getPropertyTypeColor(propertyType)}`}
           >
-            <Building2 className="w-3 h-3 mr-1 drop-shadow-sm" />
+            <Building2 className="w-2.5 h-2.5 mr-0.5 drop-shadow-sm" />
             <span className="font-semibold">{propertyType}</span>
           </Badge>
           <Badge 
-            className={`text-xs font-medium px-2 py-1 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getPropertyClassColor(propertyClassName)}`}
+            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border-0 transition-all duration-300 transform hover:scale-105 whitespace-nowrap ${getPropertyClassColor(propertyClassName)}`}
           >
-            <Home className="w-3 h-3 mr-1 drop-shadow-sm" />
+            <Home className="w-2.5 h-2.5 mr-0.5 drop-shadow-sm" />
             <span className="font-semibold">{propertyClassName}</span>
           </Badge>
         </div>
