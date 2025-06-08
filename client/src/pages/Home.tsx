@@ -52,7 +52,8 @@ export default function Home() {
         throw new Error('Failed to calculate analytics');
       }
       
-      return response.json();
+      const result = await response.json();
+      return result.data || result; // Handle both wrapped and unwrapped responses
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/investment-analytics'] });

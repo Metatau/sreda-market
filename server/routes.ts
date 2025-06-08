@@ -530,8 +530,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use only the simple investment analytics service that saves to database
       const analytics = await simpleInvestmentAnalyticsService.calculateAnalytics(propertyId);
       
-      // Return analytics without external AI service for now
-      res.json(analytics);
+      // Return analytics with proper API response format
+      res.json({
+        success: true,
+        data: analytics
+      });
     } catch (error) {
       console.error("Error calculating investment analytics:", error);
       res.status(500).json({ error: "Failed to calculate investment analytics" });
