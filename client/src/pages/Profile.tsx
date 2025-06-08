@@ -36,7 +36,7 @@ export function Profile() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
           <Card className="text-center">
             <CardContent className="pt-6">
               <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -288,17 +288,17 @@ export function Profile() {
       <Navigation />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Профиль Header */}
-        <Card className="mb-8">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-6">
-              <Avatar className="h-20 w-20">
-                <AvatarFallback className="text-2xl">
+        <Card className="mb-6 sm:mb-8">
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+              <Avatar className="h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0">
+                <AvatarFallback className="text-xl sm:text-2xl">
                   {getInitials(user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : '')}
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+              <div className="flex-1 text-center sm:text-left w-full">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3 mb-2">
                   {isEditing ? (
                     <div className="flex items-center gap-2">
                       <Input
@@ -323,9 +323,9 @@ export function Profile() {
                   )}
                 </div>
                 <p className="text-gray-600">ID: {user.id}</p>
-                {user.roles && (
+                {user.role && (
                   <div className="mt-2">
-                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 font-medium border">{user.roles}</Badge>
+                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 font-medium border">{user.role}</Badge>
                   </div>
                 )}
               </div>
@@ -780,13 +780,13 @@ export function Profile() {
                 
                 <div>
                   <Label htmlFor="user-name">Имя пользователя</Label>
-                  <Input id="user-name" value={user.name} disabled />
+                  <Input id="user-name" value={user.username} disabled />
                 </div>
                 
-                {user.roles && (
+                {user.role && (
                   <div>
-                    <Label htmlFor="user-roles">Роли</Label>
-                    <Input id="user-roles" value={user.roles} disabled />
+                    <Label htmlFor="user-roles">Роль</Label>
+                    <Input id="user-roles" value={user.role} disabled />
                   </div>
                 )}
               </CardContent>

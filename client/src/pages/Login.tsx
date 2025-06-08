@@ -168,17 +168,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-2 sm:p-4">
+      <div className="w-full max-w-sm sm:max-w-md space-y-4 sm:space-y-6">
         {/* Заголовок */}
-        <div className="text-center">
+        <div className="text-center px-2">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-white" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
-            <h1 className="text-xl font-quantum font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">SREDA Market</h1>
+            <h1 className="text-lg sm:text-xl font-quantum font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">SREDA Market</h1>
           </div>
-          <p className="text-gray-600 text-[14px] text-center">Smart Real Estate Data Analytics</p>
+          <p className="text-gray-600 text-xs sm:text-[14px] text-center">Smart Real Estate Data Analytics</p>
         </div>
 
 
@@ -187,10 +187,10 @@ export default function Login() {
 
         {/* Табы для клиентов */}
         <Card>
-          <CardHeader>
-            <CardDescription className="text-center">Войдите в систему или зарегистрируйтесь</CardDescription>
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardDescription className="text-center text-xs sm:text-sm">Войдите в систему или зарегистрируйтесь</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6">
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Вход</TabsTrigger>
