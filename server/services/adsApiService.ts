@@ -674,26 +674,26 @@ export class AdsApiService {
             console.log('Property data:', JSON.stringify(adsProperty, null, 2).substring(0, 500));
           }
 
-          // СТРОГАЯ ФИЛЬТРАЦИЯ: проверяем тип недвижимости - только квартиры
+          // ФИЛЬТРАЦИЯ: проверяем тип недвижимости по полю cat2
+          const cat2 = (adsProperty.cat2 || '').toLowerCase().trim();
           const title = (adsProperty.title || '').toLowerCase().trim();
-          const propertyType = (adsProperty.propertyType || adsProperty.category || '').toLowerCase().trim();
           
-          // Исключаем дома, гаражи, участки, коммерческую недвижимость
-          const isExcluded = title.includes('дом ') || 
-                            title.includes('участок ') || 
-                            title.includes('гараж ') ||
-                            title.includes('помещение ') ||
-                            title.includes('офис ') ||
-                            title.includes('склад ') ||
-                            title.includes('магазин ');
+          // Принимаем только квартиры и студии, исключаем комнаты, дома, участки
+          const isValidPropertyType = cat2 === 'квартиры' || 
+                                     title.includes('студия') ||
+                                     (title.includes('квартир') && !title.includes('комната'));
+          
+          // Исключаем нежелательные типы недвижимости
+          const isExcluded = cat2 === 'комнаты' || 
+                            cat2 === 'дома, дачи, коттеджи' ||
+                            cat2 === 'земельные участки' ||
+                            cat2 === 'гаражи и машиноместа' ||
+                            title.includes('участок') ||
+                            title.includes('гараж') ||
+                            title.includes('комната');
 
-          // Проверяем, что это именно квартира
-          const isApartment = title.includes('-к кв.') || 
-                             title.includes('квартира') ||
-                             title.includes('студия');
-
-          if (isExcluded || !isApartment) {
-            console.log(`Skipping property ${adsProperty.id}: title "${title}" is not an apartment`);
+          if (isExcluded || !isValidPropertyType) {
+            console.log(`Skipping property ${adsProperty.id}: cat2="${cat2}", title="${title}" - not an apartment`);
             continue;
           }
 
