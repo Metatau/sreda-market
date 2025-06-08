@@ -15,12 +15,12 @@ const RUSSIAN_CITIES: RegionCoordinates[] = [
   { id: 2, name: "Санкт-Петербург", coordinates: [59.9311, 30.3609] },
   { id: 3, name: "Новосибирск", coordinates: [55.0084, 82.9357] },
   { id: 4, name: "Екатеринбург", coordinates: [56.8431, 60.6454] },
-  { id: 5, name: "Казань", coordinates: [55.8304, 49.0661] },
+  { id: 5, name: "Казань", coordinates: [55.7887, 49.1221] },
   { id: 11, name: "Уфа", coordinates: [54.7388, 55.9721] },
   { id: 12, name: "Красноярск", coordinates: [56.0184, 92.8672] },
-  { id: 13, name: "Пермь", coordinates: [58.0105, 56.2502] },
-  { id: 35, name: "Калининград", coordinates: [54.7065, 20.4522] },
-  { id: 36, name: "Тюмень", coordinates: [57.1522, 65.5343] },
+  { id: 13, name: "Пермь", coordinates: [56.2636901, 58.0088974] },
+  { id: 35, name: "Калининград", coordinates: [54.7104, 20.4522] },
+  { id: 36, name: "Тюмень", coordinates: [57.1522, 65.5272] },
   { id: 37, name: "Сочи", coordinates: [43.6028, 39.7342] }
 ];
 
