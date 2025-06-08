@@ -8,11 +8,17 @@ import { PropertyWithRelations } from "@/types";
 interface PropertyCardProps {
   property: PropertyWithRelations;
   onSelect?: (property: PropertyWithRelations) => void;
+  onCalculateAnalytics?: (property: PropertyWithRelations) => void;
 }
 
-export function PropertyCard({ property, onSelect }: PropertyCardProps) {
+export function PropertyCard({ property, onSelect, onCalculateAnalytics }: PropertyCardProps) {
   const handleClick = () => {
     onSelect?.(property);
+  };
+
+  const handleCalculateAnalytics = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onCalculateAnalytics?.(property);
   };
 
   // Extract property class name for badge
@@ -109,7 +115,7 @@ export function PropertyCard({ property, onSelect }: PropertyCardProps) {
         </div>
 
         <Button 
-          onClick={handleClick}
+          onClick={handleCalculateAnalytics}
           className="w-full"
           variant="outline"
         >

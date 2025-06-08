@@ -369,7 +369,7 @@ export default function Home() {
                     <PropertyCard
                       key={property.id}
                       property={property}
-                      onSelect={handlePropertySelect}
+                      onCalculateAnalytics={handlePropertySelect}
                     />
                   ))}
                 </div>
