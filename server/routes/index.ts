@@ -48,6 +48,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/map', mapRoutes);
   app.use('/api/insights', insightsRoutes);
   app.use('/api/admin/sources', adminSourcesRoutes);
+  
+  // Import and register favorites routes
+  const favoritesRoutes = (await import('./favorites.routes')).default;
+  app.use('/api/favorites', favoritesRoutes);
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
