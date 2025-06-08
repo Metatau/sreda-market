@@ -54,7 +54,7 @@ export function Profile() {
   }
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(user?.name || '');
+  const [editedName, setEditedName] = useState(user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '');
   const [promoCodes, setPromoCodes] = useState({
     promo: '',
     standard: '',
@@ -112,8 +112,9 @@ export function Profile() {
   };
 
   const generateReferralCode = () => {
-    if (user?.name) {
-      const code = `${user.name.substring(0, 6).toUpperCase()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    if (user?.firstName || user?.lastName) {
+      const name = `${user.firstName || ''}${user.lastName || ''}`.replace(/\s/g, '');
+      const code = `${name.substring(0, 6).toUpperCase()}${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       setReferralCode(code);
     }
   };
