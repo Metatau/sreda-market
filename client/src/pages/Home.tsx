@@ -12,6 +12,7 @@ import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal'
 
 import { useProperties, useAllProperties, useRegions } from '@/hooks/useProperties';
 import { useNewProperties } from '@/hooks/useNewProperties';
+import { usePropertyAnalytics } from '@/hooks/usePropertyAnalytics';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Property, PropertyFilters as FilterType, InvestmentAnalytics } from '@/types';
 import { TrendingUp, BarChart3, Clock, MapPin } from 'lucide-react';
@@ -34,6 +35,10 @@ export default function Home() {
   const properties = propertiesData?.properties || [];
   const allProperties = allPropertiesData?.properties || []; // Все объекты для карты
   const pagination = propertiesData?.pagination;
+
+  // Загружаем аналитику для текущих объектов
+  const propertyIds = properties.map(p => p.id);
+  const { data: analyticsData } = usePropertyAnalytics(propertyIds);
 
 
 

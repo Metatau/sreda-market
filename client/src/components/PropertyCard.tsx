@@ -9,9 +9,10 @@ interface PropertyCardProps {
   property: PropertyWithRelations;
   onSelect?: (property: PropertyWithRelations) => void;
   onCalculateAnalytics?: (property: PropertyWithRelations) => void;
+  analytics?: any; // Investment analytics data
 }
 
-export function PropertyCard({ property, onSelect, onCalculateAnalytics }: PropertyCardProps) {
+export function PropertyCard({ property, onSelect, onCalculateAnalytics, analytics }: PropertyCardProps) {
   const handleClick = () => {
     onSelect?.(property);
   };
@@ -30,8 +31,18 @@ export function PropertyCard({ property, onSelect, onCalculateAnalytics }: Prope
 
   // Функция для получения рейтинга инвестиций
   const getInvestmentRating = () => {
-    const ratings = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C'];
-    return ratings[property.id % ratings.length];
+    // Используем реальную аналитику если доступна
+    if (analytics?.investmentRating) {
+      return analytics.investmentRating;
+    }
+    
+    // Используем аналитику из свойства объекта если доступна
+    if (property.analytics?.investmentRating) {
+      return property.analytics.investmentRating;
+    }
+    
+    // Возвращаем "Анализ" если данных нет
+    return "Анализ";
   };
 
   // Функция для получения типа недвижимости
@@ -46,6 +57,7 @@ export function PropertyCard({ property, onSelect, onCalculateAnalytics }: Prope
     if (rating.startsWith('A')) return 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-700';
     if (rating.startsWith('B')) return 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-md hover:shadow-lg hover:from-yellow-600 hover:to-amber-700';
     if (rating.startsWith('C')) return 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md hover:shadow-lg hover:from-orange-600 hover:to-red-600';
+    if (rating === 'Анализ') return 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md hover:shadow-lg hover:from-blue-600 hover:to-indigo-700';
     return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white shadow-md hover:shadow-lg hover:from-gray-600 hover:to-gray-700';
   };
 
