@@ -371,12 +371,25 @@ export function AdvancedPropertyMap({ properties, selectedRegion, onPropertySele
 
   // Add property markers
   useEffect(() => {
-    if (!mapInstance || !properties.length) return;
+    if (!mapInstance) {
+      console.log('AdvancedPropertyMap: No map instance');
+      return;
+    }
+    
+    if (!properties.length) {
+      console.log('AdvancedPropertyMap: No properties provided');
+      return;
+    }
 
     const L = (window as any).L;
     const markers: any[] = [];
 
     console.log(`AdvancedPropertyMap: Adding ${properties.length} property markers to map`);
+    console.log('AdvancedPropertyMap: First property sample:', {
+      id: properties[0]?.id,
+      coordinates: properties[0]?.coordinates,
+      title: properties[0]?.title?.substring(0, 50)
+    });
 
     properties.forEach((property, index) => {
       if (!property.coordinates) return;
