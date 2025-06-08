@@ -89,9 +89,9 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
-      {/* Map Section - Full Width Always Active */}
-      <div className="w-full pt-4 px-4 mb-6">
-        <div className="relative h-[500px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
+      {/* Map Section - Responsive Height */}
+      <div className="w-full pt-4 px-2 sm:px-4 mb-6">
+        <div className="relative h-[300px] sm:h-[400px] md:h-[500px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
           <PropertyMap 
             properties={allProperties as any}
             selectedProperty={selectedProperty}
@@ -104,8 +104,8 @@ export default function Home() {
 
       {/* 2. Map Analytics Tools */}
       <div className="w-full bg-white border-b shadow-sm mt-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             <Card 
               className={`hover:shadow-md transition-all cursor-pointer ${
                 activeMapTool === 'heatmap' ? 'ring-2 ring-blue-500 bg-blue-50' : ''
@@ -181,7 +181,7 @@ export default function Home() {
       {/* Active Tool Panel */}
       {activeMapTool !== 'none' && (
         <div className="w-full bg-gray-50 border-b shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4">
             {activeMapTool === 'heatmap' && (
               <div className="bg-white rounded-lg p-4 border">
                 <h3 className="font-semibold mb-3 text-blue-600">Настройки тепловых карт</h3>
@@ -276,10 +276,10 @@ export default function Home() {
       )}
 
       {/* 3. Filters and Property List Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
           {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 order-2 lg:order-1">
             <PropertyFilters 
               filters={filters} 
               onFiltersChange={handleFilterChange}
@@ -331,17 +331,17 @@ export default function Home() {
           </div>
 
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 order-1 lg:order-2">
 
 
             {/* Controls */}
-            <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-              <div className="flex items-center justify-between">
+            <div className="bg-white rounded-lg shadow-sm border p-3 sm:p-6 mb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                 <p className="text-sm text-gray-600">
                   Найдено {pagination?.total || 0} объектов
                 </p>
                 <Select defaultValue="price_asc">
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-full sm:w-48">
                     <SelectValue placeholder="Сортировка" />
                   </SelectTrigger>
                   <SelectContent>
