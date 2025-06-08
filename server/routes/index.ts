@@ -23,6 +23,12 @@ import insightsRoutes from "./insights";
 import adminSourcesRoutes from "./adminSources";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Force JSON response for all API routes (before other middleware)
+  app.use('/api/*', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  });
+
   // Global middleware
   app.use(corsMiddleware);
   app.use(sessionConfig);
@@ -66,6 +72,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       timestamp: new Date().toISOString(),
       uptime: process.uptime()
     });
+  });
+
+  // Direct ADS API sync endpoint for testing
+  app.post('/api/sync-ads', async (req, res) => {
+    try {
+      console.log('Manual ADS API sync triggered');
+      const { adsApiService } = await import('../services/adsApiService');
+      
+      const regions = ['Москва', 'Санкт-Петербург'];
+      const result = await adsApiService.syncProperties(regions);
+      
+      res.json({
+        success: true,
+        imported: result.imported,
+        updated: result.updated,
+        errors: result.errors
+      });
+    } catch (error) {
+      console.error('Sync error:', error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   });
 
   // Direct regions endpoints to bypass routing conflicts
