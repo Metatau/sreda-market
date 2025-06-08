@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Scale, X, Plus, MapPin, Bed, Square, Calculator } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import type { Property } from '@/types';
 
 const getPropertyClassColor = (className: string) => {
@@ -21,7 +21,7 @@ const getPropertyClassColor = (className: string) => {
 };
 
 export function Comparison() {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useUser();
   const [compareList, setCompareList] = useState<Property[]>([]);
 
   // В реальном приложении здесь бы загружались объекты для сравнения из API

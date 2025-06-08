@@ -25,11 +25,11 @@ import {
   Users,
   Copy
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 
 export function Profile() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useUser();
   const { toast } = useToast();
 
   if (!isAuthenticated || !user) {
