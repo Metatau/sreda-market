@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { User, Mail, UserPlus, MessageCircle, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -31,6 +32,9 @@ export default function Login() {
     telegramHandle: '',
     referralCode: '',
   });
+
+  // Состояние чекбокса согласия
+  const [agreementChecked, setAgreementChecked] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +92,17 @@ export default function Login() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Проверяем согласие с правовой информацией
+    if (!agreementChecked) {
+      toast({
+        title: "Требуется согласие",
+        description: "Необходимо принять соглашение для продолжения регистрации",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -281,7 +296,56 @@ export default function Login() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  {/* Согласие с правовой информацией */}
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="agreement"
+                        checked={agreementChecked}
+                        onCheckedChange={(checked) => setAgreementChecked(checked as boolean)}
+                        className="mt-1"
+                      />
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        <Label htmlFor="agreement" className="text-sm text-gray-700 cursor-pointer">
+                          Я ознакомлен и согласен с{' '}
+                        </Label>
+                        <a 
+                          href="/polzovatelskoe-soglashenie" 
+                          target="_blank" 
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          пользовательским соглашением
+                        </a>
+                        ,{' '}
+                        <a 
+                          href="/publichnaya-oferta" 
+                          target="_blank" 
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          публичной офертой
+                        </a>
+                        ,{' '}
+                        <a 
+                          href="/politika-konfidencialnosti" 
+                          target="_blank" 
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          политикой конфиденциальности
+                        </a>
+                        {' '}и даю{' '}
+                        <a 
+                          href="/soglasie-na-obrabotku-personalnyh-dannyh" 
+                          target="_blank" 
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          согласие на обработку персональных данных
+                        </a>
+                        .
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={isLoading || !agreementChecked}>
                     <UserPlus className="mr-2 h-4 w-4" />
                     Зарегистрироваться
                   </Button>
