@@ -22,6 +22,7 @@ const Favorites = lazy(() => import("@/pages/Favorites").then(module => ({ defau
 const Profile = lazy(() => import("@/pages/Profile").then(module => ({ default: module.Profile })));
 
 const AdminPanel = lazy(() => import("@/pages/AdminPanel"));
+const MapTestPage = lazy(() => import("@/pages/MapTestPage"));
 
 const Login = lazy(() => import("@/pages/Login"));
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -71,6 +72,7 @@ function Router() {
               <Route path="/favorites" component={Favorites} />
               <Route path="/profile" component={Profile} />
               <Route path="/admin" component={AdminPanel} />
+              <Route path="/map-test" component={MapTestPage} />
               <AIChat />
             </ErrorBoundary>
           </AuthProvider>
