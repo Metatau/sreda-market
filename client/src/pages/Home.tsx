@@ -376,6 +376,7 @@ export default function Home() {
                       key={property.id}
                       property={property}
                       onCalculateAnalytics={handlePropertySelect}
+                      analytics={analyticsData?.[property.id]}
                     />
                   ))}
                 </div>
