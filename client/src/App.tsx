@@ -20,7 +20,7 @@ const InvestmentAnalyticsDemo = lazy(() => import("@/pages/InvestmentAnalyticsDe
 const Insights = lazy(() => import("@/pages/Insights"));
 const Favorites = lazy(() => import("@/pages/Favorites").then(module => ({ default: module.Favorites })));
 const Profile = lazy(() => import("@/pages/Profile").then(module => ({ default: module.Profile })));
-const Comparison = lazy(() => import("@/pages/Comparison").then(module => ({ default: module.Comparison })));
+
 const AdminPanel = lazy(() => import("@/pages/AdminPanel"));
 
 const Login = lazy(() => import("@/pages/Login"));
@@ -70,7 +70,6 @@ function Router() {
               <Route path="/insights" component={Insights} />
               <Route path="/favorites" component={Favorites} />
               <Route path="/profile" component={Profile} />
-              <Route path="/comparison" component={Comparison} />
               <Route path="/admin" component={AdminPanel} />
               <AIChat />
             </ErrorBoundary>

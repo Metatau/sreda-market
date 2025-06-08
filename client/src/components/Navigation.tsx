@@ -7,7 +7,6 @@ import {
   TrendingUpIcon, 
   StarIcon, 
   UserIcon, 
-  BarChart3Icon,
   LogOutIcon,
   SettingsIcon,
   CrownIcon,
@@ -23,7 +22,6 @@ export function Navigation() {
     { path: '/', icon: HomeIcon, label: 'Главная' },
     { path: '/insights', icon: BookOpenIcon, label: 'Инсайты' },
     { path: '/favorites', icon: StarIcon, label: 'Избранное' },
-    { path: '/comparison', icon: BarChart3Icon, label: 'Сравнение' },
     { path: '/profile', icon: UserIcon, label: 'Профиль' },
   ];
 
