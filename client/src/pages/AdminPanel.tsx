@@ -627,7 +627,7 @@ export default function AdminPanel() {
                 <SelectValue placeholder="Все типы" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Все типы</SelectItem>
+                <SelectItem value="all">Все типы</SelectItem>
                 <SelectItem value="website">Веб-сайт</SelectItem>
                 <SelectItem value="telegram">Telegram</SelectItem>
                 <SelectItem value="rss">RSS</SelectItem>
