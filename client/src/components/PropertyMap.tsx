@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useMapData } from "@/hooks/useProperties";
-import type { Property } from "@/types";
+
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useProperties } from '@/hooks/useProperties';
+import type { Property } from '@/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Search, Layers, Navigation } from 'lucide-react';
+import { openStreetMapService } from '@/services/openStreetMapService';
+import { leafletMapService } from '@/services/leafletMapService';
+import { safePromise } from '@/lib/errorHandling';
 
 interface PropertyMapProps {
   filters?: {
@@ -13,27 +19,178 @@ interface PropertyMapProps {
   onPropertySelect?: (property: Property) => void;
 }
 
-// Mock Mapbox-like implementation since we can't use actual Mapbox without API key
 export function PropertyMap({ filters, onPropertySelect }: PropertyMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const [mapId, setMapId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
-  const [selectedMarker, setSelectedMarker] = useState<any>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   
-  const { data: mapData, isLoading } = useMapData(filters);
+  const { data: properties, isLoading } = useProperties(filters);
 
+  // Initialize map
   useEffect(() => {
-    if (mapRef.current && mapData) {
-      // In a real implementation, this would initialize Mapbox GL JS
-      console.log("Map data loaded:", mapData.features.length, "properties");
+    if (mapRef.current && !mapId) {
+      const initMap = async () => {
+        const [newMapId] = await safePromise(
+          leafletMapService.createMap(mapRef.current!, {
+            center: [55.7558, 37.6176], // Moscow center
+            zoom: 10,
+            useOSM: true // Force OSM tiles
+          })
+        );
+        
+        if (newMapId) {
+          setMapId(newMapId);
+          console.log('OSM Map initialized with ID:', newMapId);
+        }
+      };
+      
+      initMap();
     }
-  }, [mapData]);
+  }, [mapId]);
+
+  // Add property markers when properties load
+  useEffect(() => {
+    if (mapId && properties?.length > 0) {
+      const addMarkers = async () => {
+        const validProperties = properties.filter(property => {
+          if (!property.coordinates) return false;
+          
+          let coords;
+          try {
+            if (typeof property.coordinates === 'string') {
+              if (property.coordinates.startsWith('POINT(')) {
+                // Parse PostGIS format
+                const match = property.coordinates.match(/POINT\(([^)]+)\)/);
+                if (match) {
+                  const [lng, lat] = match[1].split(' ').map(Number);
+                  coords = { lat, lng };
+                }
+              } else {
+                // Parse JSON format
+                coords = JSON.parse(property.coordinates);
+              }
+            } else {
+              coords = property.coordinates;
+            }
+          } catch (error) {
+            console.warn(`Invalid coordinates for property ${property.id}:`, property.coordinates);
+            return false;
+          }
+          
+          return coords && !isNaN(coords.lat) && !isNaN(coords.lng);
+        });
+
+        const markers = validProperties.map(property => {
+          let coords;
+          if (typeof property.coordinates === 'string') {
+            if (property.coordinates.startsWith('POINT(')) {
+              const match = property.coordinates.match(/POINT\(([^)]+)\)/);
+              if (match) {
+                const [lng, lat] = match[1].split(' ').map(Number);
+                coords = [lat, lng];
+              }
+            } else {
+              const parsed = JSON.parse(property.coordinates);
+              coords = [parsed.lat, parsed.lng];
+            }
+          } else {
+            coords = [property.coordinates.lat, property.coordinates.lng];
+          }
+
+          return {
+            id: property.id,
+            coordinates: coords,
+            popup: {
+              ...property,
+              popup: {
+                title: property.title,
+                description: property.description?.substring(0, 200) + '...',
+                price: property.price,
+                area: property.area,
+                propertyClass: property.propertyClass?.name || 'Не указан'
+              }
+            }
+          };
+        });
+
+        console.log('PropertyMap: Processing', markers.length, 'valid markers from', properties.length, 'properties');
+        
+        if (markers.length > 0) {
+          console.log('PropertyMap: Sample marker:', markers[0]);
+          const [success] = await safePromise(
+            leafletMapService.addPropertyMarkers(mapId, markers)
+          );
+          
+          if (success) {
+            console.log('Successfully added', markers.length, 'property markers to map');
+          }
+        }
+      };
+
+      addMarkers();
+    }
+  }, [mapId, properties]);
+
+  // Search functionality
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    const [results] = await safePromise(
+      openStreetMapService.searchAddresses(query, {
+        region: 'russia',
+        limit: 5
+      })
+    );
+
+    if (results) {
+      setSearchResults(results);
+    }
+    setIsSearching(false);
+  }, []);
+
+  const handleSearchResultSelect = useCallback(async (result: any) => {
+    if (!mapId) return;
+
+    const [success] = await safePromise(
+      leafletMapService.flyToLocation(mapId, {
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon)
+      }, 16)
+    );
+
+    if (success) {
+      setSearchResults([]);
+      setSearchQuery('');
+    }
+  }, [mapId]);
+
+  const toggleHeatmap = useCallback(async () => {
+    if (!mapId) return;
+    
+    const newHeatmapState = !showHeatmap;
+    const [success] = await safePromise(
+      leafletMapService.toggleHeatmap(mapId, newHeatmapState)
+    );
+    
+    if (success) {
+      setShowHeatmap(newHeatmapState);
+    }
+  }, [mapId, showHeatmap]);
 
   if (isLoading) {
     return (
       <Card>
         <CardContent className="h-96 flex items-center justify-center">
           <div className="text-center">
-            <i className="fas fa-spinner fa-spin text-2xl text-gray-400 mb-2"></i>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
             <p className="text-gray-500">Загрузка карты...</p>
           </div>
         </CardContent>
@@ -41,158 +198,138 @@ export function PropertyMap({ filters, onPropertySelect }: PropertyMapProps) {
     );
   }
 
-  const propertyClassColors = {
-    "Эконом": "bg-blue-500",
-    "Стандарт": "bg-emerald-500", 
-    "Комфорт": "bg-amber-500",
-    "Бизнес": "bg-purple-500",
-    "Элит": "bg-orange-500",
-  };
-
   return (
-    <Card className="overflow-hidden">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <CardTitle>Карта объектов</CardTitle>
-            <span className="text-sm text-gray-500">
-              {mapData?.features.length || 0} объектов на карте
-            </span>
+    <Card className="w-full">
+      <CardContent className="p-0">
+        {/* Map Controls */}
+        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+          {/* Search */}
+          <div className="relative">
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Поиск адреса..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  handleSearch(e.target.value);
+                }}
+                className="w-64 bg-white/90 backdrop-blur-sm"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                className="bg-white/90 backdrop-blur-sm"
+                disabled={isSearching}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="absolute top-full mt-1 w-full bg-white rounded-md shadow-lg border max-h-48 overflow-y-auto z-20">
+                {searchResults.map((result, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSearchResultSelect(result)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b last:border-b-0"
+                  >
+                    <div className="font-medium text-sm">{result.display_name}</div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex items-center space-x-2">
+
+          {/* Map Controls */}
+          <div className="flex gap-2">
             <Button
               variant={showHeatmap ? "default" : "outline"}
               size="sm"
-              onClick={() => setShowHeatmap(!showHeatmap)}
+              onClick={toggleHeatmap}
+              className="bg-white/90 backdrop-blur-sm"
             >
-              <i className="fas fa-fire mr-1"></i>
-              Тепловая карта
-            </Button>
-            <Button
-              variant={!showHeatmap ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowHeatmap(false)}
-            >
-              <i className="fas fa-map-marker-alt mr-1"></i>
-              Маркеры
+              <Layers className="h-4 w-4 mr-1" />
+              {showHeatmap ? 'Скрыть тепловую карту' : 'Тепловая карта'}
             </Button>
           </div>
         </div>
-      </CardHeader>
-      
-      <CardContent className="p-0">
-        <div className="relative">
-          {/* Map Legend */}
-          <div className="absolute top-4 right-4 z-10 bg-white rounded-lg shadow-md p-3">
-            <h4 className="text-sm font-medium mb-2">Классы недвижимости</h4>
-            <div className="space-y-1 text-xs">
-              {Object.entries(propertyClassColors).map(([className, color]) => (
-                <div key={className} className="flex items-center space-x-2">
-                  <div className={`w-3 h-3 ${color} rounded-full`}></div>
-                  <span>{className}</span>
+
+        {/* Statistics */}
+        <div className="absolute top-4 right-4 z-10">
+          <Card className="bg-white/90 backdrop-blur-sm">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium">
+                  {properties?.length || 0} объектов
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Map Container */}
+        <div 
+          ref={mapRef} 
+          className="w-full h-96 rounded-md"
+          style={{ minHeight: '400px' }}
+        />
+
+        {/* Property Info Panel */}
+        {selectedProperty && (
+          <div className="absolute bottom-4 left-4 right-4 z-10">
+            <Card className="bg-white/95 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-2">
+                      {selectedProperty.title}
+                    </h3>
+                    <div className="flex gap-4 mb-2">
+                      <Badge variant="secondary">
+                        {selectedProperty.propertyClass?.name || 'Не указан'}
+                      </Badge>
+                      <span className="text-sm text-gray-600">
+                        {selectedProperty.area} м²
+                      </span>
+                    </div>
+                    <p className="text-xl font-bold text-green-600">
+                      {selectedProperty.price?.toLocaleString('ru-RU')} ₽
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => onPropertySelect?.(selectedProperty)}
+                    >
+                      Подробнее
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedProperty(null)}
+                    >
+                      Закрыть
+                    </Button>
+                  </div>
                 </div>
-              ))}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* No Data State */}
+        {!isLoading && (!properties || properties.length === 0) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50/80 backdrop-blur-sm">
+            <div className="text-center">
+              <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500">Объекты недвижимости не найдены</p>
+              <p className="text-sm text-gray-400">Попробуйте изменить фильтры поиска</p>
             </div>
           </div>
-
-          {/* Map Container */}
-          <div 
-            ref={mapRef}
-            className="h-[500px] bg-gradient-to-br from-blue-100 to-purple-100 relative overflow-hidden"
-            style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1542044896530-05d85be9b11a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=800')`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            {/* Overlay for better marker visibility */}
-            <div className="absolute inset-0 bg-black/20"></div>
-            
-            {/* Property Markers */}
-            {!showHeatmap && mapData?.features.map((feature, index) => {
-              const { properties: props } = feature;
-              const className = props.propertyClass || "Стандарт";
-              const baseColor = propertyClassColors[className as keyof typeof propertyClassColors] || "bg-blue-500";
-              
-              // Position markers in a grid-like pattern for demo
-              const left = 20 + (index % 8) * 12;
-              const top = 20 + Math.floor(index / 8) * 15;
-              
-              return (
-                <div
-                  key={props.id}
-                  className={`absolute ${baseColor} text-white rounded-lg px-2 py-1 text-xs font-semibold shadow-lg cursor-pointer hover:scale-110 transition-transform z-20`}
-                  style={{ 
-                    left: `${left}%`, 
-                    top: `${top}%`,
-                    transform: 'translate(-50%, -50%)'
-                  }}
-                  onClick={() => setSelectedMarker(props)}
-                >
-                  {(props.price / 1000000).toFixed(1)}M ₽
-                </div>
-              );
-            })}
-
-            {/* Heatmap Effect */}
-            {showHeatmap && (
-              <div className="absolute inset-0 z-10">
-                <div className="absolute inset-0 bg-gradient-radial from-red-500/30 via-yellow-500/20 to-transparent"></div>
-                <div className="absolute top-1/4 left-1/3 w-32 h-32 bg-gradient-radial from-red-500/50 to-transparent rounded-full blur-xl"></div>
-                <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-gradient-radial from-orange-500/40 to-transparent rounded-full blur-lg"></div>
-                <div className="absolute bottom-1/3 left-1/4 w-20 h-20 bg-gradient-radial from-yellow-500/30 to-transparent rounded-full blur-lg"></div>
-              </div>
-            )}
-
-            {/* Property Details Popup */}
-            {selectedMarker && (
-              <div 
-                className="absolute bg-white rounded-lg shadow-xl p-4 max-w-sm z-30 border"
-                style={{ 
-                  left: '50%', 
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)'
-                }}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-semibold text-sm">{selectedMarker.title}</h4>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedMarker(null)}
-                  >
-                    <i className="fas fa-times"></i>
-                  </Button>
-                </div>
-                <div className="space-y-1 text-xs text-gray-600 mb-3">
-                  <p><strong>Цена:</strong> {selectedMarker.price.toLocaleString()} ₽</p>
-                  {selectedMarker.pricePerSqm && (
-                    <p><strong>За м²:</strong> {selectedMarker.pricePerSqm.toLocaleString()} ₽</p>
-                  )}
-                  {selectedMarker.rooms && (
-                    <p><strong>Комнат:</strong> {selectedMarker.rooms}</p>
-                  )}
-                  {selectedMarker.area && (
-                    <p><strong>Площадь:</strong> {selectedMarker.area} м²</p>
-                  )}
-                  {selectedMarker.propertyClass && (
-                    <Badge className="text-xs">{selectedMarker.propertyClass}</Badge>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  className="w-full"
-                  onClick={() => {
-                    onPropertySelect?.(selectedMarker as any);
-                    setSelectedMarker(null);
-                  }}
-                >
-                  Подробнее
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

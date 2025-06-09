@@ -1,4 +1,6 @@
-// Geocoding service for address search and coordinates conversion
+// Geocoding service for address search and coordinates conversion using OSM
+import { openStreetMapService } from './openStreetMapService';
+
 export interface GeocodingConfig {
   accessToken: string;
   country: string;
@@ -40,13 +42,14 @@ export const geocodingConfig: GeocodingConfig = {
 
 export class GeocodingService {
   private config: GeocodingConfig;
+  private osmService = openStreetMapService;
 
   constructor(config: GeocodingConfig = geocodingConfig) {
     this.config = config;
   }
 
   /**
-   * Forward geocoding: поиск координат по адресу
+   * Forward geocoding: поиск координат по адресу через OSM
    */
   async searchAddress(query: string, options?: {
     proximity?: [number, number];
@@ -54,9 +57,25 @@ export class GeocodingService {
     types?: string[];
     limit?: number;
   }): Promise<GeocodingResult[]> {
-    if (!this.config.accessToken) {
-      throw new Error('Mapbox access token is required for geocoding');
-    }
+    // Use OSM instead of Mapbox
+    const osmResults = await this.osmService.searchAddresses(query, {
+      region: 'russia',
+      limit: options?.limit || 5
+    });
+
+    // Convert OSM format to our expected format
+    return osmResults.map(result => ({
+      id: result.place_id,
+      place_name: result.display_name,
+      center: [parseFloat(result.lon), parseFloat(result.lat)],
+      place_type: [result.type],
+      relevance: result.importance,
+      properties: {
+        osm_type: result.osm_type,
+        osm_id: result.osm_id,
+        class: result.class
+      }
+    }));
 
     const params = new URLSearchParams({
       access_token: this.config.accessToken,
@@ -93,37 +112,25 @@ export class GeocodingService {
   }
 
   /**
-   * Reverse geocoding: поиск адреса по координатам
+   * Reverse geocoding: поиск адреса по координатам через OSM
    */
   async reverseGeocode(longitude: number, latitude: number, options?: {
     types?: string[];
     limit?: number;
   }): Promise<GeocodingResult[]> {
-    if (!this.config.accessToken) {
-      throw new Error('Mapbox access token is required for geocoding');
-    }
-
-    const params = new URLSearchParams({
-      access_token: this.config.accessToken,
-      country: this.config.country,
-      language: this.config.language,
-      limit: String(options?.limit || 1)
-    });
-
-    if (options?.types) {
-      params.append('types', options.types.join(','));
-    }
-
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?${params}`;
-
     try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Reverse geocoding API error: ${response.status}`);
-      }
-
-      const data: GeocodingResponse = await response.json();
-      return data.features;
+      const osmResult = await this.osmService.reverseGeocode(latitude, longitude);
+      
+      return [{
+        id: 'reverse_result',
+        place_name: osmResult.display_name,
+        center: [longitude, latitude],
+        place_type: ['address'],
+        relevance: 1.0,
+        properties: {
+          address: osmResult.address
+        }
+      }];
     } catch (error) {
       console.error('Reverse geocoding error:', error);
       throw error;
