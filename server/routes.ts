@@ -19,7 +19,7 @@ import { PropertyService } from "./services/PropertyService";
 import { globalErrorHandler } from "./utils/errors";
 import { corsMiddleware } from "./middleware/cors";
 import { db } from "./db";
-import { promocodes, favorites, properties, regions, propertyClasses } from "@shared/schema";
+import { promocodes, favorites, properties, regions, propertyClasses, dataSources, insertDataSourceSchema, selectDataSourceSchema } from "@shared/schema";
 import { sql, eq, and, or, gte, desc, isNotNull } from "drizzle-orm";
 import { generalRateLimit, authRateLimit, aiRateLimit, apiRateLimit } from "./middleware/rateLimiting";
 import rateLimit from 'express-rate-limit';
@@ -1194,6 +1194,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error stopping scheduler:", error);
       res.status(500).json({ success: false, error: "Failed to stop scheduler" });
+    }
+  });
+
+  // Data Sources Management API
+  // Получить все источники данных
+  app.get("/api/admin/sources", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sources = await db.select().from(dataSources).orderBy(desc(dataSources.createdAt));
+      res.json({ 
+        success: true, 
+        sources: sources
+      });
+    } catch (error) {
+      console.error("Error fetching data sources:", error);
+      res.status(500).json({ success: false, error: "Failed to fetch data sources" });
+    }
+  });
+
+  // Создать новый источник данных
+  app.post("/api/admin/sources", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const validatedData = insertDataSourceSchema.parse(req.body);
+      const [newSource] = await db.insert(dataSources).values({
+        ...validatedData,
+        updatedAt: new Date()
+      }).returning();
+      
+      res.json({ 
+        success: true, 
+        message: "Data source created successfully",
+        source: newSource
+      });
+    } catch (error) {
+      console.error("Error creating data source:", error);
+      res.status(500).json({ success: false, error: "Failed to create data source" });
+    }
+  });
+
+  // Обновить источник данных
+  app.put("/api/admin/sources/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sourceId = parseInt(req.params.id);
+      if (isNaN(sourceId)) {
+        return res.status(400).json({ success: false, error: "Invalid source ID" });
+      }
+
+      const validatedData = insertDataSourceSchema.partial().parse(req.body);
+      const [updatedSource] = await db.update(dataSources)
+        .set({
+          ...validatedData,
+          updatedAt: new Date()
+        })
+        .where(eq(dataSources.id, sourceId))
+        .returning();
+
+      if (!updatedSource) {
+        return res.status(404).json({ success: false, error: "Data source not found" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Data source updated successfully",
+        source: updatedSource
+      });
+    } catch (error) {
+      console.error("Error updating data source:", error);
+      res.status(500).json({ success: false, error: "Failed to update data source" });
+    }
+  });
+
+  // Удалить источник данных
+  app.delete("/api/admin/sources/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const sourceId = parseInt(req.params.id);
+      if (isNaN(sourceId)) {
+        return res.status(400).json({ success: false, error: "Invalid source ID" });
+      }
+
+      const [deletedSource] = await db.delete(dataSources)
+        .where(eq(dataSources.id, sourceId))
+        .returning();
+
+      if (!deletedSource) {
+        return res.status(404).json({ success: false, error: "Data source not found" });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Data source deleted successfully"
+      });
+    } catch (error) {
+      console.error("Error deleting data source:", error);
+      res.status(500).json({ success: false, error: "Failed to delete data source" });
     }
   });
 
