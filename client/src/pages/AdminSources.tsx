@@ -706,7 +706,7 @@ function SourcePreviewDialog({ source, onClose }: {
 
   return (
     <Dialog open={!!source} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto p-3 sm:p-6">
         <DialogHeader>
           <DialogTitle>Предпросмотр источника: {source?.name}</DialogTitle>
           <DialogDescription>
