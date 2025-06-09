@@ -152,6 +152,24 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
     }
   }, [activeMapTool, mapId, mapLoaded]);
 
+  // Handle region filter changes - recenter map when filter changes
+  useEffect(() => {
+    if (!mapLoaded || !mapId) return;
+
+    if (regionId) {
+      // Focus on specific region
+      const regionCoords = geolocationService.getRegionCoordinates(regionId);
+      if (regionCoords) {
+        leafletMapService.setView(mapId, regionCoords, 11);
+        console.log(`Map recentered for region ${regionId}`);
+      }
+    } else {
+      // Show all of Russia for "All Cities" - wider view to see all markers
+      leafletMapService.setView(mapId, [60, 90], 3);
+      console.log('Map recentered for all cities view (Russia overview)');
+    }
+  }, [regionId, mapLoaded, mapId]);
+
   // Update properties on map
   useEffect(() => {
     console.log('PropertyMap: mapId:', mapId, 'mapLoaded:', mapLoaded, 'properties count:', properties.length);
@@ -303,23 +321,52 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
       } else {
         console.log('Successfully added', propertyMarkers.length, 'property markers to map');
         
-        // Автоматически подгоняем карту под все маркеры
+        // Подгоняем карту в зависимости от контекста
         setTimeout(() => {
-          const success = leafletMapService.fitToMarkers(mapId, 20);
-          if (success) {
-            console.log('Map fitted to show all markers with minimal padding');
-            // После подгонки добавляем немного зума для лучшей видимости
-            setTimeout(() => {
-              const mapInstance = leafletMapService.maps.get(mapId);
-              if (mapInstance) {
-                const currentZoom = mapInstance.leafletMap.getZoom();
-                const newZoom = Math.max(3, currentZoom - 1); // Минимум 3-й зум
-                mapInstance.leafletMap.setZoom(newZoom);
-                console.log(`Adjusted zoom from ${currentZoom} to ${newZoom} for better marker visibility`);
+          if (regionId) {
+            // Если выбран конкретный регион, фокусируемся только на его объектах
+            const regionProperties = propertyMarkers.filter(marker => {
+              // Проверяем принадлежность к региону по координатам
+              const [lat, lng] = marker.coordinates;
+              const regionCoords = geolocationService.getRegionCoordinates(regionId);
+              if (regionCoords) {
+                const distance = Math.sqrt(
+                  Math.pow(lat - regionCoords[0], 2) + Math.pow(lng - regionCoords[1], 2)
+                );
+                return distance < 2; // В пределах ~200км от центра региона
               }
-            }, 200);
+              return false;
+            });
+
+            if (regionProperties.length > 0) {
+              const bounds = regionProperties.map(p => p.coordinates);
+              const avgLat = bounds.reduce((sum, coord) => sum + coord[0], 0) / bounds.length;
+              const avgLng = bounds.reduce((sum, coord) => sum + coord[1], 0) / bounds.length;
+              leafletMapService.setView(mapId, [avgLat, avgLng], 11);
+              console.log(`Focused map on region ${regionId} with ${regionProperties.length} properties`);
+            } else {
+              // Fallback к координатам региона
+              const regionCoords = geolocationService.getRegionCoordinates(regionId);
+              if (regionCoords) {
+                leafletMapService.setView(mapId, regionCoords, 11);
+                console.log(`Focused map on region ${regionId} coordinates`);
+              }
+            }
           } else {
-            console.warn('Failed to fit map to markers');
+            // Если выбраны все города, показываем всю Россию
+            const success = leafletMapService.fitToMarkers(mapId, 20);
+            if (success) {
+              console.log('Map fitted to show all markers (all cities mode)');
+              setTimeout(() => {
+                const mapInstance = leafletMapService.maps.get(mapId);
+                if (mapInstance) {
+                  const currentZoom = mapInstance.leafletMap.getZoom();
+                  const newZoom = Math.max(3, currentZoom - 1);
+                  mapInstance.leafletMap.setZoom(newZoom);
+                  console.log(`Adjusted zoom from ${currentZoom} to ${newZoom} for Russia-wide view`);
+                }
+              }, 200);
+            }
           }
         }, 100);
       }
