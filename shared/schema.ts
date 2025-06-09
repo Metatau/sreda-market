@@ -76,6 +76,7 @@ export const properties = pgTable("properties", {
   livingArea: decimal("living_area", { precision: 8, scale: 2 }),
   kitchenArea: decimal("kitchen_area", { precision: 8, scale: 2 }),
   floorsTotal: integer("floors_total"),
+  buildYear: integer("build_year"), // год постройки
   metroDistance: integer("metro_distance"), // distance in meters
   autoClassified: boolean("auto_classified").default(false),
   manualOverride: boolean("manual_override").default(false),
