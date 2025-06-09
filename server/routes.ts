@@ -725,36 +725,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat - public access with rate limiting
-  app.post("/api/chat", aiRateLimit, validateBody(chatMessageSchema), async (req, res) => {
-    try {
-      const { message, sessionId } = req.body;
 
-      const response = await generateAIResponse(message);
-      
-      await storage.saveChatMessage({
-        sessionId: sessionId || `session_${Date.now()}`,
-        role: "user",
-        content: message,
-        createdAt: new Date(),
-      });
-
-      await storage.saveChatMessage({
-        sessionId: sessionId || `session_${Date.now()}`,
-        role: "assistant",
-        content: typeof response === 'string' ? response : (response as any)?.message || 'Response generated',
-        createdAt: new Date(),
-      });
-
-      res.json({
-        response: typeof response === 'string' ? response : (response as any)?.message || 'Response generated',
-        sessionId: sessionId || `session_${Date.now()}`,
-      });
-    } catch (error) {
-      console.error("Error in chat:", error);
-      res.status(500).json({ error: "Failed to process chat message" });
-    }
-  });
 
   // AI Property Recommendations (unlimited usage)
   app.post("/api/ai/recommendations", aiRateLimit, requireRoleAuth, validateBody(aiRequestSchema), async (req, res) => {
