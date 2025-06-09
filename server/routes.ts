@@ -1209,7 +1209,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sources = await db.select().from(dataSources).orderBy(desc(dataSources.createdAt));
       res.json({ 
         success: true, 
-        sources: sources
+        data: sources
       });
     } catch (error) {
       console.error("Error fetching data sources:", error);

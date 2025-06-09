@@ -113,15 +113,15 @@ export default function AdminPanel() {
     enabled: isAuthenticated && user?.roles?.includes('admin')
   });
 
-  const { data: sourcesData, isLoading: sourcesLoading } = useQuery<{ sources: DataSource[] }>({
+  const { data: sourcesData, isLoading: sourcesLoading } = useQuery<{ data: DataSource[] }>({
     queryKey: ['/api/admin/sources'],
     enabled: activeTab === 'sources' && isAuthenticated && user?.roles?.includes('admin')
   });
 
   // Filter sources based on search and type
   const filteredSources = useMemo(() => {
-    if (!sourcesData?.sources) return [];
-    return sourcesData.sources.filter((source: DataSource) => {
+    if (!sourcesData?.data) return [];
+    return sourcesData.data.filter((source: DataSource) => {
       const matchesSearch = !searchTerm || 
         source.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         source.description?.toLowerCase().includes(searchTerm.toLowerCase());
