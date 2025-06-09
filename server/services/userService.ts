@@ -1,5 +1,6 @@
 import { storage } from '../storage';
 import { nanoid } from 'nanoid';
+import { AuthService } from '../auth';
 
 export class UserService {
   // Создание администраторов при первом запуске
@@ -37,12 +38,24 @@ export class UserService {
     const existingAdmin = await storage.getUserByEmail(adminData.email);
     if (existingAdmin) {
       console.log(`Administrator ${adminData.email} already exists`);
+      // Ensure admin has a password if they don't have one
+      if (!existingAdmin.password) {
+        const defaultPassword = 'admin123';
+        const hashedPassword = await AuthService.hashPassword(defaultPassword);
+        await storage.updateUser(existingAdmin.id, { password: hashedPassword });
+        console.log(`Password set for administrator ${adminData.email}`);
+      }
       return existingAdmin;
     }
 
+    // Create new admin with default password
+    const defaultPassword = 'admin123';
+    const hashedPassword = await AuthService.hashPassword(defaultPassword);
+    
     const admin = await storage.createUser({
       username: adminData.username,
       email: adminData.email,
+      password: hashedPassword,
       role: 'administrator',
       telegramHandle: adminData.telegramHandle,
       firstName: adminData.firstName,
@@ -51,7 +64,7 @@ export class UserService {
       bonusBalance: '0.00'
     });
 
-    console.log('Administrator created successfully:', admin.email);
+    console.log('Administrator created successfully:', admin.email, 'Password: admin123');
     return admin;
   }
 
