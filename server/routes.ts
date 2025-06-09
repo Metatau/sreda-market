@@ -1282,6 +1282,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Удалить источник данных
   app.delete("/api/admin/sources/:id", requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
     try {
+      // Check if user is admin
+      if (req.user?.role !== 'administrator') {
+        return res.status(403).json({ success: false, error: "Admin access required" });
+      }
+
       const sourceId = parseInt(req.params.id);
       if (isNaN(sourceId)) {
         return res.status(400).json({ success: false, error: "Invalid source ID" });
