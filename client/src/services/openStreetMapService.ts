@@ -35,6 +35,45 @@ export interface ReverseGeocodingResult {
   };
 }
 
+// Новые интерфейсы для геоаналитики
+export interface OSMAmenity {
+  id: string;
+  lat: number;
+  lon: number;
+  tags: {
+    amenity?: string;
+    name?: string;
+    type?: string;
+    [key: string]: any;
+  };
+  distance?: number;
+}
+
+export interface OSMTransportNode {
+  id: string;
+  lat: number;
+  lon: number;
+  tags: {
+    public_transport?: string;
+    railway?: string;
+    highway?: string;
+    name?: string;
+    [key: string]: any;
+  };
+  distance?: number;
+}
+
+export interface OSMTrafficData {
+  roads: Array<{
+    id: string;
+    highway: string;
+    name?: string;
+    maxspeed?: string;
+    lanes?: string;
+  }>;
+  traffic_intensity: 'low' | 'medium' | 'high';
+}
+
 /**
  * Класс для работы с OpenStreetMap и геокодированием
  */
@@ -197,6 +236,255 @@ export class OpenStreetMapService {
     }
     
     return result.display_name;
+  }
+
+  /**
+   * Получение объектов инфраструктуры в радиусе
+   */
+  async getAmenities(lat: number, lng: number, radius: number, amenityType?: string): Promise<OSMAmenity[]> {
+    return this.queueRequest(async () => {
+      const overpassUrl = 'https://overpass-api.de/api/interpreter';
+      
+      const amenityFilter = amenityType ? `[amenity=${amenityType}]` : '[amenity]';
+      const query = `
+        [out:json][timeout:25];
+        (
+          node${amenityFilter}(around:${radius},${lat},${lng});
+          way${amenityFilter}(around:${radius},${lat},${lng});
+          relation${amenityFilter}(around:${radius},${lat},${lng});
+        );
+        out center meta;
+      `;
+
+      const response = await fetch(overpassUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'User-Agent': 'SREDA Market Analytics/1.0'
+        },
+        body: query
+      });
+
+      if (!response.ok) {
+        throw new Error(`Overpass API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.elements.map((element: any) => ({
+        id: element.id.toString(),
+        lat: element.lat || element.center?.lat || 0,
+        lon: element.lon || element.center?.lon || 0,
+        tags: element.tags || {},
+        distance: this.calculateDistance(lat, lng, element.lat || element.center?.lat || 0, element.lon || element.center?.lon || 0)
+      }));
+    });
+  }
+
+  /**
+   * Получение транспортных узлов в радиусе
+   */
+  async getTransportNodes(lat: number, lng: number, radius: number): Promise<OSMTransportNode[]> {
+    return this.queueRequest(async () => {
+      const overpassUrl = 'https://overpass-api.de/api/interpreter';
+      
+      const query = `
+        [out:json][timeout:25];
+        (
+          node[public_transport](around:${radius},${lat},${lng});
+          node[railway~"^(station|halt|tram_stop)$"](around:${radius},${lat},${lng});
+          node[highway=bus_stop](around:${radius},${lat},${lng});
+        );
+        out meta;
+      `;
+
+      const response = await fetch(overpassUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'User-Agent': 'SREDA Market Analytics/1.0'
+        },
+        body: query
+      });
+
+      if (!response.ok) {
+        throw new Error(`Overpass API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.elements.map((element: any) => ({
+        id: element.id.toString(),
+        lat: element.lat,
+        lon: element.lon,
+        tags: element.tags || {},
+        distance: this.calculateDistance(lat, lng, element.lat, element.lon)
+      }));
+    });
+  }
+
+  /**
+   * Получение данных о дорожной сети
+   */
+  async getTrafficData(lat: number, lng: number): Promise<OSMTrafficData> {
+    return this.queueRequest(async () => {
+      const overpassUrl = 'https://overpass-api.de/api/interpreter';
+      
+      const query = `
+        [out:json][timeout:25];
+        (
+          way[highway~"^(motorway|trunk|primary|secondary|tertiary)$"](around:1000,${lat},${lng});
+        );
+        out meta;
+      `;
+
+      const response = await fetch(overpassUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'User-Agent': 'SREDA Market Analytics/1.0'
+        },
+        body: query
+      });
+
+      if (!response.ok) {
+        throw new Error(`Overpass API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const roads = data.elements.map((element: any) => ({
+        id: element.id.toString(),
+        highway: element.tags?.highway || 'unknown',
+        name: element.tags?.name || 'Безымянная дорога',
+        maxspeed: element.tags?.maxspeed,
+        lanes: element.tags?.lanes
+      }));
+
+      // Определяем интенсивность трафика по типам дорог
+      const majorRoads = roads.filter(road => 
+        ['motorway', 'trunk', 'primary'].includes(road.highway)
+      ).length;
+      
+      let traffic_intensity: 'low' | 'medium' | 'high' = 'low';
+      if (majorRoads >= 3) traffic_intensity = 'high';
+      else if (majorRoads >= 1) traffic_intensity = 'medium';
+
+      return { roads, traffic_intensity };
+    });
+  }
+
+  /**
+   * Получение данных о населении (приблизительно по плотности зданий)
+   */
+  async getPopulationData(bounds: { north: number; south: number; east: number; west: number }): Promise<{
+    building_density: number;
+    estimated_population: number;
+  }> {
+    return this.queueRequest(async () => {
+      const overpassUrl = 'https://overpass-api.de/api/interpreter';
+      
+      const query = `
+        [out:json][timeout:25];
+        (
+          way[building](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+          relation[building](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+        );
+        out count;
+      `;
+
+      const response = await fetch(overpassUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'User-Agent': 'SREDA Market Analytics/1.0'
+        },
+        body: query
+      });
+
+      if (!response.ok) {
+        throw new Error(`Overpass API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const buildingCount = data.elements?.[0]?.tags?.total || 0;
+      
+      // Приблизительная оценка плотности населения
+      const area = this.calculateBoundsArea(bounds);
+      const building_density = buildingCount / area; // зданий на км²
+      const estimated_population = buildingCount * 15; // примерно 15 человек на здание
+
+      return { building_density, estimated_population };
+    });
+  }
+
+  /**
+   * Получение объектов недвижимости в области
+   */
+  async getRealEstateObjects(bounds: { north: number; south: number; east: number; west: number }): Promise<any[]> {
+    return this.queueRequest(async () => {
+      const overpassUrl = 'https://overpass-api.de/api/interpreter';
+      
+      const query = `
+        [out:json][timeout:25];
+        (
+          way[building~"^(residential|apartments|house)$"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+          relation[building~"^(residential|apartments|house)$"](${bounds.south},${bounds.west},${bounds.north},${bounds.east});
+        );
+        out center meta;
+      `;
+
+      const response = await fetch(overpassUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'User-Agent': 'SREDA Market Analytics/1.0'
+        },
+        body: query
+      });
+
+      if (!response.ok) {
+        throw new Error(`Overpass API error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.elements.map((element: any) => ({
+        id: element.id.toString(),
+        lat: element.lat || element.center?.lat || 0,
+        lon: element.lon || element.center?.lon || 0,
+        tags: element.tags || {},
+        building_type: element.tags?.building || 'residential'
+      }));
+    });
+  }
+
+  /**
+   * Вычисление расстояния между двумя точками (в метрах)
+   */
+  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371e3; // радиус Земли в метрах
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lng2-lng1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+  }
+
+  /**
+   * Вычисление площади области в км²
+   */
+  private calculateBoundsArea(bounds: { north: number; south: number; east: number; west: number }): number {
+    const latDiff = bounds.north - bounds.south;
+    const lngDiff = bounds.east - bounds.west;
+    
+    // Приблизительное вычисление площади
+    const kmPerDegreeLat = 111.32;
+    const kmPerDegreeLng = 111.32 * Math.cos(((bounds.north + bounds.south) / 2) * Math.PI / 180);
+    
+    return (latDiff * kmPerDegreeLat) * (lngDiff * kmPerDegreeLng);
   }
 
   /**
