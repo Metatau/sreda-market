@@ -21,6 +21,7 @@ import { imageRoutes } from "./imageRoutes";
 import mapRoutes from "./mapRoutes";
 import insightsRoutes from "./insights";
 import adminSourcesRoutes from "./adminSources";
+import chatRoutes from "./chat.routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Force JSON response for all API routes (before other middleware)
