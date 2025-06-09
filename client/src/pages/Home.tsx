@@ -154,7 +154,7 @@ export default function Home() {
 
         {/* Map Section */}
         <div className="w-full px-2 sm:px-4">
-          <div className="relative h-[350px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
+          <div className="relative h-[250px] sm:h-[300px] lg:h-[350px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
             <PropertyMap 
               properties={properties as any}
               selectedProperty={selectedProperty}

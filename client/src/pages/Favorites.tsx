@@ -52,11 +52,11 @@ export function Favorites() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
           <Card className="text-center">
-            <CardContent className="pt-6">
-              <Heart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+              <Heart className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-3 sm:mb-4" />
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                 Войдите в аккаунт
               </h2>
               <p className="text-gray-600">
@@ -129,21 +129,21 @@ export function Favorites() {
           </div>
         ) : favoritesData.length === 0 ? (
           <Card className="text-center">
-            <CardContent className="pt-12 pb-12">
-              <Heart className="h-16 w-16 text-gray-300 mx-auto mb-6" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <CardContent className="pt-8 pb-8 sm:pt-12 sm:pb-12 p-4 sm:p-6">
+              <Heart className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4 sm:mb-6" />
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                 Ваше избранное пусто
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
                 Добавляйте понравившиеся объекты в избранное, нажимая на иконку звездочки
               </p>
-              <Button onClick={() => window.location.href = '/'}>
+              <Button onClick={() => window.location.href = '/'} className="text-sm sm:text-base">
                 Найти недвижимость
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className={`grid gap-3 sm:gap-4 lg:gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+          <div className={`grid gap-2 sm:gap-3 lg:gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
             {favoritesData.map((favorite) => (
               <PropertyCard
                 key={favorite.id}
