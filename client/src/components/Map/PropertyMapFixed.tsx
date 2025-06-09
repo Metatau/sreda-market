@@ -16,9 +16,9 @@ const parseCoordinates = (coordinates: string): { lat: number; lng: number } | n
     const coords = coordinates.match(/POINT\(([^)]+)\)/)?.[1];
     if (coords) {
       const [longitude, latitude] = coords.split(' ').map(Number);
-      // ИСПРАВЛЕНИЕ: В POINT(longitude latitude) первое значение - долгота, второе - широта
-      // Но в базе данных значения перепутаны, поэтому меняем местами
-      return { lat: longitude, lng: latitude }; // Исправленный порядок
+      // В POINT(longitude latitude) первое значение - долгота, второе - широта
+      // Возвращаем правильно: lat = latitude, lng = longitude
+      return { lat: latitude, lng: longitude };
     }
   } else {
     // JSON format: [latitude, longitude]
