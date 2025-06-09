@@ -1,0 +1,320 @@
+# Задача: Модификация GeospatialService для расширенной геоаналитики
+
+## Контекст
+Необходимо переписать существующий GeospatialService в приложении SREDA Market, заменив текущий функционал на новые аналитические возможности, сохранив совместимость с существующей архитектурой.
+
+## Цель
+Создать систему геоаналитики недвижимости с детальными показателями по кварталам через popup-окна с информацией, получаемой из OpenStreetMap и API Perplexity для дополнительных аналитических данных.
+
+## Файлы для модификации
+
+### Основные файлы:
+- `client/src/components/Map/services/GeospatialService.ts` - основной сервис (переписать)
+- `server/services/geoService.ts` - серверный сервис (дополнить)
+- `client/src/components/Map/types/geospatial.ts` - типы данных (обновить)
+- `client/src/services/openStreetMapService.ts` - сервис OSM (расширить)
+- `client/src/services/perplexityService.ts` - новый сервис для Perplexity API (создать)
+
+## Технические требования
+
+### 1. Новые типы данных
+Создать интерфейсы для:
+```typescript
+interface QuarterAnalytics {
+  // Демографические показатели
+  demographics: {
+    population: {
+      density: number; // чел/км²
+      total: number;
+      growth_forecast: 'increase' | 'decrease' | 'stable';
+    };
+    structure: {
+      average_age: number;
+      family_composition: {
+        singles: number; // %
+        families_with_children: number; // %
+        elderly: number; // %
+      };
+      income_level: 'low' | 'medium' | 'high' | 'mixed';
+    };
+  };
+  
+  // Транспортная доступность
+  transport: {
+    pedestrian_traffic: 'low' | 'medium' | 'high';
+    car_traffic: 'low' | 'medium' | 'high';
+    metro_distance: number; // метры
+    public_transport_stops: {
+      bus_stops: number;
+      nearest_distance: number; // метры
+    };
+    major_roads_distance: number; // метры
+  };
+  
+  // Инфраструктурная обеспеченность
+  infrastructure: {
+    education: {
+      schools: number;
+      kindergartens: number;
+      nearest_school_distance: number; // метры
+    };
+    healthcare: {
+      hospitals: number;
+      clinics: number;
+      nearest_medical_distance: number; // метры
+    };
+    commercial: {
+      shopping_centers: number;
+      shops: number;
+      restaurants: number;
+    };
+    recreation: {
+      parks: number;
+      sports_facilities: number;
+      nearest_park_distance: number; // метры
+    };
+    infrastructure_score: number; // 0-100
+  };
+  
+  // Конкурентное окружение
+  competition: {
+    new_buildings: number;
+    secondary_housing: number;
+    total_competing_objects: number;
+  };
+  
+  // Экономические показатели
+  economics: {
+    price_per_sqm: {
+      economy_class: number;
+      comfort_class: number;
+      business_class: number;
+      elite_class: number;
+    };
+    price_dynamics: {
+      yearly_change: number; // %
+      trend: 'growing' | 'falling' | 'stable';
+    };
+    market_activity: {
+      average_sale_time: number; // дней
+      demand_level: 'low' | 'medium' | 'high';
+      sales_velocity: number; // объектов/месяц
+    };
+    demand_forecast: 'increasing' | 'decreasing' | 'stable';
+  };
+  
+  // Дополнительные аналитические данные от Perplexity
+  perplexity_insights?: {
+    market_sentiment: string; // Общее настроение рынка в районе
+    development_projects: string[]; // Планируемые проекты развития
+    investment_attractiveness: number; // 0-100
+    unique_location_features: string[]; // Уникальные особенности локации
+    expert_opinion: string; // Экспертная оценка района
+    future_trends: string[]; // Прогнозируемые тренды развития
+  };
+}
+
+interface EnhancedQuarterAnalytics extends QuarterAnalytics {
+  ai_insights: {
+    summary: string; // Краткая сводка по району
+    strengths: string[]; // Сильные стороны локации
+    weaknesses: string[]; // Слабые стороны
+    opportunities: string[]; // Возможности для инвестиций
+    threats: string[]; // Потенциальные риски
+    investment_recommendation: 'buy' | 'hold' | 'avoid';
+    confidence_score: number; // 0-100
+  };
+}
+```
+
+### 2. Модификация GeospatialService
+
+#### Удалить текущий функционал:
+- Все существующие методы тепловых карт
+- AdvancedHeatmapMode enum
+- Связанные вычисления ROI, ликвидности и т.д.
+
+#### Добавить новый функционал:
+```typescript
+class GeospatialService {
+  // Основной метод получения аналитики квартала
+  static async getQuarterAnalytics(
+    lat: number, 
+    lng: number, 
+    radius: number = 1000
+  ): Promise<QuarterAnalytics>;
+  
+  // Получение демографических данных через OSM + Perplexity
+  static async getDemographics(bounds: LatLngBounds): Promise<Demographics>;
+  
+  // Анализ транспортной доступности (OSM)
+  static async getTransportAnalysis(
+    lat: number, 
+    lng: number
+  ): Promise<TransportAccessibility>;
+  
+  // Оценка инфраструктуры (OSM + Perplexity для дополнительного контекста)
+  static async getInfrastructureScore(
+    lat: number, 
+    lng: number, 
+    radius: number
+  ): Promise<InfrastructureData>;
+  
+  // Анализ конкуренции (OSM + Perplexity для рыночных данных)
+  static async getCompetitionAnalysis(
+    bounds: LatLngBounds
+  ): Promise<CompetitionData>;
+  
+  // Экономический анализ (комбинированные данные)
+  static async getEconomicIndicators(
+    lat: number, 
+    lng: number
+  ): Promise<EconomicData>;
+
+  // Новые методы с использованием Perplexity
+  static async getEnhancedAnalytics(
+    location: string,
+    lat: number,
+    lng: number
+  ): Promise<EnhancedQuarterAnalytics>;
+}
+```
+
+### 3. Интеграция с OpenStreetMap и Perplexity API
+
+Расширить `openStreetMapService.ts`:
+```typescript
+// Добавить методы для получения:
+- getAmenities(lat, lng, radius, type) // школы, больницы, магазины
+- getTransportNodes(lat, lng, radius) // остановки, станции метро
+- getTrafficData(lat, lng) // дорожная сеть, интенсивность
+- getPopulationData(bounds) // демографические данные
+- getRealEstateObjects(bounds) // конкурирующие объекты
+```
+
+Создать `perplexityService.ts`:
+```typescript
+class PerplexityService {
+  private static readonly API_BASE = 'https://api.perplexity.ai';
+  private static readonly API_KEY = process.env.VITE_PERPLEXITY_API_KEY;
+
+  // Получение демографических данных района
+  static async getDemographicInsights(
+    location: string, 
+    city: string
+  ): Promise<DemographicInsights>;
+
+  // Анализ экономической ситуации в районе
+  static async getEconomicAnalysis(
+    location: string, 
+    city: string
+  ): Promise<EconomicAnalysis>;
+
+  // Получение информации о развитии инфраструктуры
+  static async getInfrastructureDevelopment(
+    location: string, 
+    city: string
+  ): Promise<InfrastructureAnalysis>;
+
+  // Анализ рынка недвижимости в районе
+  static async getRealEstateMarketAnalysis(
+    location: string, 
+    city: string
+  ): Promise<MarketAnalysis>;
+
+  // Прогнозы развития района
+  static async getDistrictForecast(
+    location: string, 
+    city: string
+  ): Promise<DistrictForecast>;
+
+  // Базовый метод для запросов к Perplexity API
+  private static async queryPerplexity(
+    prompt: string, 
+    model: string = 'llama-3.1-sonar-small-128k-online'
+  ): Promise<any>;
+}
+```
+
+### 4. Popup компонент
+
+Создать `client/src/components/Map/components/QuarterAnalyticsPopup.tsx`:
+```tsx
+interface Props {
+  analytics: QuarterAnalytics;
+  position: [number, number];
+  onClose: () => void;
+}
+
+// Структурированное отображение всех аналитических данных
+// с вкладками или аккордеонами для группировки информации
+```
+
+### 5. Обновление серверного сервиса
+
+В `server/services/geoService.ts`:
+- Добавить методы для работы с новыми типами данных
+- Интегрировать с PostGIS для пространственных запросов по инфраструктуре
+- Добавить кэширование аналитических данных (особенно важно для Perplexity API)
+- Создать endpoints для получения квартальной аналитики
+- Реализовать rate limiting для внешних API
+- Добавить обработку ошибок и fallback механизмы для Perplexity API
+
+### 6. Настройка переменных окружения
+
+Добавить в `.env`:
+```
+VITE_PERPLEXITY_API_KEY=your_perplexity_api_key_here
+```
+
+### 7. Стратегия использования данных
+
+**OpenStreetMap (основные данные):**
+- Количественные показатели (количество объектов, расстояния)
+- Географические координаты инфраструктуры
+- Транспортные узлы и дорожная сеть
+
+**Perplexity API (аналитические инсайты):**
+- Качественная оценка районов
+- Рыночные тренды и прогнозы
+- Экспертные мнения и рекомендации
+- Контекстная информация о развитии района
+- SWOT-анализ локации
+
+### 6. Интеграция с картой
+
+Обновить компоненты карты:
+- При клике на карту показывать popup с базовой аналитикой (OSM данные)
+- Добавить кнопку "Расширенный анализ" для получения AI-инсайтов от Perplexity
+- Добавить loading состояние во время загрузки данных (особенно для Perplexity запросов)
+- Обеспечить корректное закрытие popup-ов
+- Кэшировать Perplexity данные на клиенте для избежания повторных запросов
+
+## Важные ограничения
+
+1. **Не ломать существующую архитектуру**: сохранить структуру файлов и основные интерфейсы
+2. **Обратная совместимость**: убедиться, что другие компоненты приложения продолжают работать
+3. **Производительность**: кэшировать данные OSM и Perplexity, не делать избыточные запросы
+4. **Обработка ошибок**: добавить fallback для случаев недоступности OSM и Perplexity API
+5. **Rate limiting**: соблюдать ограничения OSM и Perplexity API
+6. **Стоимость API**: минимизировать количество запросов к Perplexity (платный API), использовать агрессивное кэширование
+7. **Безопасность**: API ключи должны быть защищены и не попадать в клиентский код
+
+## Последовательность выполнения
+
+1. Обновить типы данных в `geospatial.ts`
+2. Создать `perplexityService.ts` с методами для AI-анализа
+3. Расширить `openStreetMapService.ts` новыми методами
+4. Переписать `GeospatialService.ts` с новым функционалом
+5. Обновить серверный `geoService.ts`
+6. Создать компонент popup-а для отображения базовой и расширенной аналитики
+7. Интегрировать с картой (базовый анализ + кнопка расширенного анализа)
+8. Настроить кэширование и rate limiting
+9. Протестировать функциональность
+
+## Результат
+После выполнения задачи пользователи смогут кликать на любую точку карты и получать:
+1. **Базовую аналитику** (OpenStreetMap данные) - быстро загружается
+2. **Расширенную AI-аналитику** (Perplexity API) - по запросу с кнопкой
+
+Данные будут включать детальную информацию о квартале с демографическими, транспортными, инфраструктурными, конкурентными и экономическими показателями, дополненную AI-инсайтами, экспертными оценками и инвестиционными рекомендациями в удобном popup-окне.
