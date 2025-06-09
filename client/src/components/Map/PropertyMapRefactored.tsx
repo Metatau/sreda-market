@@ -302,6 +302,26 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
         console.warn('Failed to add property markers to map');
       } else {
         console.log('Successfully added', propertyMarkers.length, 'property markers to map');
+        
+        // Автоматически подгоняем карту под все маркеры
+        setTimeout(() => {
+          const success = leafletMapService.fitToMarkers(mapId, 20);
+          if (success) {
+            console.log('Map fitted to show all markers with minimal padding');
+            // После подгонки добавляем немного зума для лучшей видимости
+            setTimeout(() => {
+              const mapInstance = leafletMapService.maps.get(mapId);
+              if (mapInstance) {
+                const currentZoom = mapInstance.leafletMap.getZoom();
+                const newZoom = Math.max(3, currentZoom - 1); // Минимум 3-й зум
+                mapInstance.leafletMap.setZoom(newZoom);
+                console.log(`Adjusted zoom from ${currentZoom} to ${newZoom} for better marker visibility`);
+              }
+            }, 200);
+          } else {
+            console.warn('Failed to fit map to markers');
+          }
+        }, 100);
       }
     };
 
@@ -512,7 +532,56 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
       {/* Map Controls Panel */}
       <div className="absolute top-4 right-4 bottom-4 bg-white rounded-lg shadow-lg p-4 space-y-4 min-w-[200px] max-h-[calc(100%-2rem)] overflow-y-auto">
         <div>
-          <h3 className="text-sm font-semibold text-gray-800 mb-3">Инструменты карты</h3>
+          <h3 className="text-sm font-semibold text-gray-800 mb-3">
+            Инструменты карты
+            <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+              {properties.length} объектов
+            </span>
+          </h3>
+          
+          {/* Zoom Controls */}
+          <div className="space-y-2 mb-4">
+            <button
+              onClick={() => {
+                if (mapId) {
+                  leafletMapService.fitToMarkers(mapId, 50);
+                }
+              }}
+              className="w-full px-3 py-2 text-sm rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+              🗺️ Показать все объекты
+            </button>
+            <button
+              onClick={() => {
+                // Фокус на текущем регионе
+                if (properties.length > 0) {
+                  const regionProperties = properties.slice(0, Math.min(4, properties.length));
+                  const bounds = regionProperties.map(p => {
+                    let lat: number, lng: number;
+                    
+                    if (p.coordinates?.startsWith('POINT(')) {
+                      const coords = p.coordinates.match(/POINT\(([^)]+)\)/)?.[1];
+                      if (coords) {
+                        const [longitude, latitude] = coords.split(' ').map(Number);
+                        return [latitude, longitude];
+                      }
+                    }
+                    
+                    return null;
+                  }).filter(Boolean);
+                  
+                  if (bounds.length > 0) {
+                    const avgLat = bounds.reduce((sum, coord) => sum + coord[0], 0) / bounds.length;
+                    const avgLng = bounds.reduce((sum, coord) => sum + coord[1], 0) / bounds.length;
+                    leafletMapService.setView(mapId, [avgLat, avgLng], 11);
+                  }
+                }
+              }}
+              className="w-full px-3 py-2 text-sm rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+            >
+              📍 Фокус на регионе
+            </button>
+          </div>
           
           {/* Tool Buttons */}
           <div className="space-y-2">
