@@ -193,10 +193,10 @@ export const AIStrategyExplainerModal: React.FC<AIStrategyExplainerModalProps> =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center text-2xl">
-            <Brain className="w-6 h-6 mr-2 text-blue-600" />
+      <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="flex items-center text-lg sm:text-2xl">
+            <Brain className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-blue-600" />
             ИИ-объяснение инвестиционных стратегий
           </DialogTitle>
         </DialogHeader>
@@ -270,42 +270,42 @@ export const AIStrategyExplainerModal: React.FC<AIStrategyExplainerModalProps> =
               </Card>
 
               {/* Key Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <Clock className="w-6 h-6 mx-auto mb-2 text-blue-600" />
-                    <div className="text-sm text-gray-600">Срок</div>
-                    <div className="font-semibold">{strategyData.timeframe}</div>
+                  <CardContent className="p-2 sm:p-4 text-center">
+                    <Clock className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2 text-blue-600" />
+                    <div className="text-xs sm:text-sm text-gray-600">Срок</div>
+                    <div className="text-xs sm:text-base font-semibold">{strategyData.timeframe}</div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <TrendingUp className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                    <div className="text-sm text-gray-600">Доходность</div>
-                    <div className="font-semibold">{strategyData.expectedReturn}</div>
+                  <CardContent className="p-2 sm:p-4 text-center">
+                    <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2 text-green-600" />
+                    <div className="text-xs sm:text-sm text-gray-600">Доходность</div>
+                    <div className="text-xs sm:text-base font-semibold">{strategyData.expectedReturn}</div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <DollarSign className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                    <div className="text-sm text-gray-600">Инвестиции</div>
-                    <div className="font-semibold">{strategyData.initialInvestment}</div>
+                  <CardContent className="p-2 sm:p-4 text-center">
+                    <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2 text-purple-600" />
+                    <div className="text-xs sm:text-sm text-gray-600">Инвестиции</div>
+                    <div className="text-xs sm:text-base font-semibold">{strategyData.initialInvestment}</div>
                   </CardContent>
                 </Card>
                 
                 <Card>
-                  <CardContent className="p-4 text-center">
-                    <Calculator className="w-6 h-6 mx-auto mb-2 text-orange-600" />
-                    <div className="text-sm text-gray-600">Ежемесячно</div>
-                    <div className="font-semibold">{strategyData.monthlyCommitment}</div>
+                  <CardContent className="p-2 sm:p-4 text-center">
+                    <Calculator className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1 sm:mb-2 text-orange-600" />
+                    <div className="text-xs sm:text-sm text-gray-600">Ежемесячно</div>
+                    <div className="text-xs sm:text-base font-semibold">{strategyData.monthlyCommitment}</div>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Pros and Cons */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-green-600 flex items-center gap-2">

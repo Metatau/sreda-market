@@ -580,7 +580,7 @@ export default function Landing() {
       </footer>
       {/* Модальное окно с промокодом */}
       <Dialog open={isPromoModalOpen} onOpenChange={setIsPromoModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[95vw] max-w-md h-auto max-h-[90vh] overflow-y-auto p-3 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-center">🎉 Ваш промокод готов!</DialogTitle>
             <DialogDescription className="text-center">

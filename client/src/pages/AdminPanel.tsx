@@ -912,7 +912,7 @@ export default function AdminPanel() {
                         Добавить источник
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="w-[95vw] max-w-2xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
                       <DialogHeader>
                         <DialogTitle>
                           {editingSource ? 'Редактировать источник данных' : 'Добавить новый источник данных'}
@@ -1731,7 +1731,7 @@ export default function AdminPanel() {
 
       {/* Диалог редактирования тарифного плана */}
       <Dialog open={isEditPlanDialogOpen} onOpenChange={setIsEditPlanDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[95vw] max-w-md h-auto max-h-[90vh] overflow-y-auto p-3 sm:p-6">
           <DialogHeader>
             <DialogTitle>Редактировать тарифный план</DialogTitle>
             <DialogDescription>
