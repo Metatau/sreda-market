@@ -114,9 +114,7 @@ export default function Home() {
                     <div>
                       <h4 className={`font-semibold text-sm transition-colors ${
                         activeMapTool === 'heatmap' ? 'text-blue-700' : 'text-gray-900'
-                      }`}>
-                        Тепловые карты
-                        {activeMapTool === 'heatmap' && <span className="ml-2 text-blue-600">●</span>}
+                      }`}>Тепловая карта{activeMapTool === 'heatmap' && <span className="ml-2 text-blue-600">●</span>}
                       </h4>
                       <p className="text-xs text-gray-600">Карта цен</p>
                     </div>
