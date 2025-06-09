@@ -15,7 +15,7 @@ import { useNewProperties } from '@/hooks/useNewProperties';
 import { usePropertyAnalytics } from '@/hooks/usePropertyAnalytics';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Property, PropertyFilters as FilterType, InvestmentAnalytics } from '@/types';
-import { TrendingUp, BarChart3, Clock, MapPin } from 'lucide-react';
+import { TrendingUp, BarChart3, Clock, MapPin, Filter } from 'lucide-react';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,6 +25,7 @@ export default function Home() {
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [activeMapTool, setActiveMapTool] = useState<'none' | 'heatmap' | 'geoanalysis' | 'investment'>('none');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: regions = [] } = useRegions();
@@ -166,17 +167,39 @@ export default function Home() {
       </div>
       {/* Flexible Bottom Section */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        <div className="h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4">
-          <div className="h-full grid grid-cols-1 lg:grid-cols-4 gap-4">
-            {/* Fixed Filters Sidebar */}
-            <div className="lg:col-span-1 overflow-hidden">
+        <div className="h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-4">
+          <div className="h-full flex flex-col lg:grid lg:grid-cols-4 gap-4">
+            {/* Mobile Filters Toggle */}
+            <div className="lg:hidden">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className="w-full mb-4"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Фильтры {mobileFiltersOpen ? '▲' : '▼'}
+              </Button>
+              
+              {mobileFiltersOpen && (
+                <div className="mb-4 bg-white rounded-lg border p-4 max-h-60 overflow-y-auto">
+                  <PropertyFilters 
+                    filters={filters} 
+                    onFiltersChange={handleFilterChange}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Filters Sidebar */}
+            <div className="hidden lg:block lg:col-span-1 overflow-hidden">
               <div className="h-full overflow-y-auto pr-2">
                 <PropertyFilters 
                   filters={filters} 
                   onFiltersChange={handleFilterChange}
                 />
                 
-                {/* Analytics Overview Cards */}
+                {/* Analytics Overview Cards - Hidden on mobile to save space */}
                 <div className="mt-6 space-y-4 pb-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -223,16 +246,16 @@ export default function Home() {
             </div>
 
             {/* Scrollable Properties Content */}
-            <div className="lg:col-span-3 overflow-hidden">
+            <div className="flex-1 lg:col-span-3 overflow-hidden">
               <div className="h-full flex flex-col">
                 {/* Fixed Controls */}
-                <div className="flex-none bg-white rounded-lg shadow-sm border p-3 mb-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-                    <p className="text-sm text-gray-600">
+                <div className="flex-none bg-white rounded-lg shadow-sm border p-2 sm:p-3 mb-2 sm:mb-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                    <p className="text-xs sm:text-sm text-gray-600">
                       Найдено {pagination?.total || 0} объектов
                     </p>
                     <Select defaultValue="price_asc">
-                      <SelectTrigger className="w-full sm:w-48">
+                      <SelectTrigger className="w-full sm:w-48 text-xs sm:text-sm">
                         <SelectValue placeholder="Сортировка" />
                       </SelectTrigger>
                       <SelectContent>
@@ -246,21 +269,21 @@ export default function Home() {
                 </div>
 
                 {/* Scrollable Property Grid */}
-                <div className="flex-1 overflow-y-auto pr-2">
+                <div className="flex-1 overflow-y-auto pr-1 sm:pr-2">
                   {isLoading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
                       {[...Array(6)].map((_, i) => (
                         <Card key={i} className="animate-pulse">
-                          <CardContent className="p-3 sm:p-4">
-                            <div className="h-32 sm:h-40 bg-gray-200 rounded mb-3 sm:mb-4"></div>
-                            <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                            <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                          <CardContent className="p-2 sm:p-3 lg:p-4">
+                            <div className="h-28 sm:h-32 lg:h-40 bg-gray-200 rounded mb-2 sm:mb-3 lg:mb-4"></div>
+                            <div className="h-3 sm:h-4 bg-gray-200 rounded mb-1 sm:mb-2"></div>
+                            <div className="h-2 sm:h-3 bg-gray-200 rounded w-2/3"></div>
                           </CardContent>
                         </Card>
                       ))}
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 pb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3 lg:gap-4 pb-4">
                       {properties.map((property: any) => (
                         <PropertyCard
                           key={property.id}
@@ -274,17 +297,18 @@ export default function Home() {
 
                   {/* Pagination */}
                   {pagination && pagination.pages && pagination.pages > 1 && (
-                    <div className="flex justify-center space-x-2 py-4">
+                    <div className="flex justify-center space-x-1 sm:space-x-2 py-2 sm:py-4">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
+                        className="text-xs sm:text-sm px-2 sm:px-3"
                       >
                         Назад
                       </Button>
                       
-                      <span className="flex items-center px-3 text-sm text-gray-600">
+                      <span className="flex items-center px-2 sm:px-3 text-xs sm:text-sm text-gray-600">
                         {currentPage} из {pagination.pages}
                       </span>
                       
@@ -293,6 +317,7 @@ export default function Home() {
                         size="sm"
                         onClick={() => setCurrentPage(Math.min(pagination.pages || 1, currentPage + 1))}
                         disabled={currentPage === pagination.pages}
+                        className="text-xs sm:text-sm px-2 sm:px-3"
                       >
                         Далее
                       </Button>

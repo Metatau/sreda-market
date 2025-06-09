@@ -62,12 +62,12 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4 sm:space-y-6 pt-0">
+      <CardContent className="space-y-3 sm:space-y-4 pt-0 p-3 sm:p-6">
         {/* City Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Город</label>
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Город</label>
           <Select value={filters.regionId?.toString() || "all"} onValueChange={(value) => handleFilterChange('regionId', value === "all" ? null : parseInt(value))}>
-            <SelectTrigger>
+            <SelectTrigger className="h-8 sm:h-10 text-xs sm:text-sm">
               <SelectValue placeholder="Все города" />
             </SelectTrigger>
             <SelectContent>
@@ -83,19 +83,19 @@ export function PropertyFilters({ filters, onFiltersChange }: PropertyFiltersPro
 
         {/* Market Type Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Тип недвижимости</label>
-          <div className="grid grid-cols-2 gap-3">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Тип недвижимости</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             <Button
               variant={filters.marketType === 'secondary' ? "default" : "outline"}
               onClick={() => handleFilterChange('marketType', filters.marketType === 'secondary' ? undefined : 'secondary')}
-              className="h-10"
+              className="h-8 sm:h-10 text-xs sm:text-sm"
             >
               Вторичка
             </Button>
             <Button
               variant={filters.marketType === 'new_construction' ? "default" : "outline"}
               onClick={() => handleFilterChange('marketType', filters.marketType === 'new_construction' ? undefined : 'new_construction')}
-              className="h-10"
+              className="h-8 sm:h-10 text-xs sm:text-sm"
             >
               Новостройки
             </Button>
