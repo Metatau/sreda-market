@@ -3,6 +3,26 @@ import type { Property } from '@/types';
 import { leafletMapService } from '@/services/leafletMapService';
 import { geolocationService } from '@/services/geolocationService';
 
+// Utility function to correctly parse coordinates from POINT format
+const parseCoordinates = (coordinates: string): { lat: number; lng: number } | null => {
+  if (coordinates.startsWith('POINT(')) {
+    const coords = coordinates.match(/POINT\(([^)]+)\)/)?.[1];
+    if (coords) {
+      const [longitude, latitude] = coords.split(' ').map(Number);
+      return { lat: latitude, lng: longitude }; // Correct order for Leaflet
+    }
+  } else {
+    // JSON format: [latitude, longitude]
+    try {
+      const [latitude, longitude] = JSON.parse(coordinates);
+      return { lat: latitude, lng: longitude };
+    } catch (e) {
+      console.warn('Failed to parse coordinates:', coordinates);
+    }
+  }
+  return null;
+};
+
 export interface PropertyMapProps {
   properties: Property[];
   selectedProperty?: Property | null;
