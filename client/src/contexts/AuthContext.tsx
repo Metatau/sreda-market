@@ -39,14 +39,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth/status');
+      const response = await fetch('/api/users/status');
       if (response.ok) {
         const userData = await response.json();
         if (userData.authenticated) {
           setUser({
-            id: userData.userId,
-            name: userData.userName,
-            roles: userData.userRoles,
+            id: userData.user.id,
+            name: userData.user.username,
+            roles: userData.user.role,
           });
         }
       }
