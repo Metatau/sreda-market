@@ -5,6 +5,25 @@ import { schedulerService } from '../services/schedulerService';
 
 const router = Router();
 
+// API info endpoint
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      service: 'Admin Service',
+      endpoints: [
+        'GET /ads-api/status - Get ADS API status',
+        'POST /ads-api/sync - Trigger ADS API sync',
+        'GET /scheduler/status - Get scheduler status',
+        'POST /scheduler/start - Start scheduler',
+        'POST /scheduler/stop - Stop scheduler'
+      ],
+      status: 'active',
+      access: 'admin-only'
+    }
+  });
+});
+
 // ADS API status endpoint
 router.get('/ads-api/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
   try {
