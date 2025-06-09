@@ -376,60 +376,164 @@ export default function Login() {
 
               <TabsContent value="register" className="space-y-4">
                 <form onSubmit={handleRegister} className="space-y-4">
+                  {/* General error display */}
+                  {errors.general && (
+                    <div className="bg-red-50 border border-red-200 rounded-md p-3 flex items-start space-x-2">
+                      <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-red-700">{errors.general}</span>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">Имя</Label>
+                      <Label htmlFor="firstName">Имя *</Label>
                       <Input
                         id="firstName"
                         placeholder="Иван"
                         value={registerForm.firstName}
-                        onChange={(e) => setRegisterForm({ ...registerForm, firstName: e.target.value })}
+                        onChange={(e) => {
+                          setRegisterForm({ ...registerForm, firstName: e.target.value });
+                          if (e.target.value.trim()) setErrors(prev => ({ ...prev, firstName: '' }));
+                        }}
+                        className={errors.firstName ? 'border-red-500 focus:border-red-500' : ''}
                       />
+                      {errors.firstName && (
+                        <span className="text-xs text-red-500 flex items-center space-x-1">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>{errors.firstName}</span>
+                        </span>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Фамилия</Label>
+                      <Label htmlFor="lastName">Фамилия *</Label>
                       <Input
                         id="lastName"
                         placeholder="Иванов"
                         value={registerForm.lastName}
-                        onChange={(e) => setRegisterForm({ ...registerForm, lastName: e.target.value })}
+                        onChange={(e) => {
+                          setRegisterForm({ ...registerForm, lastName: e.target.value });
+                          if (e.target.value.trim()) setErrors(prev => ({ ...prev, lastName: '' }));
+                        }}
+                        className={errors.lastName ? 'border-red-500 focus:border-red-500' : ''}
                       />
+                      {errors.lastName && (
+                        <span className="text-xs text-red-500 flex items-center space-x-1">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>{errors.lastName}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="username">Имя пользователя</Label>
+                    <Label htmlFor="username">Имя пользователя *</Label>
                     <Input
                       id="username"
                       placeholder="ivan_ivanov"
                       value={registerForm.username}
-                      onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })}
-                      required
+                      onChange={(e) => {
+                        setRegisterForm({ ...registerForm, username: e.target.value });
+                        if (e.target.value.trim()) setErrors(prev => ({ ...prev, username: '' }));
+                      }}
+                      className={errors.username ? 'border-red-500 focus:border-red-500' : ''}
                     />
+                    {errors.username && (
+                      <span className="text-xs text-red-500 flex items-center space-x-1">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{errors.username}</span>
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="register-email">Email</Label>
+                    <Label htmlFor="register-email">Email *</Label>
                     <Input
                       id="register-email"
                       type="email"
                       placeholder="your@email.com"
                       value={registerForm.email}
-                      onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })}
-                      required
+                      onChange={(e) => handleEmailChange(e.target.value)}
+                      className={errors.email ? 'border-red-500 focus:border-red-500' : ''}
                     />
+                    {errors.email && (
+                      <span className="text-xs text-red-500 flex items-center space-x-1">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{errors.email}</span>
+                      </span>
+                    )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="register-password">Пароль</Label>
-                    <Input
-                      id="register-password"
-                      type="password"
-                      placeholder="Минимум 6 символов"
-                      value={registerForm.password}
-                      onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })}
-                      required
-                    />
+                  <div className="space-y-3">
+                    <Label htmlFor="register-password">Пароль *</Label>
+                    <div className="relative">
+                      <Input
+                        id="register-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Минимум 8 символов"
+                        value={registerForm.password}
+                        onChange={(e) => handlePasswordChange(e.target.value)}
+                        className={errors.password ? 'border-red-500 focus:border-red-500 pr-10' : 'pr-10'}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    
+                    {/* Password strength indicator */}
+                    {registerForm.password && (
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Progress 
+                            value={(passwordStrength.score / 5) * 100} 
+                            className="flex-1 h-2"
+                            style={{
+                              '--progress-background': passwordStrength.color,
+                            } as React.CSSProperties}
+                          />
+                          <span className="text-xs font-medium" style={{ color: passwordStrength.color }}>
+                            {passwordStrength.score}/5
+                          </span>
+                        </div>
+                        <div className="text-xs" style={{ color: passwordStrength.color }}>
+                          {passwordStrength.feedback}
+                        </div>
+                        
+                        {/* Password requirements checklist */}
+                        <div className="grid grid-cols-2 gap-1 text-xs">
+                          <div className={`flex items-center space-x-1 ${passwordStrength.requirements.length ? 'text-green-600' : 'text-gray-400'}`}>
+                            {passwordStrength.requirements.length ? <CheckCircle className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                            <span>8+ символов</span>
+                          </div>
+                          <div className={`flex items-center space-x-1 ${passwordStrength.requirements.uppercase ? 'text-green-600' : 'text-gray-400'}`}>
+                            {passwordStrength.requirements.uppercase ? <CheckCircle className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                            <span>A-Z</span>
+                          </div>
+                          <div className={`flex items-center space-x-1 ${passwordStrength.requirements.lowercase ? 'text-green-600' : 'text-gray-400'}`}>
+                            {passwordStrength.requirements.lowercase ? <CheckCircle className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                            <span>a-z</span>
+                          </div>
+                          <div className={`flex items-center space-x-1 ${passwordStrength.requirements.number ? 'text-green-600' : 'text-gray-400'}`}>
+                            {passwordStrength.requirements.number ? <CheckCircle className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                            <span>0-9</span>
+                          </div>
+                          <div className={`flex items-center space-x-1 ${passwordStrength.requirements.special ? 'text-green-600' : 'text-gray-400'}`}>
+                            {passwordStrength.requirements.special ? <CheckCircle className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                            <span>!@#$</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {errors.password && (
+                      <span className="text-xs text-red-500 flex items-center space-x-1">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{errors.password}</span>
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -491,9 +595,22 @@ export default function Login() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={isLoading || !agreementChecked}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Зарегистрироваться
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={isSubmitting || !agreementChecked}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Регистрируемся...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Зарегистрироваться
+                      </>
+                    )}
                   </Button>
                 </form>
               </TabsContent>
