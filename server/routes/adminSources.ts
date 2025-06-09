@@ -266,7 +266,7 @@ router.post('/:id/toggle', requireSessionAdmin, async (req: SessionAuthenticated
 });
 
 // Upload file for data source
-router.post('/upload', requireAdmin, upload.single('file'), async (req: AuthenticatedRequest, res: any) => {
+router.post('/upload', requireSessionAdmin, upload.single('file'), async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -297,7 +297,7 @@ router.post('/upload', requireAdmin, upload.single('file'), async (req: Authenti
 });
 
 // Validate source URL/channel
-router.post('/validate', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.post('/validate', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     const { type, config } = req.body;
     
@@ -359,7 +359,7 @@ router.post('/validate', requireAdmin, async (req: AuthenticatedRequest, res: an
 });
 
 // Get source data preview
-router.get('/:id/preview', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.get('/:id/preview', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     const { id } = req.params;
     const numId = parseInt(id, 10);

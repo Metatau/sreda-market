@@ -119,7 +119,7 @@ export default function AdminPanel() {
   // Мутации для источников данных
   const toggleSourceMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest('POST', `/api/admin/sources/${id}/toggle`);
+      return await apiRequest(`/api/admin/sources/${id}/toggle`, { method: 'POST' });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
@@ -129,7 +129,7 @@ export default function AdminPanel() {
 
   const deleteSourceMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest('DELETE', `/api/admin/sources/${id}`);
+      return await apiRequest(`/api/admin/sources/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
@@ -140,7 +140,7 @@ export default function AdminPanel() {
   const createSourceMutation = useMutation({
     mutationFn: async (sourceData: any) => {
       console.log('Creating source with apiRequest:', sourceData);
-      return await apiRequest('POST', '/api/admin/sources', sourceData);
+      return await apiRequest('/api/admin/sources', { method: 'POST', body: JSON.stringify(sourceData), headers: { 'Content-Type': 'application/json' } });
     },
     onSuccess: (data) => {
       console.log('Source created successfully:', data);
@@ -161,7 +161,7 @@ export default function AdminPanel() {
 
   const updateSourceMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return await apiRequest('PUT', `/api/admin/sources/${id}`, data);
+      return await apiRequest(`/api/admin/sources/${id}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
