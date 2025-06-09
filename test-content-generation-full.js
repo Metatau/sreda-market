@@ -1,6 +1,6 @@
 
-import fetch from 'node-fetch';
-import { generateInsightFromDataSources } from './server/services/perplexity.js';
+const fetch = require('node-fetch');
+const { generateInsightFromDataSources } = require('./server/services/perplexity.js');
 
 const API_BASE = 'http://localhost:5000/api';
 const ADMIN_TOKEN = 'test-admin-token'; // Заглушка для тестирования
