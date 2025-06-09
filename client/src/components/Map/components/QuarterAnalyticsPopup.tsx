@@ -169,7 +169,7 @@ export function QuarterAnalyticsPopup({ position, address, onClose }: QuarterAna
               <TabsTrigger value="overview">Обзор</TabsTrigger>
               <TabsTrigger value="infrastructure">Инфраструктура</TabsTrigger>
               <TabsTrigger value="economics">Экономика</TabsTrigger>
-              <TabsTrigger value="ai-insights" disabled={!enhancedAnalytics}>
+              <TabsTrigger value="ai-insights">
                 AI-анализ
                 {enhancedLoading && <Clock className="h-3 w-3 ml-1 animate-spin" />}
               </TabsTrigger>
