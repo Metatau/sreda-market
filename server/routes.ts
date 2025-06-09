@@ -184,44 +184,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/register', async (req: any, res: any) => {
     res.setHeader('Content-Type', 'application/json');
     try {
+      console.log('Registration attempt with data:', JSON.stringify(req.body, null, 2));
+      
+      // Validate input data
       const data = registerSchema.parse(req.body);
+      console.log('Validation passed for:', data.email);
       
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(data.email);
       if (existingUser) {
+        console.log('User already exists:', data.email);
         return res.status(400).json({ 
           success: false, 
           error: 'Пользователь с таким email уже существует' 
         });
       }
 
+      console.log('Creating new user...');
       const user = await AuthService.register(data);
+      console.log('User created successfully:', user.id);
       
       // Set session and save it
       req.session.userId = user.id;
       await new Promise((resolve, reject) => {
         req.session.save((err: any) => {
-          if (err) reject(err);
-          else resolve(undefined);
+          if (err) {
+            console.error('Session save error:', err);
+            reject(err);
+          } else {
+            console.log('Session saved for user:', user.id);
+            resolve(undefined);
+          }
         });
       });
       
       res.status(201).json({
         success: true,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role
+        data: {
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+          }
         }
       });
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      console.error('Registration error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        cause: error.cause
+      });
+      
+      // Handle validation errors specifically
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Ошибка валидации данных',
+          details: error.errors
+        });
+      }
+      
+      // Handle duplicate key errors
+      if (error.code === '23505' || error.message.includes('duplicate key')) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Пользователь с таким email или именем уже существует' 
+        });
+      }
+      
       res.status(500).json({ 
         success: false, 
-        error: 'Ошибка регистрации' 
+        error: 'Ошибка регистрации',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
   });

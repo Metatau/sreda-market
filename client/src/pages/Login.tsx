@@ -41,7 +41,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest('/api/users/login', {
+      const response = await apiRequest('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify(loginForm),
       });
@@ -106,14 +106,14 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest('/api/users/register', {
+      const response = await apiRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(registerForm),
       });
 
       if (response.success) {
         // Store user email for session management
-        localStorage.setItem('userEmail', response.user.email);
+        localStorage.setItem('userEmail', response.data.user.email);
         
         toast({
           title: "Регистрация успешна",
