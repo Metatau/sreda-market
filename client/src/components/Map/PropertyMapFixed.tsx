@@ -45,6 +45,17 @@ const getPropertyClassColor = (className: string): string => {
   return colors[className] || 'bg-gray-500';
 };
 
+const getMarkerColor = (className: string): string => {
+  const colors: Record<string, string> = {
+    'Эконом': '#3b82f6',     // Blue
+    'Комфорт': '#eab308',    // Yellow
+    'Бизнес': '#f97316',     // Orange  
+    'Элит': '#ef4444',       // Red
+    'unknown': '#6b7280'     // Gray
+  };
+  return colors[className] || '#ef4444'; // Default to red
+};
+
 export function PropertyMap({ properties, selectedProperty, onPropertySelect, regionId, activeMapTool = 'none' }: PropertyMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [mapId, setMapId] = useState<string | null>(null);
@@ -228,6 +239,48 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
             }
 
             try {
+              // Определяем класс недвижимости по ID
+              const propertyClassMap: Record<number, string> = {
+                1: 'Эконом',
+                2: 'Комфорт', 
+                3: 'Бизнес',
+                4: 'Элит'
+              };
+              const propertyClass = propertyClassMap[marker.popup.propertyClassId] || 'unknown';
+              const markerColor = getMarkerColor(propertyClass);
+              const markerSize = Math.max(40, Math.min(80, marker.size)); // Размер между 40-80px
+              
+              // Проверяем доступность Leaflet
+              if (!window.L) {
+                console.error('Leaflet not loaded');
+                continue;
+              }
+              
+              const customIcon = window.L.divIcon({
+                className: 'custom-property-marker',
+                html: `
+                  <div style="
+                    width: ${markerSize}px; 
+                    height: ${markerSize}px; 
+                    background-color: ${markerColor}; 
+                    border: 3px solid white; 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    font-weight: bold;
+                    font-size: 12px;
+                    color: white;
+                    position: relative;
+                  ">
+                    ${Math.round((marker.popup.price || 0) / 1000000)}М
+                  </div>
+                `,
+                iconSize: [markerSize, markerSize],
+                iconAnchor: [markerSize/2, markerSize/2]
+              });
+
               const markerResult = await leafletMapService.addMarker(
                 mapId,
                 marker.coordinates,
@@ -240,7 +293,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
                       <p class="text-xs text-gray-500">ID: ${marker.popup.id}</p>
                     </div>
                   `,
-                  clickable: true
+                  clickable: true,
+                  icon: customIcon
                 }
               );
               
