@@ -209,6 +209,25 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Data sources table for admin panel
+export const dataSources = pgTable("data_sources", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 50 }).notNull(), // 'website', 'telegram', 'rss', 'file'
+  config: jsonb("config").notNull(), // Store configuration specific to type
+  tags: text("tags").array().default([]),
+  isActive: boolean("is_active").default(true),
+  frequency: varchar("frequency", { length: 50 }).default('daily'), // 'hourly', 'daily', 'weekly'
+  lastUpdated: timestamp("last_updated"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  nameIdx: index("idx_data_sources_name").on(table.name),
+  typeIdx: index("idx_data_sources_type").on(table.type),
+  activeIdx: index("idx_data_sources_active").on(table.isActive),
+}));
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 100 }).notNull().unique(),
@@ -459,6 +478,9 @@ export const selectReferralEarningSchema = createSelectSchema(referralEarnings);
 export const insertBonusTransactionSchema = createInsertSchema(bonusTransactions);
 export const selectBonusTransactionSchema = createSelectSchema(bonusTransactions);
 
+export const insertDataSourceSchema = createInsertSchema(dataSources);
+export const selectDataSourceSchema = createSelectSchema(dataSources);
+
 export const insertPromocodeSchema = createInsertSchema(promocodes);
 export const selectPromocodeSchema = createSelectSchema(promocodes);
 
@@ -531,25 +553,6 @@ export const insights = pgTable("insights", {
 
 export type Insight = typeof insights.$inferSelect;
 export type InsertInsight = typeof insights.$inferInsert;
-
-// Data sources table for admin management
-export const dataSources = pgTable("data_sources", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  type: varchar("type", { length: 50 }).notNull(), // telegram_channel, website, rss_feed, uploaded_file, etc.
-  config: jsonb("config").notNull(), // source-specific configuration
-  tags: varchar("tags", { length: 255 }).array().default([]),
-  isActive: boolean("is_active").default(true),
-  frequency: varchar("frequency", { length: 20 }).default('daily'), // hourly, daily, weekly
-  lastUpdated: timestamp("last_updated"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => ({
-  nameIdx: index("idx_data_sources_name").on(table.name),
-  typeIdx: index("idx_data_sources_type").on(table.type),
-  isActiveIdx: index("idx_data_sources_active").on(table.isActive),
-}));
 
 export type DataSource = typeof dataSources.$inferSelect;
 export type InsertDataSource = typeof dataSources.$inferInsert;
