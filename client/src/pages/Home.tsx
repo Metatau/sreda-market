@@ -119,7 +119,7 @@ export default function Home() {
                         Тепловые карты
                         {activeMapTool === 'heatmap' && <span className="ml-2 text-blue-600">●</span>}
                       </h4>
-                      <p className="text-xs text-gray-600">Анализ цены, плотности, инвестиций</p>
+                      <p className="text-xs text-gray-600">Карта цен</p>
                     </div>
                   </div>
                 </CardContent>
@@ -147,7 +147,7 @@ export default function Home() {
                         Геоанализ
                         {activeMapTool === 'geoanalysis' && <span className="ml-2 text-green-600">●</span>}
                       </h4>
-                      <p className="text-xs text-gray-600">Измерения и региональная статистика</p>
+                      <p className="text-xs text-gray-600">Анализ районов с ИИ</p>
                     </div>
                   </div>
                 </CardContent>
