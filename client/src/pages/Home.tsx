@@ -173,25 +173,8 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4">
             {activeMapTool === 'heatmap' && (
               <div className="bg-white rounded-lg p-4 border">
-                <h3 className="font-semibold mb-3 text-blue-600">Настройки тепловых карт</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Тип карты</label>
-                    <select className="w-full border rounded-md px-3 py-2">
-                      <option>Карта цен</option>
-                      <option>Плотность объектов</option>
-                      <option>Инвестиционная привлекательность</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Интенсивность</label>
-                    <input type="range" min="0.1" max="2" step="0.1" className="w-full" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Радиус</label>
-                    <input type="range" min="100" max="1000" step="50" className="w-full" />
-                  </div>
-                </div>
+                <h3 className="font-semibold mb-3 text-blue-600">Карта цен</h3>
+                <p className="text-sm text-gray-600">Отображение плотности цен на недвижимость по районам</p>
               </div>
             )}
             
