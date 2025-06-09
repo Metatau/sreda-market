@@ -167,23 +167,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Active Tool Panel */}
-      {activeMapTool !== 'none' && (
-        <div className="w-full bg-gray-50 border-b shadow-sm">
-          <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4">
-            {activeMapTool === 'heatmap' && (
-              <div className="bg-white rounded-lg p-4 border">
-                <h3 className="font-semibold mb-3 text-blue-600">Карта цен</h3>
-                <p className="text-sm text-gray-600">Отображение плотности цен на недвижимость по районам</p>
-              </div>
-            )}
-            
 
-            
-
-          </div>
-        </div>
-      )}
 
       {/* Investment Analytics Modal */}
       {selectedProperty && (
