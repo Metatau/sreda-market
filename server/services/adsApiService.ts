@@ -656,6 +656,7 @@ export class AdsApiService {
       rooms: typeof adsProperty.rooms === 'number' ? adsProperty.rooms : 1,
       floor: typeof adsProperty.floor === 'number' ? adsProperty.floor : 1,
       totalFloors: typeof adsProperty.totalFloors === 'number' ? adsProperty.totalFloors : 5,
+      buildYear: buildYear,
       address: String(adsProperty.address || regionName),
       coordinates: `POINT(${lng} ${lat})`,
       imageUrl: this.extractValidImageUrl(adsProperty),
