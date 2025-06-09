@@ -64,8 +64,18 @@ export class AuthService {
     // Хешируем пароль
     const hashedPassword = await this.hashPassword(data.password);
 
-    // Генерируем реферальный код если не предоставлен
-    const referralCode = data.referralCode || this.generateReferralCode();
+    // Генерируем или валидируем реферальный код
+    let referralCode: string;
+    if (data.referralCode) {
+      // Проверяем, что предоставленный код уникален
+      const existingUser = await storage.getUserByReferralCode(data.referralCode);
+      if (existingUser) {
+        throw new Error('Реферальный код уже используется. Выберите другой код.');
+      }
+      referralCode = data.referralCode;
+    } else {
+      referralCode = await this.generateUniqueReferralCode();
+    }
 
     // Создаем пользователя
     const newUser = await storage.createUser({
@@ -85,14 +95,30 @@ export class AuthService {
     return userWithoutPassword as User;
   }
 
-  // Генерация реферального кода
-  private static generateReferralCode(): string {
+  // Генерация уникального реферального кода
+  private static async generateUniqueReferralCode(): Promise<string> {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    while (attempts < maxAttempts) {
+      let result = '';
+      for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      
+      // Проверяем, что код уникален
+      const existingUser = await storage.getUserByReferralCode(result);
+      if (!existingUser) {
+        return result;
+      }
+      
+      attempts++;
     }
-    return result;
+    
+    // Если не удалось сгенерировать уникальный код за 10 попыток, добавляем timestamp
+    const timestamp = Date.now().toString().slice(-4);
+    return `REF${timestamp}`;
   }
 
   // Обновление пароля
