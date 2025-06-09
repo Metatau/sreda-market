@@ -358,16 +358,26 @@ export default function Insights() {
                   </p>
                   
                   {insight.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-4">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {insight.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                        <span
+                          key={tag}
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border transition-all duration-200 ${getTagColorForCard(tag)}`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            tag.toLowerCase().includes('иш') || tag.toLowerCase().includes('ai') ? 'bg-purple-500' :
+                            tag.toLowerCase().includes('инвестиц') ? 'bg-green-500' :
+                            tag.toLowerCase().includes('москв') || tag.toLowerCase().includes('регион') ? 'bg-blue-500' :
+                            tag.toLowerCase().includes('esg') || tag.toLowerCase().includes('эколог') ? 'bg-emerald-500' :
+                            tag.toLowerCase().includes('коммерч') ? 'bg-orange-500' : 'bg-indigo-500'
+                          }`}></span>
                           {tag}
-                        </Badge>
+                        </span>
                       ))}
                       {insight.tags.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
                           +{insight.tags.length - 3}
-                        </Badge>
+                        </span>
                       )}
                     </div>
                   )}
