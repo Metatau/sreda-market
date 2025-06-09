@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAdmin, type AuthenticatedRequest } from '../middleware/unifiedAuth';
+import { requireSessionAuth, type SessionAuthenticatedRequest } from '../middleware/sessionAuth';
 import { adsApiService } from '../services/adsApiService';
 import { schedulerService } from '../services/schedulerService';
 
@@ -25,7 +25,7 @@ router.get('/', (req, res) => {
 });
 
 // ADS API status endpoint
-router.get('/ads-api/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/ads-api/status', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
   try {
     const status = await adsApiService.getStatus();
     res.json({ success: true, data: status });
@@ -42,7 +42,7 @@ router.get('/ads-api/status', requireAdmin, async (req: AuthenticatedRequest, re
 });
 
 // ADS API synchronization endpoint
-router.post('/ads-api/sync', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/ads-api/sync', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
   try {
     const { regions, credentials } = req.body;
     console.log('Starting ADS API sync for regions:', regions);
@@ -64,7 +64,7 @@ router.post('/ads-api/sync', requireAdmin, async (req: AuthenticatedRequest, res
 });
 
 // Scheduler status endpoint
-router.get('/scheduler/status', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.get('/scheduler/status', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
   try {
     const status = {
       isActive: true,

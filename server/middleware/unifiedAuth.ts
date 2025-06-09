@@ -20,8 +20,16 @@ interface AuthOptions {
 export function createUnifiedAuth(options: AuthOptions = {}) {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      // Приоритет: email из заголовка (для Telegram auth)
-      const userEmail = req.headers['x-user-email'] as string;
+      // Приоритет 1: email из заголовка (для Telegram auth)
+      let userEmail = req.headers['x-user-email'] as string;
+      
+      // Приоритет 2: сессионная аутентификация (для веб-интерфейса)
+      if (!userEmail && (req as any).session?.userId) {
+        const sessionUser = await storage.getUserById((req as any).session.userId);
+        if (sessionUser) {
+          userEmail = sessionUser.email;
+        }
+      }
       
       if (!userEmail) {
         if (options.required) {
