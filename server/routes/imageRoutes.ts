@@ -5,6 +5,20 @@ import fs from 'fs';
 
 const router = Router();
 
+// API info endpoint
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      service: 'Image Service',
+      endpoints: [
+        'GET /properties/:id/image - Get property image'
+      ],
+      status: 'active'
+    }
+  });
+});
+
 // Default property images
 const DEFAULT_IMAGES = [
   'property-default-1.jpg',

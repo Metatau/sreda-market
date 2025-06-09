@@ -7,6 +7,22 @@ import { mapPreloadService } from '../services/mapPreloadService';
 
 const router = Router();
 
+// API info endpoint
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      service: 'Map Service',
+      endpoints: [
+        'GET /heatmap - Get property heatmap data',
+        'GET /clusters - Get property clusters',
+        'GET /bounds - Get map bounds for properties'
+      ],
+      status: 'active'
+    }
+  });
+});
+
 // Get property heatmap data
 router.get('/heatmap',
   mapRateLimit,
