@@ -308,6 +308,15 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
     updateProperties();
   }, [mapId, mapLoaded, properties, onPropertySelect]);
 
+  // Sync with external tool state
+  useEffect(() => {
+    if (activeMapTool === 'heatmap' && heatmapMode === 'none') {
+      setHeatmapMode('price'); // Default to price mode when heatmap tool is activated
+    } else if (activeMapTool !== 'heatmap' && heatmapMode !== 'none') {
+      setHeatmapMode('none'); // Disable heatmap when tool is deactivated
+    }
+  }, [activeMapTool]);
+
   // Handle heatmap mode changes
   useEffect(() => {
     if (!mapId || !mapLoaded) return;
@@ -443,8 +452,49 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
 
     const highlightProperty = async () => {
       if (selectedProperty.coordinates) {
-        const [lat, lng] = selectedProperty.coordinates.split(',').map(Number);
-        leafletMapService.highlightMarker(mapId, selectedProperty.id, { lat, lng });
+        let lat: number, lng: number;
+        
+        try {
+          // Парсинг координат в зависимости от формата
+          if (selectedProperty.coordinates.startsWith('POINT(')) {
+            // Формат: POINT(longitude latitude)
+            const coords = selectedProperty.coordinates.match(/POINT\(([^)]+)\)/)?.[1];
+            if (coords) {
+              const [longitude, latitude] = coords.split(' ').map(Number);
+              lng = longitude;
+              lat = latitude;
+            } else {
+              console.warn('Invalid POINT format for selected property:', selectedProperty.coordinates);
+              return;
+            }
+          } else {
+            // Формат: "latitude,longitude" или "longitude,latitude"
+            const parts = selectedProperty.coordinates.split(',').map(s => parseFloat(s.trim()));
+            if (parts.length !== 2 || parts.some(isNaN)) {
+              console.warn('Invalid coordinate format for selected property:', selectedProperty.coordinates);
+              return;
+            }
+            
+            // Определяем порядок координат по диапазону
+            if (Math.abs(parts[0]) > Math.abs(parts[1])) {
+              lng = parts[0];
+              lat = parts[1];
+            } else {
+              lat = parts[0];
+              lng = parts[1];
+            }
+          }
+
+          // Валидация координат
+          if (lat < 41 || lat > 82 || lng < 19 || lng > 180) {
+            console.warn('Coordinates out of bounds for selected property:', lat, lng);
+            return;
+          }
+
+          leafletMapService.highlightMarker(mapId, selectedProperty.id, { lat, lng });
+        } catch (error) {
+          console.warn('Error highlighting selected property:', error);
+        }
       }
     };
 

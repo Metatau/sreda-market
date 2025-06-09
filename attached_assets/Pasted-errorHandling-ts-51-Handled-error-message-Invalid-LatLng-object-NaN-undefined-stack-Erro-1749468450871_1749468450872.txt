@@ -1,0 +1,110 @@
+errorHandling.ts:51 Handled error: {message: 'Invalid LatLng object: (NaN, undefined)', stack: 'Error: Invalid LatLng object: (NaN, undefined)\n   ….vite/deps/chunk-RPCDYKBN.js?v=83fb8efc:18156:19)', context: {…}}
+handleError @ errorHandling.ts:51
+(anonymous) @ errorHandling.ts:34
+PropertyMapRefactored.tsx:157 PropertyMap: mapId: map_1749468381493_2dihl9v44 mapLoaded: true properties count: 10
+PropertyMapRefactored.tsx:208 Processing property 1003 with coordinates: lat=59.9238707, lng=30.4566858
+PropertyMapRefactored.tsx:250 Property 1003: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 939 with coordinates: lat=55.7558, lng=37.6176
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 939 matches 909 at 55.7558,37.6176
+PropertyMapRefactored.tsx:250 Property 939: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 939: from 55.7558,37.6176 to 55.7528,37.6176 (offset=0.003, angle=3.141592653589793)
+PropertyMapRefactored.tsx:208 Processing property 909 with coordinates: lat=55.7558, lng=37.6176
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 909 matches 939 at 55.7558,37.6176
+PropertyMapRefactored.tsx:250 Property 909: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 909: from 55.7558,37.6176 to 55.7588,37.6176 (offset=0.003, angle=0)
+PropertyMapRefactored.tsx:208 Processing property 862 with coordinates: lat=56.0015691, lng=92.9502806
+PropertyMapRefactored.tsx:250 Property 862: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 861 with coordinates: lat=54.7235234, lng=20.4345853
+PropertyMapRefactored.tsx:250 Property 861: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 826 with coordinates: lat=54.7207273, lng=20.4548589
+PropertyMapRefactored.tsx:250 Property 826: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 702 with coordinates: lat=55.578091, lng=37.677472
+PropertyMapRefactored.tsx:250 Property 702: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 654 with coordinates: lat=54.7388, lng=55.9721
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 654 matches 643 at 54.7388,55.9721
+PropertyMapRefactored.tsx:250 Property 654: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 654: from 54.7388,55.9721 to 54.7358,55.9721 (offset=0.003, angle=3.141592653589793)
+PropertyMapRefactored.tsx:208 Processing property 643 with coordinates: lat=54.7388, lng=55.9721
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 643 matches 654 at 54.7388,55.9721
+PropertyMapRefactored.tsx:250 Property 643: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 643: from 54.7388,55.9721 to 54.7418,55.9721 (offset=0.003, angle=0)
+PropertyMapRefactored.tsx:208 Processing property 615 with coordinates: lat=57.1522, lng=65.5272
+PropertyMapRefactored.tsx:250 Property 615: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:284 PropertyMap: Processing 10 valid markers from 10 properties
+PropertyMapRefactored.tsx:286 PropertyMap: Sample marker: {id: 1003, coordinates: Array(2), popup: {…}, className: 'default', price: 16050000}
+leafletMapService.ts:392 addPropertyMarkers called with mapId: map_1749468381493_2dihl9v44 properties count: 10
+leafletMapService.ts:408 Creating marker for property 1003 at coordinates: (2) [59.9238707, 30.4566858]
+leafletMapService.ts:453 Marker 1003 added to map. Total markers: 1
+leafletMapService.ts:408 Creating marker for property 939 at coordinates: (2) [55.7528, 37.6176]
+leafletMapService.ts:453 Marker 939 added to map. Total markers: 2
+leafletMapService.ts:408 Creating marker for property 909 at coordinates: (2) [55.7588, 37.6176]
+leafletMapService.ts:453 Marker 909 added to map. Total markers: 3
+leafletMapService.ts:408 Creating marker for property 862 at coordinates: (2) [56.0015691, 92.9502806]
+leafletMapService.ts:453 Marker 862 added to map. Total markers: 4
+leafletMapService.ts:408 Creating marker for property 861 at coordinates: (2) [54.7235234, 20.4345853]
+leafletMapService.ts:453 Marker 861 added to map. Total markers: 5
+leafletMapService.ts:408 Creating marker for property 826 at coordinates: (2) [54.7207273, 20.4548589]
+leafletMapService.ts:453 Marker 826 added to map. Total markers: 6
+leafletMapService.ts:408 Creating marker for property 702 at coordinates: (2) [55.578091, 37.677472]
+leafletMapService.ts:453 Marker 702 added to map. Total markers: 7
+leafletMapService.ts:408 Creating marker for property 654 at coordinates: (2) [54.7358, 55.9721]
+leafletMapService.ts:453 Marker 654 added to map. Total markers: 8
+leafletMapService.ts:408 Creating marker for property 643 at coordinates: (2) [54.7418, 55.9721]
+leafletMapService.ts:453 Marker 643 added to map. Total markers: 9
+leafletMapService.ts:408 Creating marker for property 615 at coordinates: (2) [57.1522, 65.5272]
+leafletMapService.ts:453 Marker 615 added to map. Total markers: 10
+PropertyMapRefactored.tsx:304 Successfully added 10 property markers to map
+PropertyMapRefactored.tsx:157 PropertyMap: mapId: map_1749468381493_2dihl9v44 mapLoaded: true properties count: 10
+PropertyMapRefactored.tsx:208 Processing property 1003 with coordinates: lat=59.9238707, lng=30.4566858
+PropertyMapRefactored.tsx:250 Property 1003: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 939 with coordinates: lat=55.7558, lng=37.6176
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 939 matches 909 at 55.7558,37.6176
+PropertyMapRefactored.tsx:250 Property 939: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 939: from 55.7558,37.6176 to 55.7528,37.6176 (offset=0.003, angle=3.141592653589793)
+PropertyMapRefactored.tsx:208 Processing property 909 with coordinates: lat=55.7558, lng=37.6176
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 909 matches 939 at 55.7558,37.6176
+PropertyMapRefactored.tsx:250 Property 909: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 909: from 55.7558,37.6176 to 55.7588,37.6176 (offset=0.003, angle=0)
+PropertyMapRefactored.tsx:208 Processing property 862 with coordinates: lat=56.0015691, lng=92.9502806
+PropertyMapRefactored.tsx:250 Property 862: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 861 with coordinates: lat=54.7235234, lng=20.4345853
+PropertyMapRefactored.tsx:250 Property 861: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 826 with coordinates: lat=54.7207273, lng=20.4548589
+PropertyMapRefactored.tsx:250 Property 826: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 702 with coordinates: lat=55.578091, lng=37.677472
+PropertyMapRefactored.tsx:250 Property 702: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:208 Processing property 654 with coordinates: lat=54.7388, lng=55.9721
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 654 matches 643 at 54.7388,55.9721
+PropertyMapRefactored.tsx:250 Property 654: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 654: from 54.7388,55.9721 to 54.7358,55.9721 (offset=0.003, angle=3.141592653589793)
+PropertyMapRefactored.tsx:208 Processing property 643 with coordinates: lat=54.7388, lng=55.9721
+PropertyMapRefactored.tsx:242 Found duplicate coords: Property 643 matches 654 at 54.7388,55.9721
+PropertyMapRefactored.tsx:250 Property 643: Found 1 properties with same coordinates
+PropertyMapRefactored.tsx:261 Applied offset for property 643: from 54.7388,55.9721 to 54.7418,55.9721 (offset=0.003, angle=0)
+PropertyMapRefactored.tsx:208 Processing property 615 with coordinates: lat=57.1522, lng=65.5272
+PropertyMapRefactored.tsx:250 Property 615: Found 0 properties with same coordinates
+PropertyMapRefactored.tsx:284 PropertyMap: Processing 10 valid markers from 10 properties
+PropertyMapRefactored.tsx:286 PropertyMap: Sample marker: {id: 1003, coordinates: Array(2), popup: {…}, className: 'default', price: 16050000}
+leafletMapService.ts:392 addPropertyMarkers called with mapId: map_1749468381493_2dihl9v44 properties count: 10
+leafletMapService.ts:408 Creating marker for property 1003 at coordinates: (2) [59.9238707, 30.4566858]
+leafletMapService.ts:453 Marker 1003 added to map. Total markers: 1
+leafletMapService.ts:408 Creating marker for property 939 at coordinates: (2) [55.7528, 37.6176]
+leafletMapService.ts:453 Marker 939 added to map. Total markers: 2
+leafletMapService.ts:408 Creating marker for property 909 at coordinates: (2) [55.7588, 37.6176]
+leafletMapService.ts:453 Marker 909 added to map. Total markers: 3
+leafletMapService.ts:408 Creating marker for property 862 at coordinates: (2) [56.0015691, 92.9502806]
+leafletMapService.ts:453 Marker 862 added to map. Total markers: 4
+leafletMapService.ts:408 Creating marker for property 861 at coordinates: (2) [54.7235234, 20.4345853]
+leafletMapService.ts:453 Marker 861 added to map. Total markers: 5
+leafletMapService.ts:408 Creating marker for property 826 at coordinates: (2) [54.7207273, 20.4548589]
+leafletMapService.ts:453 Marker 826 added to map. Total markers: 6
+leafletMapService.ts:408 Creating marker for property 702 at coordinates: (2) [55.578091, 37.677472]
+leafletMapService.ts:453 Marker 702 added to map. Total markers: 7
+leafletMapService.ts:408 Creating marker for property 654 at coordinates: (2) [54.7358, 55.9721]
+leafletMapService.ts:453 Marker 654 added to map. Total markers: 8
+leafletMapService.ts:408 Creating marker for property 643 at coordinates: (2) [54.7418, 55.9721]
+leafletMapService.ts:453 Marker 643 added to map. Total markers: 9
+leafletMapService.ts:408 Creating marker for property 615 at coordinates: (2) [57.1522, 65.5272]0: 57.15221: 65.5272length: 2[[Prototype]]: Array(0)
+leafletMapService.ts:453 Marker 615 added to map. Total markers: 10
+PropertyMapRefactored.tsx:304 Successfully added 10 property markers to map
+@radix-ui_react-dialog.js?v=83fb8efc:340 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
