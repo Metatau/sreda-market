@@ -21,12 +21,29 @@ export function QuarterAnalyticsPopup({ position, address, onClose }: QuarterAna
   const [loading, setLoading] = useState(true);
   const [enhancedLoading, setEnhancedLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedAddress, setResolvedAddress] = useState<string | null>(address ?? null);
 
   const [lat, lng] = position;
 
   useEffect(() => {
     loadBasicAnalytics();
+    if (!address) {
+      resolveAddress();
+    }
   }, [lat, lng]);
+
+  const resolveAddress = async () => {
+    try {
+      const openStreetMapService = (await import('../../../services/openStreetMapService')).OpenStreetMapService.getInstance();
+      const result = await openStreetMapService.reverseGeocode(lat, lng);
+      if (result) {
+        setResolvedAddress(result.display_name);
+      }
+    } catch (error) {
+      console.error('Address resolution error:', error);
+      setResolvedAddress(`Координаты: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    }
+  };
 
   const loadBasicAnalytics = async () => {
     try {
@@ -43,14 +60,16 @@ export function QuarterAnalyticsPopup({ position, address, onClose }: QuarterAna
   };
 
   const loadEnhancedAnalytics = async () => {
-    if (!address) {
+    const addressToUse = resolvedAddress || address;
+    if (!addressToUse) {
       setError('Адрес не определен для расширенного анализа');
       return;
     }
 
     try {
       setEnhancedLoading(true);
-      const data = await GeospatialService.getEnhancedAnalytics(address, lat, lng);
+      setError(null);
+      const data = await GeospatialService.getEnhancedAnalytics(addressToUse, lat, lng);
       setEnhancedAnalytics(data);
     } catch (err) {
       setError('Не удалось загрузить расширенную аналитику');
@@ -137,7 +156,7 @@ export function QuarterAnalyticsPopup({ position, address, onClose }: QuarterAna
         <CardHeader className="flex flex-row items-center justify-between border-b">
           <div>
             <CardTitle className="text-xl">Аналитика района</CardTitle>
-            {address && <p className="text-sm text-gray-600 mt-1">{address}</p>}
+            {(resolvedAddress || address) && <p className="text-sm text-gray-600 mt-1">{resolvedAddress || address}</p>}
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-5 w-5" />
