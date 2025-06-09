@@ -351,30 +351,40 @@ export class LeafletMapService {
     const color = `rgb(${r}, ${g}, ${b})`;
     
     // Создаем увеличенную SVG иконку для лучшей видимости на широких масштабах
-    const baseSize = 40; // Увеличенный базовый размер
-    const dynamicSize = Math.max(baseSize, baseSize + intensity * 20);
+    const baseSize = 60; // Еще больший размер для одиночных объектов
+    const dynamicSize = Math.max(baseSize, baseSize + intensity * 30);
     const radius = dynamicSize / 3;
     const center = dynamicSize / 2;
     
-    const svgIcon = `
-      <svg width="${dynamicSize}" height="${dynamicSize}" viewBox="0 0 ${dynamicSize} ${dynamicSize}" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <filter id="shadow-${Math.random().toString(36).substr(2, 9)}" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="rgba(0,0,0,0.4)"/>
-          </filter>
-        </defs>
-        <circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" stroke="white" stroke-width="3" filter="url(#shadow-${Math.random().toString(36).substr(2, 9)})"/>
-        <circle cx="${center}" cy="${center}" r="${radius/2.5}" fill="white" opacity="0.9"/>
-        <circle cx="${center}" cy="${center}" r="${radius/5}" fill="${color}" opacity="0.7"/>
-      </svg>
+    // Простой тестовый маркер для проверки видимости
+    const testSize = 80;
+    const testIcon = `
+      <div style="
+        width: ${testSize}px;
+        height: ${testSize}px;
+        background: red;
+        border: 4px solid white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        z-index: 10000;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        font-size: 14px;
+      ">
+        ${Math.round(price / 1000000)}M
+      </div>
     `;
     
     return window.L.divIcon({
-      html: svgIcon,
-      className: 'gradient-pin-large',
-      iconSize: [dynamicSize, dynamicSize],
-      iconAnchor: [center, center],
-      popupAnchor: [0, -center]
+      html: testIcon,
+      className: 'test-marker-large',
+      iconSize: [testSize, testSize],
+      iconAnchor: [testSize/2, testSize/2],
+      popupAnchor: [0, -testSize/2]
     });
   }
 
