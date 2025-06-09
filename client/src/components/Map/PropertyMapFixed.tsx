@@ -3,6 +3,13 @@ import type { Property } from '@/types';
 import { leafletMapService } from '@/services/leafletMapService';
 import { geolocationService } from '@/services/geolocationService';
 
+// Расширяем интерфейс Window для глобальной функции
+declare global {
+  interface Window {
+    openPropertyModal?: (propertyId: number) => void;
+  }
+}
+
 // Utility function to correctly parse coordinates from POINT format
 const parseCoordinates = (coordinates: string): { lat: number; lng: number } | null => {
   if (coordinates.startsWith('POINT(')) {
@@ -61,6 +68,20 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
   const [mapId, setMapId] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
+
+  // Создаем глобальную функцию для открытия модального окна из popup
+  useEffect(() => {
+    (window as any).openPropertyModal = (propertyId: number) => {
+      const property = properties.find(p => p.id === propertyId);
+      if (property && onPropertySelect) {
+        onPropertySelect(property);
+      }
+    };
+
+    return () => {
+      delete (window as any).openPropertyModal;
+    };
+  }, [properties, onPropertySelect]);
 
   // Initialize map
   useEffect(() => {
@@ -246,7 +267,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
                 3: 'Бизнес',
                 4: 'Элит'
               };
-              const propertyClass = propertyClassMap[marker.popup.propertyClassId] || 'unknown';
+              const propertyClass = propertyClassMap[marker.popup.propertyClassId || 0] || 'unknown';
               const markerColor = getMarkerColor(propertyClass);
               const markerSize = Math.max(40, Math.min(80, marker.size)); // Размер между 40-80px
               
@@ -290,7 +311,13 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
                       <h3 class="font-bold text-sm mb-2">${marker.popup.title}</h3>
                       <p class="text-lg font-bold text-blue-600 mb-1">${marker.popup.priceFormatted}</p>
                       <p class="text-sm text-gray-600 mb-2">${marker.popup.address}</p>
-                      <p class="text-xs text-gray-500">ID: ${marker.popup.id}</p>
+                      <p class="text-xs text-gray-500 mb-3">ID: ${marker.popup.id}</p>
+                      <button 
+                        onclick="window.openPropertyModal(${marker.popup.id})" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded transition-colors"
+                      >
+                        Подробнее
+                      </button>
                     </div>
                   `,
                   clickable: true,
