@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,6 +99,8 @@ export default function AdminPanel() {
 
   const [editingPlan, setEditingPlan] = useState<any>(null);
   const [isEditPlanDialogOpen, setIsEditPlanDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('');
 
   // Debug form state
   console.log('Form state:', newSourceForm);
@@ -111,10 +113,22 @@ export default function AdminPanel() {
     enabled: isAuthenticated && user?.roles?.includes('admin')
   });
 
-  const { data: sourcesData, isLoading: sourcesLoading } = useQuery({
+  const { data: sourcesData, isLoading: sourcesLoading } = useQuery<{ sources: DataSource[] }>({
     queryKey: ['/api/admin/sources'],
     enabled: activeTab === 'sources' && isAuthenticated && user?.roles?.includes('admin')
   });
+
+  // Filter sources based on search and type
+  const filteredSources = useMemo(() => {
+    if (!sourcesData?.sources) return [];
+    return sourcesData.sources.filter((source: DataSource) => {
+      const matchesSearch = !searchTerm || 
+        source.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        source.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesType = !filterType || source.type === filterType;
+      return matchesSearch && matchesType;
+    });
+  }, [sourcesData?.sources, searchTerm, filterType]);
 
   // Мутации для источников данных
   const toggleSourceMutation = useMutation({
@@ -181,8 +195,7 @@ export default function AdminPanel() {
 
   const syncMutation = useMutation({
     mutationFn: async (params: { regions?: string[]; credentials?: { email: string; password: string } }) => {
-      const response = await apiRequest('POST', '/api/admin/ads-api/sync', params);
-      return response.json();
+      return await apiRequest('/api/admin/ads-api/sync', { method: 'POST', body: JSON.stringify(params), headers: { 'Content-Type': 'application/json' } });
     },
     onSuccess: (data: { success: boolean } & SyncResult) => {
       if (data.success) {
@@ -1766,7 +1779,7 @@ export default function AdminPanel() {
 
               <div className="space-y-3">
                 <Label>Функции плана</Label>
-                {editingPlan.features.map((feature, index) => (
+                {editingPlan.features.map((feature: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <span className="text-sm font-medium">{feature.name}</span>
                     {feature.value !== undefined ? (
