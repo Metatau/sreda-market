@@ -9,6 +9,7 @@ import { globalErrorHandler } from "../utils/errors";
 import { UserService } from "../services/userService";
 
 // Import modular routes
+import authRoutes from "./auth.routes";
 import usersRoutes from "./users.routes";
 import propertiesRoutes from "./properties.routes";
 import propertyClassesRoutes from "./property-classes.routes";
@@ -43,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Register modular routes
-  // Authentication routes are handled in main routes.ts
+  app.use('/api/auth', authRoutes);
   app.use('/api/users', usersRoutes);
   app.use('/api/properties', propertiesRoutes);
   app.use('/api/property-classes', propertyClassesRoutes);
