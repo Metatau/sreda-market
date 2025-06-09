@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { storage } from '../storage';
-import { requireAuth, requireAdmin, type AuthenticatedRequest } from '../middleware/unifiedAuth';
+import { requireSessionAdmin, type SessionAuthenticatedRequest } from '../middleware/sessionAuth';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
@@ -51,7 +51,7 @@ const createSourceSchema = z.object({
 });
 
 // Get all data sources
-router.get('/', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.get('/', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     const { type, isActive, tags } = req.query;
     
@@ -76,7 +76,7 @@ router.get('/', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
 });
 
 // Get single data source
-router.get('/:id', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.get('/:id', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     const { id } = req.params;
     const numId = parseInt(id, 10);
@@ -111,7 +111,7 @@ router.get('/:id', requireAdmin, async (req: AuthenticatedRequest, res: any) => 
 });
 
 // Create new data source
-router.post('/', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.post('/', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     console.log('Creating data source - request body:', JSON.stringify(req.body, null, 2));
     
@@ -150,7 +150,7 @@ router.post('/', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
 });
 
 // Update data source
-router.put('/:id', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.put('/:id', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     const { id } = req.params;
     const numId = parseInt(id, 10);
@@ -196,7 +196,7 @@ router.put('/:id', requireAdmin, async (req: AuthenticatedRequest, res: any) => 
 });
 
 // Delete data source
-router.delete('/:id', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.delete('/:id', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     const { id } = req.params;
     const numId = parseInt(id, 10);
@@ -231,7 +231,7 @@ router.delete('/:id', requireAdmin, async (req: AuthenticatedRequest, res: any) 
 });
 
 // Toggle data source status
-router.post('/:id/toggle', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
+router.post('/:id/toggle', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
   try {
     const { id } = req.params;
     const numId = parseInt(id, 10);

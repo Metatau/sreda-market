@@ -25,7 +25,7 @@ export function createUnifiedAuth(options: AuthOptions = {}) {
       
       // Приоритет 2: сессионная аутентификация (для веб-интерфейса)
       if (!userEmail && (req as any).session?.userId) {
-        const sessionUser = await storage.getUserById((req as any).session.userId);
+        const sessionUser = await storage.getUser((req as any).session.userId);
         if (sessionUser) {
           userEmail = sessionUser.email;
         }
