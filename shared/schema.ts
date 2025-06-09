@@ -253,7 +253,7 @@ export const bonusTransactions = pgTable("bonus_transactions", {
 // Promocodes table
 export const promocodes = pgTable("promocodes", {
   id: serial("id").primaryKey(),
-  code: varchar("code", { length: 6 }).notNull().unique(),
+  code: varchar("code", { length: 10 }).notNull().unique(), // Increased length for TEST30
   userId: integer("user_id").references(() => users.id),
   isUsed: boolean("is_used").default(false).notNull(),
   usedAt: timestamp("used_at"),
@@ -261,11 +261,27 @@ export const promocodes = pgTable("promocodes", {
   expiresAt: timestamp("expires_at").notNull(),
   createdFromIp: varchar("created_from_ip", { length: 45 }), // IPv4/IPv6
   usedFromIp: varchar("used_from_ip", { length: 45 }), // IPv4/IPv6
+  maxUses: integer("max_uses").default(1).notNull(), // Maximum number of uses allowed
+  currentUses: integer("current_uses").default(0).notNull(), // Current number of uses
+  isMultiUse: boolean("is_multi_use").default(false).notNull(), // Flag for multi-use codes
 }, (table) => ({
   codeIdx: index("idx_promocodes_code").on(table.code),
   userIdx: index("idx_promocodes_user").on(table.userId),
   createdIpIdx: index("idx_promocodes_created_ip").on(table.createdFromIp),
   usedIpIdx: index("idx_promocodes_used_ip").on(table.usedFromIp),
+}));
+
+// Promocode usage tracking table
+export const promocodeUsages = pgTable("promocode_usages", {
+  id: serial("id").primaryKey(),
+  promocodeId: integer("promocode_id").references(() => promocodes.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  usedAt: timestamp("used_at").defaultNow().notNull(),
+  usedFromIp: varchar("used_from_ip", { length: 45 }), // IPv4/IPv6
+}, (table) => ({
+  promocodeUserIdx: index("idx_promocode_usages_promocode_user").on(table.promocodeId, table.userId),
+  promocodeIdx: index("idx_promocode_usages_promocode").on(table.promocodeId),
+  userIdx: index("idx_promocode_usages_user").on(table.userId),
 }));
 
 // Favorites table
