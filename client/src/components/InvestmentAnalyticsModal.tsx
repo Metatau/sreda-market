@@ -112,12 +112,12 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   if (!analytics && analyticsLoading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Загрузка аналитики...</DialogTitle>
+        <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+          <DialogHeader className="pb-2 sm:pb-4">
+            <DialogTitle className="text-lg sm:text-xl">Загрузка аналитики...</DialogTitle>
           </DialogHeader>
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="flex justify-center py-6 sm:py-8">
+            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
           </div>
         </DialogContent>
       </Dialog>
@@ -128,12 +128,12 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   if (!analytics) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Аналитика недоступна</DialogTitle>
+        <DialogContent className="w-[95vw] max-w-4xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+          <DialogHeader className="pb-2 sm:pb-4">
+            <DialogTitle className="text-lg sm:text-xl">Аналитика недоступна</DialogTitle>
           </DialogHeader>
-          <div className="text-center py-8">
-            <p className="text-gray-600">Аналитика для этого объекта пока не рассчитана.</p>
+          <div className="text-center py-6 sm:py-8">
+            <p className="text-sm sm:text-base text-gray-600">Аналитика для этого объекта пока не рассчитана.</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -644,41 +644,41 @@ export const InvestmentAnalyticsModal: React.FC<InvestmentAnalyticsModalProps> =
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto z-[10000]" style={{ zIndex: 10000 }}>
-          <DialogHeader>
-            <DialogTitle className="text-xl font-semibold">
+        <DialogContent className="w-[95vw] max-w-6xl h-[90vh] max-h-[90vh] overflow-y-auto z-[10000] p-3 sm:p-6" style={{ zIndex: 10000 }}>
+          <DialogHeader className="pb-2 sm:pb-4">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">
               Инвестиционная аналитика
             </DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">
+            <DialogDescription className="text-xs sm:text-sm text-gray-600">
               Детальный анализ инвестиционной привлекательности объекта: {property.address}
             </DialogDescription>
           </DialogHeader>
 
           {/* Основные метрики в шапке */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <div className="text-center p-2 sm:p-3 bg-green-50 rounded-lg">
+              <div className="text-lg sm:text-2xl font-bold text-green-600">
                 {analytics.rentalYield || '0'}%
               </div>
               <div className="text-xs text-gray-600">Доходность аренды</div>
             </div>
-            <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="text-center p-2 sm:p-3 bg-blue-50 rounded-lg">
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">
                 {analytics.flipRoi || '0'}%
               </div>
               <div className="text-xs text-gray-600">ROI флиппинга</div>
             </div>
-            <div className="text-center p-3 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">
+            <div className="text-center p-2 sm:p-3 bg-purple-50 rounded-lg">
+              <div className="text-lg sm:text-2xl font-bold text-purple-600">
                 +{analytics.priceForecast3y || '0'}%
               </div>
               <div className="text-xs text-gray-600">Прогноз 3 года</div>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
               {analytics.investmentRating && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Badge className={`text-2xl font-bold px-3 py-1 cursor-help ${getRatingColor(analytics.investmentRating)}`}>
+                    <Badge className={`text-lg sm:text-2xl font-bold px-2 sm:px-3 py-1 cursor-help ${getRatingColor(analytics.investmentRating)}`}>
                       {analytics.investmentRating}
                     </Badge>
                   </TooltipTrigger>
