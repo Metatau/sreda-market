@@ -397,36 +397,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users/register", async (req, res) => {
+  // Login endpoint
+  app.post("/api/users/login", async (req, res) => {
     try {
-      const { username, email, firstName, lastName, telegramHandle, referralCode } = req.body;
+      const { email, password } = req.body;
 
-      // Проверяем, не существует ли уже пользователь с таким email
-      const existingUser = await storage.getUserByEmail(email);
-      if (existingUser) {
-        return res.status(400).json({ error: 'User with this email already exists' });
+      // Validate required fields
+      if (!email || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Email and password are required' 
+        });
       }
 
-      const newUser = await storage.createUser({
+      const user = await AuthService.login({ email, password });
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          error: 'Неверный email или пароль' 
+        });
+      }
+
+      // Set session
+      req.session.userId = user.id;
+      await new Promise((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(undefined);
+        });
+      });
+      
+      res.json({
+        success: true,
+        data: {
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Ошибка авторизации' 
+      });
+    }
+  });
+
+  app.post("/api/users/register", async (req, res) => {
+    try {
+      const { username, email, password, firstName, lastName, telegramHandle, referralCode } = req.body;
+
+      // Validate required fields
+      if (!username || !email || !password) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Username, email and password are required' 
+        });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Password must be at least 6 characters long' 
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Пользователь с таким email уже существует' 
+        });
+      }
+
+      // Hash password and register user
+      const user = await AuthService.register({
         username,
         email,
+        password,
         firstName,
         lastName,
         telegramHandle,
-        role: 'client',
-        referralCode: referralCode || `REF${Date.now()}`,
-        bonusBalance: '0.00'
+        referralCode
+      });
+
+      // Set session
+      req.session.userId = user.id;
+      await new Promise((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(undefined);
+        });
       });
 
       res.status(201).json({
-        id: newUser.id,
-        username: newUser.username,
-        email: newUser.email,
-        role: newUser.role
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
       });
     } catch (error) {
       console.error('Error registering user:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ 
+        success: false, 
+        error: 'Ошибка регистрации' 
+      });
     }
   });
 

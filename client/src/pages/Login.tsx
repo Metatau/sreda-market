@@ -41,7 +41,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest('/api/auth/login', {
+      const response = await apiRequest('/api/users/login', {
         method: 'POST',
         body: JSON.stringify(loginForm),
       });
@@ -106,7 +106,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await apiRequest('/api/auth/register', {
+      const response = await apiRequest('/api/users/register', {
         method: 'POST',
         body: JSON.stringify(registerForm),
       });
