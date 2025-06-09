@@ -54,7 +54,15 @@ class ApiClient {
   }
 
   private async post<T>(endpoint: string, data?: any): Promise<T> {
-    const response = await apiRequest("POST", `${API_BASE}${endpoint}`, data);
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
     return this.handleResponse<T>(response);
   }
 
