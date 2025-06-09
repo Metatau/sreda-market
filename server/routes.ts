@@ -725,8 +725,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat with role-based access (unlimited usage)
-  app.post("/api/chat", aiRateLimit, requireRoleAuth, validateBody(chatMessageSchema), async (req, res) => {
+  // AI Chat - public access with rate limiting
+  app.post("/api/chat", aiRateLimit, validateBody(chatMessageSchema), async (req, res) => {
     try {
       const { message, sessionId } = req.body;
 
