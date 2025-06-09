@@ -223,7 +223,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
               return null;
             }
 
-            console.log(`Processing property ${property.id} with coordinates: lat=${lat}, lng=${lng}`);
+            console.log(`Processing property ${property.id} with coordinates: lat=${lat}, lng=${lng} from raw: ${property.coordinates}`);
 
             // Добавляем небольшое смещение для объектов с одинаковыми координатами
             // чтобы они не накладывались друг на друга
