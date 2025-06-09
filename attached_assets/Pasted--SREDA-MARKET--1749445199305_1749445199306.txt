@@ -1,0 +1,978 @@
+# 🏢 КОМПЛЕКСНАЯ ДИАГНОСТИКА ПРИЛОЖЕНИЯ SREDA.MARKET
+
+## 🎯 ЦЕЛЬ ДИАГНОСТИКИ
+Провести полную системную диагностику приложения недвижимости sreda.market, проверить работоспособность ВСЕХ модулей, сервисов, API endpoints, frontend компонентов и интеграций.
+
+**URL приложения:** https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/
+
+## 📋 ПЛАН КОМПЛЕКСНОЙ ДИАГНОСТИКИ
+
+### Этап 1: Анализ архитектуры проекта
+```bash
+echo "=== АРХИТЕКТУРНЫЙ АНАЛИЗ SREDA.MARKET ===" > diagnosis_report.txt
+echo "Дата диагностики: $(date)" >> diagnosis_report.txt
+echo "URL: https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/" >> diagnosis_report.txt
+echo "" >> diagnosis_report.txt
+
+# Структура проекта
+echo "### СТРУКТУРА ПРОЕКТА ###" >> diagnosis_report.txt
+find . -maxdepth 3 -type d | grep -v node_modules | grep -v .git | sort >> diagnosis_report.txt
+echo "" >> diagnosis_report.txt
+
+# Ключевые файлы конфигурации
+echo "### КОНФИГУРАЦИОННЫЕ ФАЙЛЫ ###" >> diagnosis_report.txt
+ls -la package.json tsconfig.json vite.config.* server.* index.* 2>/dev/null >> diagnosis_report.txt
+echo "" >> diagnosis_report.txt
+
+# Backend компоненты
+echo "### BACKEND КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find ./server -name "*.ts" -o -name "*.js" 2>/dev/null | wc -l | xargs echo "TypeScript/JavaScript файлов в server:" >> diagnosis_report.txt
+find ./server -name "*route*" -o -name "*controller*" -o -name "*service*" 2>/dev/null | wc -l | xargs echo "Route/Controller/Service файлов:" >> diagnosis_report.txt
+
+# Frontend компоненты
+echo "### FRONTEND КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find ./client -name "*.tsx" -o -name "*.jsx" -o -name "*.ts" -o -name "*.js" 2>/dev/null | wc -l | xargs echo "React компонентов и файлов:" >> diagnosis_report.txt
+find ./client -name "*component*" -o -name "*page*" -o -name "*hook*" 2>/dev/null | wc -l | xargs echo "Component/Page/Hook файлов:" >> diagnosis_report.txt
+```
+
+### Этап 2: Инвентаризация всех API endpoints
+```bash
+echo "=== ИНВЕНТАРИЗАЦИЯ API ENDPOINTS ===" >> diagnosis_report.txt
+
+# Поиск всех API маршрутов в коде
+echo "### НАЙДЕННЫЕ API МАРШРУТЫ ###" >> diagnosis_report.txt
+grep -r "app\.\|router\." --include="*.ts" --include="*.js" . | \
+grep -E "(get|post|put|delete|patch).*'/.*" | \
+grep -v node_modules | \
+grep -E "/api|api/" | \
+sed 's/.*['"'"'"]\([^'"'"'"]*\)['"'"'"].*/\1/' | \
+sort | uniq >> diagnosis_report.txt
+
+# Поиск регистраций маршрутов
+echo "### РЕГИСТРАЦИИ МАРШРУТОВ ###" >> diagnosis_report.txt
+grep -r "app\.use\|router\.use" --include="*.ts" --include="*.js" . | \
+grep -E "api|route" | \
+grep -v node_modules >> diagnosis_report.txt
+
+echo "" >> diagnosis_report.txt
+```
+
+## 🔍 ДИАГНОСТИКА ПО ФУНКЦИОНАЛЬНЫМ МОДУЛЯМ
+
+### МОДУЛЬ 1: Система аутентификации
+```bash
+echo "=== ДИАГНОСТИКА АУТЕНТИФИКАЦИИ ===" >> diagnosis_report.txt
+
+# Поиск auth компонентов
+echo "### AUTH КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find . -name "*auth*" -type f | grep -v node_modules >> diagnosis_report.txt
+
+# Тестирование auth endpoints
+echo "### AUTH ENDPOINTS ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+
+# Базовые auth endpoints
+auth_endpoints=(
+  "GET /api/auth"
+  "POST /api/auth/register"
+  "POST /api/auth/login"
+  "POST /api/auth/logout" 
+  "GET /api/auth/profile"
+  "GET /api/auth/refresh"
+  "GET /api/auth/verify"
+)
+
+for endpoint in "${auth_endpoints[@]}"; do
+  method=$(echo $endpoint | cut -d' ' -f1)
+  path=$(echo $endpoint | cut -d' ' -f2)
+  
+  echo "Тестирую: $method $path" >> diagnosis_report.txt
+  
+  if [ "$method" = "GET" ]; then
+    status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" 2>/dev/null)
+    content_type=$(curl -s -I "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" 2>/dev/null | grep -i "content-type" | head -1)
+  else
+    status=$(curl -s -o /dev/null -w "%{http_code}" -X $method "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -H "Content-Type: application/json" -d '{}' 2>/dev/null)
+    content_type=$(curl -s -I -X $method "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -H "Content-Type: application/json" -d '{}' 2>/dev/null | grep -i "content-type" | head -1)
+  fi
+  
+  if [[ $status =~ ^[2-4][0-9][0-9]$ ]]; then
+    if [[ $content_type == *"application/json"* ]]; then
+      echo "✅ $endpoint - Статус: $status, Content-Type: JSON" >> diagnosis_report.txt
+    elif [[ $content_type == *"text/html"* ]]; then
+      echo "❌ $endpoint - Статус: $status, Content-Type: HTML (ПРОБЛЕМА MIDDLEWARE!)" >> diagnosis_report.txt
+    else
+      echo "⚠️ $endpoint - Статус: $status, Content-Type: $content_type" >> diagnosis_report.txt
+    fi
+  else
+    echo "❌ $endpoint - Статус: $status (недоступен)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 2: Управление недвижимостью
+```bash
+echo "=== ДИАГНОСТИКА НЕДВИЖИМОСТИ ===" >> diagnosis_report.txt
+
+# Поиск property компонентов
+echo "### PROPERTY КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find . -name "*propert*" -type f | grep -v node_modules >> diagnosis_report.txt
+
+# Тестирование properties endpoints
+echo "### PROPERTIES ENDPOINTS ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+
+property_endpoints=(
+  "GET /api/properties"
+  "POST /api/properties"
+  "GET /api/properties/search"
+  "GET /api/properties/filters"
+  "GET /api/properties/regions"
+  "GET /api/properties/categories"
+  "GET /api/properties/favorites"
+  "GET /api/properties/1"
+  "PUT /api/properties/1"
+  "DELETE /api/properties/1"
+)
+
+for endpoint in "${property_endpoints[@]}"; do
+  method=$(echo $endpoint | cut -d' ' -f1)
+  path=$(echo $endpoint | cut -d' ' -f2)
+  
+  echo "Тестирую: $method $path" >> diagnosis_report.txt
+  
+  if [ "$method" = "GET" ]; then
+    status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" 2>/dev/null)
+    content_type=$(curl -s -I "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" 2>/dev/null | grep -i "content-type" | head -1)
+  else
+    status=$(curl -s -o /dev/null -w "%{http_code}" -X $method "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -H "Content-Type: application/json" -d '{}' 2>/dev/null)
+    content_type=$(curl -s -I -X $method "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -H "Content-Type: application/json" -d '{}' 2>/dev/null | grep -i "content-type" | head -1)
+  fi
+  
+  if [[ $status =~ ^[2-4][0-9][0-9]$ ]]; then
+    if [[ $content_type == *"application/json"* ]]; then
+      echo "✅ $endpoint - Статус: $status, Content-Type: JSON" >> diagnosis_report.txt
+    elif [[ $content_type == *"text/html"* ]]; then
+      echo "❌ $endpoint - Статус: $status, Content-Type: HTML (ПРОБЛЕМА MIDDLEWARE!)" >> diagnosis_report.txt
+    else
+      echo "⚠️ $endpoint - Статус: $status, Content-Type: $content_type" >> diagnosis_report.txt
+    fi
+  else
+    echo "❌ $endpoint - Статус: $status (недоступен)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+# Проверка фильтрации недвижимости
+echo "### ТЕСТИРОВАНИЕ ФИЛЬТРОВ НЕДВИЖИМОСТИ ###" >> diagnosis_report.txt
+filter_tests=(
+  "/api/properties?marketType=secondary"
+  "/api/properties?marketType=new_construction"
+  "/api/properties?page=1&limit=10"
+  "/api/properties?region=moscow"
+  "/api/properties?category=apartment"
+)
+
+for filter_test in "${filter_tests[@]}"; do
+  echo "Тестирую фильтр: $filter_test" >> diagnosis_report.txt
+  
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$filter_test" 2>/dev/null)
+  response=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$filter_test" 2>/dev/null | head -c 100)
+  
+  if [[ $status == "200" ]]; then
+    if [[ $response == "{"* ]] || [[ $response == "["* ]]; then
+      echo "✅ Фильтр работает - Статус: $status, Возвращает: JSON" >> diagnosis_report.txt
+    else
+      echo "❌ Фильтр не работает - Возвращает: HTML вместо JSON" >> diagnosis_report.txt
+    fi
+  else
+    echo "❌ Фильтр недоступен - Статус: $status" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 3: Пользователи и профили
+```bash
+echo "=== ДИАГНОСТИКА ПОЛЬЗОВАТЕЛЕЙ ===" >> diagnosis_report.txt
+
+# Поиск user компонентов
+echo "### USER КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find . -name "*user*" -type f | grep -v node_modules >> diagnosis_report.txt
+
+# Тестирование user endpoints
+echo "### USER ENDPOINTS ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+
+user_endpoints=(
+  "GET /api/users"
+  "GET /api/users/profile"
+  "PUT /api/users/profile"
+  "GET /api/users/favorites"
+  "POST /api/users/favorites"
+  "DELETE /api/users/favorites/1"
+  "GET /api/users/1"
+  "PUT /api/users/1"
+  "DELETE /api/users/1"
+)
+
+for endpoint in "${user_endpoints[@]}"; do
+  method=$(echo $endpoint | cut -d' ' -f1)
+  path=$(echo $endpoint | cut -d' ' -f2)
+  
+  echo "Тестирую: $method $path" >> diagnosis_report.txt
+  
+  if [ "$method" = "GET" ]; then
+    status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" 2>/dev/null)
+  else
+    status=$(curl -s -o /dev/null -w "%{http_code}" -X $method "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -H "Content-Type: application/json" -d '{}' 2>/dev/null)
+  fi
+  
+  if [[ $status =~ ^[2-4][0-9][0-9]$ ]]; then
+    echo "✅ $endpoint - Статус: $status" >> diagnosis_report.txt
+  else
+    echo "❌ $endpoint - Статус: $status (недоступен)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 4: Загрузка файлов и медиа
+```bash
+echo "=== ДИАГНОСТИКА ФАЙЛОВ И МЕДИА ===" >> diagnosis_report.txt
+
+# Поиск file/upload компонентов
+echo "### FILE/UPLOAD КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find . -name "*file*" -o -name "*upload*" -o -name "*image*" -o -name "*media*" | grep -v node_modules >> diagnosis_report.txt
+
+# Поиск multer или других upload middleware
+echo "### UPLOAD MIDDLEWARE ###" >> diagnosis_report.txt
+grep -r "multer\|upload\|multipart" --include="*.ts" --include="*.js" . | grep -v node_modules | head -5 >> diagnosis_report.txt
+
+# Тестирование file endpoints
+echo "### FILE ENDPOINTS ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+
+file_endpoints=(
+  "GET /api/files"
+  "POST /api/upload"
+  "POST /api/upload/image"
+  "GET /api/images"
+  "DELETE /api/files/1"
+  "GET /uploads"
+  "GET /static"
+)
+
+for endpoint in "${file_endpoints[@]}"; do
+  method=$(echo $endpoint | cut -d' ' -f1)
+  path=$(echo $endpoint | cut -d' ' -f2)
+  
+  echo "Тестирую: $method $path" >> diagnosis_report.txt
+  
+  if [ "$method" = "GET" ]; then
+    status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" 2>/dev/null)
+  elif [ "$method" = "POST" ] && [[ $path == *"upload"* ]]; then
+    # Тест загрузки с фиктивным файлом
+    status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -F "file=@package.json" 2>/dev/null)
+  else
+    status=$(curl -s -o /dev/null -w "%{http_code}" -X $method "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -H "Content-Type: application/json" -d '{}' 2>/dev/null)
+  fi
+  
+  if [[ $status =~ ^[2-4][0-9][0-9]$ ]]; then
+    echo "✅ $endpoint - Статус: $status" >> diagnosis_report.txt
+  else
+    echo "❌ $endpoint - Статус: $status (недоступен)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+## 🖥️ ДИАГНОСТИКА FRONTEND КОМПОНЕНТОВ
+
+### МОДУЛЬ 5: React компоненты и страницы
+```bash
+echo "=== ДИАГНОСТИКА FRONTEND КОМПОНЕНТОВ ===" >> diagnosis_report.txt
+
+# Анализ структуры frontend
+echo "### FRONTEND СТРУКТУРА ###" >> diagnosis_report.txt
+echo "React компоненты:" >> diagnosis_report.txt
+find ./client/src/components -name "*.tsx" -o -name "*.jsx" 2>/dev/null | wc -l | xargs echo "Количество компонентов:" >> diagnosis_report.txt
+
+echo "Страницы приложения:" >> diagnosis_report.txt
+find ./client/src/pages -name "*.tsx" -o -name "*.jsx" 2>/dev/null | wc -l | xargs echo "Количество страниц:" >> diagnosis_report.txt
+
+echo "Hooks и утилиты:" >> diagnosis_report.txt
+find ./client/src/hooks -name "*.ts" -o -name "*.tsx" 2>/dev/null | wc -l | xargs echo "Количество hooks:" >> diagnosis_report.txt
+
+# Ключевые компоненты недвижимости
+echo "### КЛЮЧЕВЫЕ КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+echo "Компоненты недвижимости:" >> diagnosis_report.txt
+find ./client -name "*Property*" -o -name "*property*" | head -10 >> diagnosis_report.txt
+
+echo "Компоненты карты:" >> diagnosis_report.txt
+find ./client -name "*Map*" -o -name "*map*" | head -10 >> diagnosis_report.txt
+
+echo "Компоненты фильтров:" >> diagnosis_report.txt
+find ./client -name "*Filter*" -o -name "*filter*" | head -10 >> diagnosis_report.txt
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 6: Проверка маршрутизации
+```bash
+echo "=== ДИАГНОСТИКА МАРШРУТИЗАЦИИ ===" >> diagnosis_report.txt
+
+# Тестирование основных страниц
+echo "### FRONTEND СТРАНИЦЫ ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+
+frontend_routes=(
+  "/"
+  "/properties"
+  "/property/1"
+  "/login"
+  "/register" 
+  "/profile"
+  "/favorites"
+  "/search"
+  "/about"
+  "/contact"
+)
+
+for route in "${frontend_routes[@]}"; do
+  echo "Тестирую страницу: $route" >> diagnosis_report.txt
+  
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$route" 2>/dev/null)
+  response=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$route" 2>/dev/null | head -c 100)
+  
+  if [[ $status == "200" ]]; then
+    if [[ $response == "<!DOCTYPE html"* ]]; then
+      echo "✅ Страница $route - Доступна (HTML)" >> diagnosis_report.txt
+    else
+      echo "⚠️ Страница $route - Статус 200, но содержимое неожиданное" >> diagnosis_report.txt
+    fi
+  else
+    echo "❌ Страница $route - Статус: $status (недоступна)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+## 🔧 ДИАГНОСТИКА СЕРВИСОВ И ИНТЕГРАЦИЙ
+
+### МОДУЛЬ 7: База данных и подключения
+```bash
+echo "=== ДИАГНОСТИКА БАЗЫ ДАННЫХ ===" >> diagnosis_report.txt
+
+# Поиск database компонентов
+echo "### DATABASE КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find . -name "*database*" -o -name "*db*" -o -name "*prisma*" -o -name "*drizzle*" | grep -v node_modules >> diagnosis_report.txt
+
+# Поиск конфигурации БД
+echo "### DATABASE КОНФИГУРАЦИЯ ###" >> diagnosis_report.txt
+grep -r "database\|DATABASE" --include="*.env*" --include="*.ts" --include="*.js" . | grep -v node_modules | head -5 >> diagnosis_report.txt
+
+# Тестирование health check endpoints
+echo "### DATABASE HEALTH CHECK ###" >> diagnosis_report.txt
+
+health_endpoints=(
+  "/api/health"
+  "/health"
+  "/api/status"
+  "/status"
+  "/api/health/db"
+  "/api/db/status"
+)
+
+for endpoint in "${health_endpoints[@]}"; do
+  echo "Тестирую health check: $endpoint" >> diagnosis_report.txt
+  
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$endpoint" 2>/dev/null)
+  response=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$endpoint" 2>/dev/null | head -c 200)
+  
+  if [[ $status == "200" ]]; then
+    if [[ $response == "{"* ]]; then
+      echo "✅ Health check $endpoint - Работает (JSON)" >> diagnosis_report.txt
+    elif [[ $response == *"OK"* ]] || [[ $response == *"healthy"* ]]; then
+      echo "✅ Health check $endpoint - Работает (Text)" >> diagnosis_report.txt
+    else
+      echo "⚠️ Health check $endpoint - Статус 200, но ответ неясен" >> diagnosis_report.txt
+    fi
+  else
+    echo "❌ Health check $endpoint - Статус: $status (недоступен)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 8: Middleware и безопасность
+```bash
+echo "=== ДИАГНОСТИКА MIDDLEWARE И БЕЗОПАСНОСТИ ===" >> diagnosis_report.txt
+
+# Поиск middleware
+echo "### MIDDLEWARE КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find . -name "*middleware*" -o -name "*auth*" -o -name "*cors*" -o -name "*helmet*" | grep -v node_modules >> diagnosis_report.txt
+
+# Проверка CORS
+echo "### CORS ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+cors_test=$(curl -s -I -X OPTIONS "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/api/properties" 2>/dev/null | grep -i "access-control")
+if [[ $cors_test == *"access-control"* ]]; then
+  echo "✅ CORS настроен правильно" >> diagnosis_report.txt
+  echo "$cors_test" >> diagnosis_report.txt
+else
+  echo "⚠️ CORS заголовки не найдены" >> diagnosis_report.txt
+fi
+
+# Проверка безопасности заголовков
+echo "### SECURITY HEADERS ###" >> diagnosis_report.txt
+security_headers=$(curl -s -I "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/" 2>/dev/null | grep -iE "x-frame-options|x-content-type-options|strict-transport-security|content-security-policy")
+if [[ $security_headers ]]; then
+  echo "✅ Security заголовки найдены:" >> diagnosis_report.txt
+  echo "$security_headers" >> diagnosis_report.txt
+else
+  echo "⚠️ Security заголовки не найдены" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 9: Производительность и кэширование
+```bash
+echo "=== ДИАГНОСТИКА ПРОИЗВОДИТЕЛЬНОСТИ ===" >> diagnosis_report.txt
+
+# Тестирование времени ответа
+echo "### ВРЕМЯ ОТВЕТА ENDPOINTS ###" >> diagnosis_report.txt
+
+performance_endpoints=(
+  "/"
+  "/api/properties"
+  "/api/auth/profile"
+  "/api/health"
+)
+
+for endpoint in "${performance_endpoints[@]}"; do
+  echo "Тестирую производительность: $endpoint" >> diagnosis_report.txt
+  
+  time_total=$(curl -s -o /dev/null -w "%{time_total}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$endpoint" 2>/dev/null)
+  time_connect=$(curl -s -o /dev/null -w "%{time_connect}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$endpoint" 2>/dev/null)
+  
+  if (( $(echo "$time_total < 2.0" | bc -l) )); then
+    echo "✅ $endpoint - Время ответа: ${time_total}s (быстро)" >> diagnosis_report.txt
+  elif (( $(echo "$time_total < 5.0" | bc -l) )); then
+    echo "⚠️ $endpoint - Время ответа: ${time_total}s (средне)" >> diagnosis_report.txt
+  else
+    echo "❌ $endpoint - Время ответа: ${time_total}s (медленно)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+# Проверка кэширования
+echo "### КЭШИРОВАНИЕ ###" >> diagnosis_report.txt
+cache_headers=$(curl -s -I "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/api/properties" 2>/dev/null | grep -iE "cache-control|etag|expires")
+if [[ $cache_headers ]]; then
+  echo "✅ Кэширование настроено:" >> diagnosis_report.txt
+  echo "$cache_headers" >> diagnosis_report.txt
+else
+  echo "⚠️ Кэширование не настроено" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+```
+
+## 📊 ГЕНЕРАЦИЯ ФИНАЛЬНОГО ОТЧЕТА
+
+### Создание сводки результатов
+```bash
+echo "=== СВОДКА РЕЗУЛЬТАТОВ ДИАГНОСТИКИ ===" >> diagnosis_report.txt
+echo "" >> diagnosis_report.txt
+
+# Подсчет результатов
+total_tests=$(grep -c "Тестирую:" diagnosis_report.txt)
+passed_tests=$(grep -c "✅" diagnosis_report.txt)
+warning_tests=$(grep -c "⚠️" diagnosis_report.txt)
+failed_tests=$(grep -c "❌" diagnosis_report.txt)
+
+echo "### СТАТИСТИКА ТЕСТИРОВАНИЯ ###" >> diagnosis_report.txt
+echo "Всего тестов выполнено: $total_tests" >> diagnosis_report.txt
+echo "Успешных тестов: $passed_tests" >> diagnosis_report.txt
+echo "Предупреждений: $warning_tests" >> diagnosis_report.txt
+echo "Неудачных тестов: $failed_tests" >> diagnosis_report.txt
+echo "" >> diagnosis_report.txt
+
+# Расчет процента успешности
+if [ $total_tests -gt 0 ]; then
+  success_rate=$(echo "scale=1; $passed_tests * 100 / $total_tests" | bc)
+  echo "Процент успешности: $success_rate%" >> diagnosis_report.txt
+else
+  echo "Процент успешности: 0%" >> diagnosis_report.txt
+fi
+echo "" >> diagnosis_report.txt
+
+# Критические проблемы
+echo "### КРИТИЧЕСКИЕ ПРОБЛЕМЫ ###" >> diagnosis_report.txt
+grep "❌.*HTML.*ПРОБЛЕМА MIDDLEWARE" diagnosis_report.txt | head -5 >> diagnosis_report.txt
+grep "❌.*недоступен" diagnosis_report.txt | head -5 >> diagnosis_report.txt
+echo "" >> diagnosis_report.txt
+
+# Рекомендации по исправлению
+echo "### РЕКОМЕНДАЦИИ ПО ИСПРАВЛЕНИЮ ###" >> diagnosis_report.txt
+
+if grep -q "HTML.*ПРОБЛЕМА MIDDLEWARE" diagnosis_report.txt; then
+  echo "🚨 КРИТИЧНО: Обнаружены API endpoints, возвращающие HTML вместо JSON" >> diagnosis_report.txt
+  echo "   → Необходимо исправить порядок middleware в Express сервере" >> diagnosis_report.txt
+  echo "   → API routes должны быть зарегистрированы ПЕРЕД Vite/статическим middleware" >> diagnosis_report.txt
+  echo "" >> diagnosis_report.txt
+fi
+
+if grep -q "медленно" diagnosis_report.txt; then
+  echo "⚠️ ПРОИЗВОДИТЕЛЬНОСТЬ: Обнаружены медленные endpoints (>5s)" >> diagnosis_report.txt
+  echo "   → Рекомендуется оптимизация database запросов" >> diagnosis_report.txt
+  echo "   → Добавить кэширование для часто используемых данных" >> diagnosis_report.txt
+  echo "" >> diagnosis_report.txt
+fi
+
+if ! grep -q "✅.*CORS" diagnosis_report.txt; then
+  echo "⚠️ БЕЗОПАСНОСТЬ: CORS заголовки не найдены" >> diagnosis_report.txt
+  echo "   → Необходимо настроить CORS middleware" >> diagnosis_report.txt
+  echo "" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+```
+
+## 🔍 ДЕТАЛЬНАЯ ДИАГНОСТИКА СПЕЦИФИЧНЫХ ДЛЯ SREDA.MARKET ФУНКЦИЙ
+
+### МОДУЛЬ 10: Геолокация и карты
+```bash
+echo "=== ДИАГНОСТИКА ГЕОЛОКАЦИИ И КАРТ ===" >> diagnosis_report.txt
+
+# Поиск map/geo компонентов
+echo "### КАРТЫ И ГЕОЛОКАЦИЯ ###" >> diagnosis_report.txt
+find . -name "*map*" -o -name "*geo*" -o -name "*location*" -o -name "*leaflet*" | grep -v node_modules >> diagnosis_report.txt
+
+# Тестирование geo endpoints
+echo "### GEO ENDPOINTS ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+
+geo_endpoints=(
+  "/api/geo/regions"
+  "/api/geo/cities" 
+  "/api/map/properties"
+  "/api/location/search"
+  "/api/coordinates"
+  "/api/properties/map"
+  "/api/regions"
+)
+
+for endpoint in "${geo_endpoints[@]}"; do
+  echo "Тестирую geo endpoint: $endpoint" >> diagnosis_report.txt
+  
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$endpoint" 2>/dev/null)
+  response=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$endpoint" 2>/dev/null | head -c 200)
+  
+  if [[ $status == "200" ]]; then
+    if [[ $response == "{"* ]] || [[ $response == "["* ]]; then
+      # Проверяем наличие geo данных
+      if [[ $response == *"latitude"* ]] || [[ $response == *"longitude"* ]] || [[ $response == *"coordinates"* ]]; then
+        echo "✅ $endpoint - Содержит geo данные" >> diagnosis_report.txt
+      else
+        echo "✅ $endpoint - JSON данные (geo структура не определена)" >> diagnosis_report.txt
+      fi
+    else
+      echo "❌ $endpoint - Возвращает HTML вместо JSON" >> diagnosis_report.txt
+    fi
+  else
+    echo "❌ $endpoint - Статус: $status (недоступен)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 11: Поиск и фильтрация недвижимости
+```bash
+echo "=== ДИАГНОСТИКА ПОИСКА И ФИЛЬТРАЦИИ ===" >> diagnosis_report.txt
+
+# Комплексное тестирование поисковых фильтров
+echo "### КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ ФИЛЬТРОВ ###" >> diagnosis_report.txt
+
+advanced_filters=(
+  "/api/properties?marketType=secondary&limit=5"
+  "/api/properties?marketType=new_construction&limit=5"
+  "/api/properties?priceFrom=1000000&priceTo=5000000"
+  "/api/properties?roomsFrom=1&roomsTo=3"
+  "/api/properties?region=moscow&marketType=secondary"
+  "/api/properties?search=квартира"
+  "/api/properties?category=apartment&marketType=new_construction"
+  "/api/properties?sort=price_asc&limit=10"
+  "/api/properties?sort=price_desc&limit=10"
+  "/api/properties?page=1&limit=20"
+)
+
+for filter in "${advanced_filters[@]}"; do
+  echo "Тестирую продвинутый фильтр: $filter" >> diagnosis_report.txt
+  
+  status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$filter" 2>/dev/null)
+  response=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$filter" 2>/dev/null)
+  
+  if [[ $status == "200" ]]; then
+    if [[ $response == "{"* ]]; then
+      # Пытаемся определить количество результатов
+      count=$(echo "$response" | grep -o '"total":[0-9]*' | head -1 | cut -d':' -f2)
+      if [[ $count ]]; then
+        echo "✅ Фильтр работает - Найдено результатов: $count" >> diagnosis_report.txt
+      else
+        properties_count=$(echo "$response" | grep -o '"properties":\[' | wc -l)
+        echo "✅ Фильтр работает - JSON структура обнаружена" >> diagnosis_report.txt
+      fi
+    elif [[ $response == "["* ]]; then
+      echo "✅ Фильтр работает - Возвращает массив данных" >> diagnosis_report.txt
+    else
+      echo "❌ Фильтр не работает - Возвращает HTML вместо JSON" >> diagnosis_report.txt
+    fi
+  else
+    echo "❌ Фильтр недоступен - Статус: $status" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.3
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 12: Система избранного и сохранений
+```bash
+echo "=== ДИАГНОСТИКА СИСТЕМЫ ИЗБРАННОГО ===" >> diagnosis_report.txt
+
+# Поиск favorites компонентов
+echo "### FAVORITES КОМПОНЕНТЫ ###" >> diagnosis_report.txt
+find . -name "*favorite*" -o -name "*bookmark*" -o -name "*saved*" | grep -v node_modules >> diagnosis_report.txt
+
+# Тестирование favorites endpoints
+echo "### FAVORITES ENDPOINTS ТЕСТИРОВАНИЕ ###" >> diagnosis_report.txt
+
+favorites_endpoints=(
+  "GET /api/favorites"
+  "GET /api/users/favorites"
+  "POST /api/favorites"
+  "POST /api/properties/1/favorite"
+  "DELETE /api/favorites/1"
+  "DELETE /api/properties/1/favorite"
+  "GET /api/users/saved"
+  "POST /api/users/save/property/1"
+)
+
+for endpoint in "${favorites_endpoints[@]}"; do
+  method=$(echo $endpoint | cut -d' ' -f1)
+  path=$(echo $endpoint | cut -d' ' -f2)
+  
+  echo "Тестирую favorites: $method $path" >> diagnosis_report.txt
+  
+  if [ "$method" = "GET" ]; then
+    status=$(curl -s -o /dev/null -w "%{http_code}" "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" 2>/dev/null)
+  else
+    status=$(curl -s -o /dev/null -w "%{http_code}" -X $method "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev$path" -H "Content-Type: application/json" -d '{"propertyId": 1}' 2>/dev/null)
+  fi
+  
+  if [[ $status =~ ^[2-4][0-9][0-9]$ ]]; then
+    echo "✅ $endpoint - Статус: $status" >> diagnosis_report.txt
+  else
+    echo "❌ $endpoint - Статус: $status (недоступен)" >> diagnosis_report.txt
+  fi
+  
+  sleep 0.2
+done
+
+echo "" >> diagnosis_report.txt
+```
+
+## 🧪 ФУНКЦИОНАЛЬНОЕ ТЕСТИРОВАНИЕ
+
+### МОДУЛЬ 13: End-to-End сценарии
+```bash
+echo "=== E2E ФУНКЦИОНАЛЬНОЕ ТЕСТИРОВАНИЕ ===" >> diagnosis_report.txt
+
+# Сценарий 1: Поиск недвижимости
+echo "### СЦЕНАРИЙ 1: ПОИСК НЕДВИЖИМОСТИ ###" >> diagnosis_report.txt
+echo "1. Получение списка всех объектов:" >> diagnosis_report.txt
+all_properties=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/api/properties?limit=5" 2>/dev/null)
+if [[ $all_properties == "{"* ]]; then
+  echo "✅ Базовый поиск работает" >> diagnosis_report.txt
+else
+  echo "❌ Базовый поиск не работает" >> diagnosis_report.txt
+fi
+
+echo "2. Фильтрация по типу рынка:" >> diagnosis_report.txt
+secondary_properties=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/api/properties?marketType=secondary&limit=3" 2>/dev/null)
+if [[ $secondary_properties == "{"* ]]; then
+  echo "✅ Фильтрация по marketType работает" >> diagnosis_report.txt
+else
+  echo "❌ Фильтрация по marketType не работает" >> diagnosis_report.txt
+fi
+
+echo "3. Пагинация:" >> diagnosis_report.txt
+paginated_properties=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/api/properties?page=1&limit=2" 2>/dev/null)
+if [[ $paginated_properties == "{"* ]]; then
+  echo "✅ Пагинация работает" >> diagnosis_report.txt
+else
+  echo "❌ Пагинация не работает" >> diagnosis_report.txt
+fi
+
+# Сценарий 2: Регистрация и аутентификация
+echo "### СЦЕНАРИЙ 2: АУТЕНТИФИКАЦИЯ ###" >> diagnosis_report.txt
+echo "1. Регистрация нового пользователя:" >> diagnosis_report.txt
+register_response=$(curl -s -X POST "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/api/auth/register" -H "Content-Type: application/json" -d '{"email":"test@example.com","password":"test123","name":"Test User"}' 2>/dev/null | head -c 1)
+if [[ $register_response == "{" ]]; then
+  echo "✅ API регистрации возвращает JSON" >> diagnosis_report.txt
+else
+  echo "❌ API регистрации возвращает HTML (проблема middleware)" >> diagnosis_report.txt
+fi
+
+echo "2. Авторизация:" >> diagnosis_report.txt
+login_response=$(curl -s -X POST "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/api/auth/login" -H "Content-Type: application/json" -d '{"email":"test@example.com","password":"test123"}' 2>/dev/null | head -c 1)
+if [[ $login_response == "{" ]]; then
+  echo "✅ API авторизации возвращает JSON" >> diagnosis_report.txt
+else
+  echo "❌ API авторизации возвращает HTML (проблема middleware)" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+```
+
+## 📱 ДИАГНОСТИКА АДАПТИВНОСТИ И UX
+
+### МОДУЛЬ 14: Мобильная адаптивность
+```bash
+echo "=== ДИАГНОСТИКА МОБИЛЬНОЙ АДАПТИВНОСТИ ===" >> diagnosis_report.txt
+
+# Проверка viewport и responsive дизайна
+echo "### RESPONSIVE ДИЗАЙН ###" >> diagnosis_report.txt
+responsive_check=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/" 2>/dev/null | grep -i "viewport")
+if [[ $responsive_check == *"viewport"* ]]; then
+  echo "✅ Viewport meta tag найден" >> diagnosis_report.txt
+  echo "$responsive_check" >> diagnosis_report.txt
+else
+  echo "⚠️ Viewport meta tag не найден" >> diagnosis_report.txt
+fi
+
+# Проверка CSS framework
+css_framework=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/" 2>/dev/null | grep -i -E "bootstrap|tailwind|material|antd")
+if [[ $css_framework ]]; then
+  echo "✅ CSS framework обнаружен" >> diagnosis_report.txt
+else
+  echo "⚠️ CSS framework не идентифицирован" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+```
+
+### МОДУЛЬ 15: SEO и метаданные
+```bash
+echo "=== ДИАГНОСТИКА SEO ===" >> diagnosis_report.txt
+
+# Проверка основных SEO элементов
+echo "### SEO ЭЛЕМЕНТЫ ###" >> diagnosis_report.txt
+seo_content=$(curl -s "https://1c0c01a7-b1a3-42ab-a683-a045f1cc20d8-00-38e3l2t1r201x.kirk.replit.dev/" 2>/dev/null)
+
+# Title tag
+title_tag=$(echo "$seo_content" | grep -i "<title>" | head -1)
+if [[ $title_tag ]]; then
+  echo "✅ Title tag найден: $title_tag" >> diagnosis_report.txt
+else
+  echo "❌ Title tag не найден" >> diagnosis_report.txt
+fi
+
+# Meta description
+meta_desc=$(echo "$seo_content" | grep -i "meta.*description" | head -1)
+if [[ $meta_desc ]]; then
+  echo "✅ Meta description найден" >> diagnosis_report.txt
+else
+  echo "⚠️ Meta description не найден" >> diagnosis_report.txt
+fi
+
+# OpenGraph tags
+og_tags=$(echo "$seo_content" | grep -i "og:" | wc -l)
+if [[ $og_tags -gt 0 ]]; then
+  echo "✅ OpenGraph теги найдены ($og_tags)" >> diagnosis_report.txt
+else
+  echo "⚠️ OpenGraph теги не найдены" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+```
+
+## 📈 ФИНАЛЬНЫЙ АНАЛИЗ И РЕКОМЕНДАЦИИ
+
+### Создание детального отчета
+```bash
+echo "=== ДЕТАЛЬНЫЙ АНАЛИЗ РЕЗУЛЬТАТОВ ===" >> diagnosis_report.txt
+
+# Анализ по модулям
+echo "### АНАЛИЗ ПО МОДУЛЯМ ###" >> diagnosis_report.txt
+
+modules=("АУТЕНТИФИКАЦИЯ" "НЕДВИЖИМОСТЬ" "ПОЛЬЗОВАТЕЛИ" "ФАЙЛЫ" "ГЕОЛОКАЦИЯ" "ПОИСК" "ИЗБРАННОЕ")
+for module in "${modules[@]}"; do
+  module_tests=$(grep -c "$module.*Тестирую" diagnosis_report.txt)
+  module_success=$(grep -c "$module" diagnosis_report.txt | grep -c "✅")
+  
+  if [[ $module_tests -gt 0 ]]; then
+    echo "$module: Тестов $module_tests, Успешных $module_success" >> diagnosis_report.txt
+  fi
+done
+
+echo "" >> diagnosis_report.txt
+
+# Приоритетные рекомендации
+echo "### ПРИОРИТЕТНЫЕ РЕКОМЕНДАЦИИ ###" >> diagnosis_report.txt
+
+echo "🔴 КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ:" >> diagnosis_report.txt
+if grep -q "HTML.*ПРОБЛЕМА MIDDLEWARE" diagnosis_report.txt; then
+  echo "1. НЕМЕДЛЕННО исправить порядок middleware - API endpoints возвращают HTML" >> diagnosis_report.txt
+fi
+
+if grep -q "недоступен" diagnosis_report.txt; then
+  echo "2. Восстановить недоступные endpoints:" >> diagnosis_report.txt
+  grep "❌.*недоступен" diagnosis_report.txt | head -3 | sed 's/^/   - /' >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+echo "🟡 УЛУЧШЕНИЯ ПРОИЗВОДИТЕЛЬНОСТИ:" >> diagnosis_report.txt
+if grep -q "медленно" diagnosis_report.txt; then
+  echo "1. Оптимизировать медленные endpoints (>5s)" >> diagnosis_report.txt
+fi
+
+if ! grep -q "✅.*Кэширование" diagnosis_report.txt; then
+  echo "2. Настроить кэширование статических ресурсов" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+echo "🟢 РЕКОМЕНДУЕМЫЕ УЛУЧШЕНИЯ:" >> diagnosis_report.txt
+if ! grep -q "✅.*Meta description" diagnosis_report.txt; then
+  echo "1. Добавить SEO метаданные" >> diagnosis_report.txt
+fi
+
+if ! grep -q "✅.*OpenGraph" diagnosis_report.txt; then
+  echo "2. Настроить OpenGraph для социальных сетей" >> diagnosis_report.txt
+fi
+
+# Итоговая оценка
+echo "" >> diagnosis_report.txt
+echo "### ИТОГОВАЯ ОЦЕНКА СИСТЕМЫ ###" >> diagnosis_report.txt
+
+critical_issues=$(grep -c "HTML.*ПРОБЛЕМА MIDDLEWARE" diagnosis_report.txt)
+if [[ $critical_issues -gt 0 ]]; then
+  echo "🔴 СИСТЕМА ТРЕБУЕТ КРИТИЧЕСКИХ ИСПРАВЛЕНИЙ" >> diagnosis_report.txt
+  echo "Основная проблема: Middleware порядок нарушен" >> diagnosis_report.txt
+elif [[ $failed_tests -gt $((total_tests/2)) ]]; then
+  echo "🟡 СИСТЕМА ЧАСТИЧНО ФУНКЦИОНАЛЬНА" >> diagnosis_report.txt
+  echo "Требуется средний объем исправлений" >> diagnosis_report.txt
+elif [[ $passed_tests -gt $((total_tests*3/4)) ]]; then
+  echo "🟢 СИСТЕМА В ХОРОШЕМ СОСТОЯНИИ" >> diagnosis_report.txt
+  echo "Требуются минимальные улучшения" >> diagnosis_report.txt
+else
+  echo "🟡 СИСТЕМА РАБОТОСПОСОБНА С ЗАМЕЧАНИЯМИ" >> diagnosis_report.txt
+  echo "Рекомендуется плановое улучшение" >> diagnosis_report.txt
+fi
+
+echo "" >> diagnosis_report.txt
+echo "=== ДИАГНОСТИКА ЗАВЕРШЕНА ===" >> diagnosis_report.txt
+echo "Полный отчет сохранен в файл: diagnosis_report.txt" >> diagnosis_report.txt
+
+# Вывод отчета
+cat diagnosis_report.txt
+
+# Создание краткой сводки
+echo ""
+echo "🎯 КРАТКАЯ СВОДКА ДИАГНОСТИКИ SREDA.MARKET:"
+echo "📊 Тестов выполнено: $total_tests"
+echo "✅ Успешных: $passed_tests"
+echo "⚠️ Предупреждений: $warning_tests" 
+echo "❌ Ошибок: $failed_tests"
+echo "📈 Успешность: $success_rate%"
+echo ""
+echo "📋 Следующие шаги:"
+echo "1. Просмотреть полный отчет в diagnosis_report.txt"
+echo "2. Исправить критические проблемы (если есть)"
+echo "3. Реализовать рекомендуемые улучшения"
+echo "4. Повторить диагностику после исправлений"
+```
+
+## 🔄 ПЛАН ДЕЙСТВИЙ ПОСЛЕ ДИАГНОСТИКИ
+
+### Автоматическое создание задач
+```bash
+# Создание файла с планом действий
+echo "=== ПЛАН ДЕЙСТВИЙ ПО РЕЗУЛЬТАТАМ ДИАГНОСТИКИ ===" > action_plan.txt
+echo "Дата создания: $(date)" >> action_plan.txt
+echo "" >> action_plan.txt
+
+echo "### КРИТИЧЕСКИЕ ЗАДАЧИ (выполнить немедленно) ###" >> action_plan.txt
+if grep -q "HTML.*ПРОБЛЕМА MIDDLEWARE" diagnosis_report.txt; then
+  echo "□ Исправить порядок middleware в Express сервере" >> action_plan.txt
+  echo "  - Переместить API routes перед Vite middleware" >> action_plan.txt
+  echo "  - Добавить защиту API от catch-all routes" >> action_plan.txt
+  echo "" >> action_plan.txt
+fi
+
+echo "### ВЫСОКИЙ ПРИОРИТЕТ ###" >> action_plan.txt
+grep "❌.*недоступен" diagnosis_report.txt | head -5 | sed 's/❌/□ Восстановить:/' >> action_plan.txt
+echo "" >> action_plan.txt
+
+echo "### СРЕДНИЙ ПРИОРИТЕТ ###" >> action_plan.txt
+if grep -q "медленно" diagnosis_report.txt; then
+  echo "□ Оптимизировать производительность медленных endpoints" >> action_plan.txt
+fi
+if ! grep -q "✅.*Кэширование" diagnosis_report.txt; then
+  echo "□ Настроить кэширование" >> action_plan.txt
+fi
+echo "" >> action_plan.txt
+
+echo "### НИЗКИЙ ПРИОРИТЕТ (улучшения) ###" >> action_plan.txt
+if ! grep -q "✅.*Meta description" diagnosis_report.txt; then
+  echo "□ Добавить SEO метаданные" >> action_plan.txt
+fi
+if ! grep -q "✅.*OpenGraph" diagnosis_report.txt; then
+  echo "□ Настроить OpenGraph теги" >> action_plan.txt
+fi
+
+echo "" >> action_plan.txt
+echo "Детальная информация в файле: diagnosis_report.txt" >> action_plan.txt
+
+cat action_plan.txt
+```
+
+## ✅ КРИТЕРИИ УСПЕШНОЙ ДИАГНОСТИКИ
+
+### Обязательные проверки выполнены:
+- [ ] Полная инвентаризация всех компонентов системы
+- [ ] Тестирование всех основных API endpoints  
+- [ ] Проверка работоспособности всех модулей
+- [ ] Анализ производительности и безопасности
+- [ ] Функциональное E2E тестирование
+- [ ] Создание детального отчета с рекомендациями
+- [ ] Формирование плана действий по исправлению
+
+### Результат диагностики:
+📄 **diagnosis_report.txt** - полный технический отчет  
+📋 **action_plan.txt** - план действий по приоритетам  
+📊 **Численные метрики** - процент успешности системы  
+🎯 **Конкретные рекомендации** - что именно исправлять  
+
+**🚀 ДИАГНОСТИКА SREDA.MARKET ГОТОВА К ВЫПОЛНЕНИЮ!**

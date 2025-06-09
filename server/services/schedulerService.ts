@@ -512,7 +512,7 @@ export class SchedulerService {
     // node-cron автоматически останавливает задачи при завершении процесса
   }
 
-  public getStatus(): { isRunning: boolean; nextRun: string } {
+  public getDetailedStatus(): { isRunning: boolean; nextRun: string } {
     const now = new Date();
     const nextRun = new Date(now);
     nextRun.setDate(nextRun.getDate() + 1);
