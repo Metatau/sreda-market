@@ -606,6 +606,57 @@ export class LeafletMapService {
   }
 
   /**
+   * Включение режима клика для геоаналитики
+   */
+  async enableClickMode(mapId: string, clickHandler: (lat: number, lng: number) => void): Promise<boolean> {
+    try {
+      const mapInstance = this.maps.get(mapId);
+      if (!mapInstance) {
+        console.error('Map not found for click mode:', mapId);
+        return false;
+      }
+
+      // Сохраняем обработчик для возможности удаления
+      (mapInstance as any).clickHandler = clickHandler;
+
+      // Добавляем обработчик клика на карту
+      mapInstance.leafletMap.on('click', (e: any) => {
+        const { lat, lng } = e.latlng;
+        clickHandler(lat, lng);
+      });
+
+      console.log('Click mode enabled for map:', mapId);
+      return true;
+    } catch (error) {
+      console.error('Error enabling click mode:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Отключение режима клика
+   */
+  async disableClickMode(mapId: string): Promise<boolean> {
+    try {
+      const mapInstance = this.maps.get(mapId);
+      if (!mapInstance) {
+        console.error('Map not found for disabling click mode:', mapId);
+        return false;
+      }
+
+      // Удаляем обработчик клика
+      mapInstance.leafletMap.off('click');
+      delete (mapInstance as any).clickHandler;
+
+      console.log('Click mode disabled for map:', mapId);
+      return true;
+    } catch (error) {
+      console.error('Error disabling click mode:', error);
+      return false;
+    }
+  }
+
+  /**
    * Получение цвета для тепловой карты с поддержкой разных режимов
    */
   private getHeatmapColor(intensity: number, mode: string = 'price'): string {

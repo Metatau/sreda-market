@@ -372,7 +372,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
     addPropertyMarkers();
   }, [properties, mapId, mapLoaded, regionId, onPropertySelect]);
 
-  // Handle active map tool changes
+  // Handle active map tool changes and add click handlers
   useEffect(() => {
     if (!mapId || !mapLoaded) return;
 
@@ -408,8 +408,23 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
             break;
 
           case 'geoanalysis':
-            // Add geo-analysis layers (districts, transport, etc.)
-            console.log('Geo-analysis mode activated');
+            // Enable quarter analytics click mode
+            console.log('Geo-analysis mode activated - click on map for quarter analytics');
+            await leafletMapService.enableClickMode(mapId, async (lat: number, lng: number) => {
+              console.log('Map clicked for analytics at:', lat, lng);
+              
+              // Get address for the clicked location
+              try {
+                const reverseGeoResult = await openStreetMapService.reverseGeocode(lat, lng);
+                const address = openStreetMapService.formatAddress(reverseGeoResult);
+                setAnalyticsAddress(address);
+              } catch (error) {
+                console.error('Error getting address:', error);
+                setAnalyticsAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+              }
+              
+              setAnalyticsPosition([lat, lng]);
+            });
             break;
 
           case 'investment':
@@ -418,7 +433,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
             break;
 
           default:
-            // Clear all special layers for 'none' mode
+            // Clear all special layers for 'none' mode and disable click mode
+            await leafletMapService.disableClickMode(mapId);
             break;
         }
       } catch (error) {
@@ -429,12 +445,29 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
     handleMapToolChange();
   }, [activeMapTool, mapId, mapLoaded, properties]);
 
+  // Handle closing analytics popup
+  const handleCloseAnalytics = () => {
+    setAnalyticsPosition(null);
+    setAnalyticsAddress(null);
+  };
+
   return (
-    <div 
-      ref={mapContainer} 
-      className="w-full h-full rounded-lg"
-      style={{ minHeight: '400px' }}
-    />
+    <>
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full rounded-lg"
+        style={{ minHeight: '400px' }}
+      />
+      
+      {/* Quarter Analytics Popup */}
+      {analyticsPosition && (
+        <QuarterAnalyticsPopup
+          position={analyticsPosition}
+          address={analyticsAddress || undefined}
+          onClose={handleCloseAnalytics}
+        />
+      )}
+    </>
   );
 }
 
