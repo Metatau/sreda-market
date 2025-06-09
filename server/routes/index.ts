@@ -59,6 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/insights', insightsRoutes);
   app.use('/api/admin/sources', adminSourcesRoutes);
   app.use('/api/chat', chatRoutes);
+  app.use('/api/admin/content', contentManagementRoutes);
   
   // Import and register admin routes
   const adminRoutes = (await import('./admin.routes')).default;

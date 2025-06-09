@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { requireSessionAdmin } from '../middleware/auth';
+import { requireAdmin } from '../middleware/auth';
 import { contentParser } from '../services/contentParser';
 import { contentScheduler } from '../services/contentScheduler';
-import { SessionAuthenticatedRequest } from '../types/auth';
+import { AuthenticatedRequest } from '../types/auth';
 
 const router = Router();
 
 // Синхронизация всех источников данных
-router.post('/sync-sources', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
+router.post('/sync-sources', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
   try {
     console.log('Starting manual source synchronization...');
     
@@ -39,7 +39,7 @@ router.post('/sync-sources', requireSessionAdmin, async (req: SessionAuthenticat
 });
 
 // Создание интеллектуального плана контента
-router.post('/create-content-plan', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
+router.post('/create-content-plan', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
   try {
     console.log('Creating intelligent content plan...');
     
@@ -72,7 +72,7 @@ router.post('/create-content-plan', requireSessionAdmin, async (req: SessionAuth
 });
 
 // Выполнение конкретного плана контента
-router.post('/execute-plan/:planId', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
+router.post('/execute-plan/:planId', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
   try {
     const { planId } = req.params;
     
@@ -118,7 +118,7 @@ router.post('/execute-plan/:planId', requireSessionAdmin, async (req: SessionAut
 });
 
 // Автоматическая генерация и публикация контента
-router.post('/auto-generate-content', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
+router.post('/auto-generate-content', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
   try {
     const { contentType, priority } = req.body;
     
@@ -173,7 +173,7 @@ router.post('/auto-generate-content', requireSessionAdmin, async (req: SessionAu
 });
 
 // Получение статистики работы с контентом
-router.get('/content-stats', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
+router.get('/content-stats', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
   try {
     // Получаем статистику синхронизации
     const syncResults = await contentParser.syncAllSources();
@@ -219,7 +219,7 @@ router.get('/content-stats', requireSessionAdmin, async (req: SessionAuthenticat
 });
 
 // Тестирование парсинга конкретного источника
-router.post('/test-source/:sourceId', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res: any) => {
+router.post('/test-source/:sourceId', requireAdmin, async (req: AuthenticatedRequest, res: any) => {
   try {
     const { sourceId } = req.params;
     
