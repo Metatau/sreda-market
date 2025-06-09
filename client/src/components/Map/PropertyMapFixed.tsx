@@ -89,6 +89,10 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           setMapId(newMapId);
           setMapLoaded(true);
           console.log('Map initialized with ID:', newMapId);
+          
+          // Проверяем, что карта действительно загружена
+          const mapInstance = leafletMapService.getMap(newMapId);
+          console.log('Map instance check:', mapInstance ? 'Found' : 'Not found');
         }
       } catch (error) {
         console.error('Error initializing map:', error);
@@ -215,23 +219,36 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
         for (const marker of propertyMarkers) {
           if (marker) {
             console.log(`Creating marker for property ${marker.id} at coordinates:`, marker.coordinates);
-            await leafletMapService.addMarker(
-              mapId,
-              marker.coordinates,
-              {
-                popup: `
-                  <div class="property-popup">
-                    <h3 class="font-bold text-sm mb-2">${marker.popup.title}</h3>
-                    <p class="text-lg font-bold text-blue-600 mb-1">${marker.popup.priceFormatted}</p>
-                    <p class="text-sm text-gray-600 mb-2">${marker.popup.address}</p>
-                    <p class="text-xs text-gray-500">ID: ${marker.popup.id}</p>
-                  </div>
-                `,
-                clickable: true
-              }
-            );
             
-            console.log(`Marker ${marker.id} added to map. Total markers: ${propertyMarkers.indexOf(marker) + 1}`);
+            // Проверяем валидность координат перед добавлением маркера
+            const [lat, lng] = marker.coordinates;
+            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+              console.error(`Invalid coordinates for marker ${marker.id}: [${lat}, ${lng}]`);
+              continue;
+            }
+
+            try {
+              const markerResult = await leafletMapService.addMarker(
+                mapId,
+                marker.coordinates,
+                {
+                  popup: `
+                    <div class="property-popup">
+                      <h3 class="font-bold text-sm mb-2">${marker.popup.title}</h3>
+                      <p class="text-lg font-bold text-blue-600 mb-1">${marker.popup.priceFormatted}</p>
+                      <p class="text-sm text-gray-600 mb-2">${marker.popup.address}</p>
+                      <p class="text-xs text-gray-500">ID: ${marker.popup.id}</p>
+                    </div>
+                  `,
+                  clickable: true
+                }
+              );
+              
+              console.log(`Marker ${marker.id} added successfully. Result:`, markerResult);
+              console.log(`Marker ${marker.id} added to map. Total markers: ${propertyMarkers.indexOf(marker) + 1}`);
+            } catch (error) {
+              console.error(`Failed to add marker ${marker.id}:`, error);
+            }
           }
         }
 

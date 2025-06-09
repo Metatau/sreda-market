@@ -162,7 +162,7 @@ export class LeafletMapService {
       return null;
     }
 
-    const marker = window.L.marker([coordinates[1], coordinates[0]], {
+    const marker = window.L.marker([coordinates[0], coordinates[1]], {
       title: options?.title,
       draggable: options?.draggable || false,
       ...(options?.icon && { icon: options.icon })
