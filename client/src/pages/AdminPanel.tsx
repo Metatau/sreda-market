@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RefreshCw, Database, CheckCircle, XCircle, AlertCircle, Key, BarChart, Users, Settings, Globe, MessageSquare, FileText, Plus, Search, ToggleLeft, ToggleRight, Eye, Edit, Trash2, Upload } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { Navigation } from "@/components/Navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AdsApiStatus {
   available: boolean;
@@ -41,6 +42,7 @@ interface DataSource {
 }
 
 export default function AdminPanel() {
+  const { user, isAuthenticated } = useAuth();
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [showCredentials, setShowCredentials] = useState(false);
@@ -106,26 +108,18 @@ export default function AdminPanel() {
   const { data: adsApiStatus, isLoading: statusLoading } = useQuery<AdsApiStatus>({
     queryKey: ['/api/admin/ads-api/status'],
     refetchInterval: 30000, // Обновляем каждые 30 секунд
+    enabled: isAuthenticated && user?.roles?.includes('admin')
   });
 
   const { data: sourcesData, isLoading: sourcesLoading } = useQuery({
     queryKey: ['/api/admin/sources'],
-    enabled: activeTab === 'sources'
+    enabled: activeTab === 'sources' && isAuthenticated && user?.roles?.includes('admin')
   });
-
-  const sources = (sourcesData as any)?.data || [];
-
-  // Фильтрация источников данных
-  const filteredSources = sources.filter((source: DataSource) =>
-    source.name.toLowerCase().includes(sourcesSearchTerm.toLowerCase()) ||
-    source.description?.toLowerCase().includes(sourcesSearchTerm.toLowerCase()) ||
-    source.tags.some(tag => tag.toLowerCase().includes(sourcesSearchTerm.toLowerCase()))
-  );
 
   // Мутации для источников данных
   const toggleSourceMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest('POST', `/api/admin/sources/${id}/toggle`, {});
+      return await apiRequest('POST', `/api/admin/sources/${id}/toggle`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
@@ -135,7 +129,7 @@ export default function AdminPanel() {
 
   const deleteSourceMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest('DELETE', `/api/admin/sources/${id}`, {});
+      return await apiRequest('DELETE', `/api/admin/sources/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/sources'] });
