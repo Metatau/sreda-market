@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireSessionAdmin, type SessionAuthenticatedRequest } from '../middleware/sessionAuth';
+import { adminRateLimitMiddleware } from '../middleware/adminRateLimit';
 import { adsApiService } from '../services/adsApiService';
 import { schedulerService } from '../services/schedulerService';
 

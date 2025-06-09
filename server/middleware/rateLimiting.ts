@@ -84,6 +84,13 @@ export function createRateLimit(options: RateLimitOptions) {
       return;
     }
     
+    // Skip rate limiting for authenticated admin users
+    const session = (req as any).session;
+    if (session?.userId && req.path.startsWith('/api/admin/')) {
+      next();
+      return;
+    }
+    
     const identifier = keyGenerator(req);
     
     if (!rateLimiter.checkLimit(identifier, max, windowMs)) {
@@ -134,6 +141,12 @@ export const mapRateLimit = createRateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 2000, // Extremely high limits for map functionality
   message: 'Too many map requests, please slow down'
+});
+
+export const adminRateLimit = createRateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 500, // Very high limits for admin operations
+  message: 'Too many admin requests, please slow down'
 });
 
 // Cleanup on process exit

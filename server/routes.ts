@@ -36,7 +36,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Global middleware
   app.use(corsMiddleware);
   app.use(sessionConfig); // Add session support
-  app.use(generalRateLimit);
+  // Skip rate limiting in development and for admin routes
+  app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'development' || req.path.startsWith('/api/admin/')) {
+      next();
+    } else {
+      generalRateLimit(req, res, next);
+    }
+  });
   app.use(performanceMonitor.middleware());
   app.use(compression);
 
