@@ -18,7 +18,7 @@ const RUSSIAN_CITIES: RegionCoordinates[] = [
   { id: 5, name: "Казань", coordinates: [55.7887, 49.1221] },
   { id: 11, name: "Уфа", coordinates: [54.7388, 55.9721] },
   { id: 12, name: "Красноярск", coordinates: [56.0184, 92.8672] },
-  { id: 13, name: "Пермь", coordinates: [56.2636901, 58.0088974] },
+  { id: 13, name: "Пермь", coordinates: [58.0105, 56.2502] },
   { id: 35, name: "Калининград", coordinates: [54.7104, 20.4522] },
   { id: 36, name: "Тюмень", coordinates: [57.1522, 65.5272] },
   { id: 37, name: "Сочи", coordinates: [43.6028, 39.7342] }
