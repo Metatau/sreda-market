@@ -24,6 +24,7 @@ const registerSchema = z.object({
 
 // Login endpoint
 router.post('/login', async (req: any, res: any) => {
+  res.setHeader('Content-Type', 'application/json');
   try {
     const { email, password } = loginSchema.parse(req.body);
     
@@ -66,6 +67,7 @@ router.post('/login', async (req: any, res: any) => {
 
 // Register endpoint
 router.post('/register', async (req: any, res: any) => {
+  res.setHeader('Content-Type', 'application/json');
   try {
     const data = registerSchema.parse(req.body);
     

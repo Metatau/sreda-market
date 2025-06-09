@@ -106,6 +106,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Force JSON response for API routes (must be before any other middleware)
+  app.use('/api/*', (req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  });
+
   // Import and use fixed modular auth routes
   const authRoutes = await import('./routes/authFixed');
   app.use('/api/auth', authRoutes.default);
