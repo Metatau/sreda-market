@@ -134,6 +134,40 @@ router.post('/logout', async (req: any, res: any) => {
   }
 });
 
+// Auth status endpoint
+router.get('/status', async (req: any, res: any) => {
+  try {
+    const userId = req.session?.userId;
+    
+    if (!userId) {
+      return res.json({ authenticated: false });
+    }
+
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.json({ authenticated: false });
+    }
+
+    res.json({
+      authenticated: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Auth status error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
+  }
+});
+
 // Get user profile with session authentication
 router.get('/profile',
   generalRateLimit,
