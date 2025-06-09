@@ -154,8 +154,6 @@ router.post('/register', registrationLimiter, async (req: any, res: any) => {
     });
   } catch (error: any) {
     console.error('Registration error:', error);
-    console.error('Error message:', error.message);
-    console.error('Error type:', typeof error);
     
     // Handle specific validation errors
     if (error?.issues) {
@@ -171,7 +169,6 @@ router.post('/register', registrationLimiter, async (req: any, res: any) => {
     
     // Handle specific business logic errors
     if (error.message === 'Реферальный код уже используется. Выберите другой код.') {
-      console.log('Matched referral code error');
       return res.status(409).json({
         success: false,
         error: 'Реферальный код уже используется. Выберите другой код.'
