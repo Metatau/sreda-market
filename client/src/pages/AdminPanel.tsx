@@ -113,22 +113,22 @@ export default function AdminPanel() {
     enabled: isAuthenticated && user?.roles?.includes('admin')
   });
 
-  const { data: sourcesData, isLoading: sourcesLoading } = useQuery<{ data: DataSource[] }>({
+  const { data: sourcesData, isLoading: sourcesLoading } = useQuery<{ sources: DataSource[] }>({
     queryKey: ['/api/admin/sources'],
     enabled: activeTab === 'sources' && isAuthenticated && user?.roles?.includes('admin')
   });
 
   // Filter sources based on search and type
   const filteredSources = useMemo(() => {
-    if (!sourcesData?.data) return [];
-    return sourcesData.data.filter((source: DataSource) => {
+    if (!sourcesData?.sources) return [];
+    return sourcesData.sources.filter((source: DataSource) => {
       const matchesSearch = !searchTerm || 
         source.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         source.description?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesType = !filterType || source.type === filterType;
       return matchesSearch && matchesType;
     });
-  }, [sourcesData?.data, searchTerm, filterType]);
+  }, [sourcesData?.sources, searchTerm, filterType]);
 
   // Мутации для источников данных
   const toggleSourceMutation = useMutation({
@@ -432,41 +432,6 @@ export default function AdminPanel() {
         };
       default:
         return {};
-    }
-  };
-
-  const handleToggleSource = (source: DataSource) => {
-    toggleSourceMutation.mutate(source.id);
-  };
-
-  const handleViewSource = (source: DataSource) => {
-    // Show source details in a modal or navigate to details page
-    console.log('Viewing source:', source);
-  };
-
-  const handleEditSource = (source: DataSource) => {
-    setEditingSource(source);
-    setNewSourceForm({
-      name: source.name,
-      description: source.description || '',
-      type: source.type,
-      frequency: source.frequency,
-      tags: source.tags.join(', '),
-      config: {
-        websiteUrl: source.config?.websiteUrl || '',
-        channelUrl: source.config?.channelUrl || '',
-        channelUsername: source.config?.channelUsername || '',
-        rssUrl: source.config?.rssUrl || '',
-        fileName: source.config?.fileName || '',
-        keywords: source.config?.keywords?.join(', ') || ''
-      }
-    });
-    setIsAddSourceDialogOpen(true);
-  };
-
-  const handleDeleteSource = (source: DataSource) => {
-    if (confirm(`Вы уверены, что хотите удалить источник "${source.name}"?`)) {
-      deleteSourceMutation.mutate(source.id);
     }
   };
 
@@ -947,7 +912,7 @@ export default function AdminPanel() {
                         Добавить источник
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="w-[95vw] max-w-2xl h-[90vh] max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>
                           {editingSource ? 'Редактировать источник данных' : 'Добавить новый источник данных'}
@@ -1766,7 +1731,7 @@ export default function AdminPanel() {
 
       {/* Диалог редактирования тарифного плана */}
       <Dialog open={isEditPlanDialogOpen} onOpenChange={setIsEditPlanDialogOpen}>
-        <DialogContent className="w-[95vw] max-w-md h-auto max-h-[90vh] overflow-y-auto p-3 sm:p-6">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Редактировать тарифный план</DialogTitle>
             <DialogDescription>
