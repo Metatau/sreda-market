@@ -95,7 +95,7 @@ export default function Home() {
           <PropertyMap 
             properties={allProperties as any}
             selectedProperty={selectedProperty}
-            onPropertySelect={(property: any) => setSelectedProperty(property as Property)}
+            onPropertySelect={handlePropertySelect}
             regionId={filters.regionId}
             activeMapTool={activeMapTool}
           />

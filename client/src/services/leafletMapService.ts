@@ -470,27 +470,38 @@ export class LeafletMapService {
   ): boolean {
     const mapInstance = this.maps.get(mapId);
     if (!mapInstance) {
+      console.warn('Map instance not found for heatmap:', mapId);
       return false;
     }
 
     // Удаляем предыдущую тепловую карту
     this.removeHeatmap(mapId);
 
+    console.log('Adding heatmap with', data.length, 'points, mode:', options?.mode);
+
+    if (data.length === 0) {
+      console.warn('No heatmap data provided');
+      return false;
+    }
+
     // Создаем группу слоев для тепловой карты
     const heatmapLayerGroup = window.L.layerGroup();
 
-    // Простая реализация тепловой карты через круги с градиентом
+    // Улучшенная реализация тепловой карты
     data.forEach((point, index) => {
-      const baseRadius = options?.radius || 500; // Базовый радиус в метрах
-      const dynamicRadius = Math.max(200, baseRadius * (0.5 + point.intensity * 0.8));
+      const baseRadius = options?.radius || 300; // Уменьшенный базовый радиус
+      const dynamicRadius = Math.max(150, baseRadius * (0.3 + point.intensity * 0.7));
+      
+      // Получаем цвет на основе интенсивности и режима
+      const color = this.getHeatmapColor(point.intensity, options?.mode || 'price');
       
       const circle = window.L.circle([point.lat, point.lng], {
-        color: this.getHeatmapColor(point.intensity, options?.mode || 'price'),
-        fillColor: this.getHeatmapColor(point.intensity, options?.mode || 'price'),
-        fillOpacity: 0.3 + (point.intensity * 0.4), // Динамическая прозрачность
+        color: color,
+        fillColor: color,
+        fillOpacity: Math.max(0.15, Math.min(0.6, point.intensity * 0.5)), // Ограниченная прозрачность
         radius: dynamicRadius,
-        weight: 1,
-        opacity: 0.6
+        weight: 0.5,
+        opacity: 0.4
       });
 
       heatmapLayerGroup.addLayer(circle);

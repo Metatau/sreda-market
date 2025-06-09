@@ -122,30 +122,35 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
   useEffect(() => {
     if (!mapId || !mapLoaded) return;
 
+    console.log('Active map tool changed:', activeMapTool);
+
     switch (activeMapTool) {
       case 'heatmap':
         // Активируем тепловую карту по умолчанию (цены)
+        console.log('Activating heatmap mode (price)');
         setHeatmapMode('price');
         break;
       
       case 'geoanalysis':
         // Очищаем тепловые карты и подготавливаем для геоанализа
-        setHeatmapMode('none');
-        // Здесь можно добавить специальные слои для геоанализа
+        console.log('Activating geoanalysis mode');
+        setHeatmapMode('density');
         break;
       
       case 'investment':
         // Активируем инвестиционную тепловую карту
+        console.log('Activating investment mode');
         setHeatmapMode('investment');
         break;
       
       case 'none':
       default:
         // Очищаем все дополнительные слои
+        console.log('Clearing all map layers');
         setHeatmapMode('none');
         break;
     }
-  }, [activeMapTool, mapId, mapLoaded, properties, heatmapIntensity]);
+  }, [activeMapTool, mapId, mapLoaded]);
 
   // Update properties on map
   useEffect(() => {
