@@ -85,7 +85,7 @@ router.get('/scheduler/status', requireSessionAdmin, async (req: SessionAuthenti
 });
 
 // Manual scheduler trigger
-router.post('/scheduler/sync', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
+router.post('/scheduler/sync', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res) => {
   try {
     console.log('Manual sync triggered by admin:', req.user?.email);
     
@@ -107,7 +107,7 @@ router.post('/scheduler/sync', requireSessionAuth, async (req: SessionAuthentica
 });
 
 // Start scheduler
-router.post('/scheduler/start', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
+router.post('/scheduler/start', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res) => {
   try {
     schedulerService.start();
     res.json({ success: true, message: 'Scheduler started successfully' });
@@ -124,7 +124,7 @@ router.post('/scheduler/start', requireSessionAuth, async (req: SessionAuthentic
 });
 
 // Stop scheduler
-router.post('/scheduler/stop', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
+router.post('/scheduler/stop', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res) => {
   try {
     schedulerService.stop();
     res.json({ success: true, message: 'Scheduler stopped successfully' });
