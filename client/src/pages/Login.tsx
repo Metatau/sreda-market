@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User, Mail, UserPlus, MessageCircle, TrendingUp } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { User, Mail, UserPlus, MessageCircle, TrendingUp, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { TelegramAuthButton } from '@/components/TelegramAuthButton';
@@ -35,6 +36,106 @@ export default function Login() {
 
   // Состояние чекбокса согласия
   const [agreementChecked, setAgreementChecked] = useState(false);
+
+  // Состояние валидации и ошибок
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: '',
+    general: ''
+  });
+
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: '',
+    color: '#ef4444',
+    requirements: {
+      length: false,
+      uppercase: false,
+      lowercase: false,
+      number: false,
+      special: false
+    }
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Password validation function
+  const validatePassword = useCallback((password: string) => {
+    const requirements = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[^A-Za-z0-9]/.test(password)
+    };
+
+    const score = Object.values(requirements).filter(Boolean).length;
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
+    const messages = ['Очень слабый', 'Слабый', 'Средний', 'Хороший', 'Отличный'];
+    
+    let feedback = '';
+    const missing = [];
+    if (!requirements.length) missing.push('минимум 8 символов');
+    if (!requirements.uppercase) missing.push('заглавная буква');
+    if (!requirements.lowercase) missing.push('строчная буква');
+    if (!requirements.number) missing.push('цифра');
+    if (!requirements.special) missing.push('спецсимвол');
+    
+    if (missing.length > 0) {
+      feedback = `Нужно: ${missing.join(', ')}`;
+    } else {
+      feedback = messages[score - 1] || 'Отличный';
+    }
+
+    return {
+      score,
+      feedback,
+      color: colors[Math.min(score, 4)],
+      requirements
+    };
+  }, []);
+
+  // Email validation function
+  const validateEmail = useCallback((email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValid = emailRegex.test(email);
+    
+    return {
+      isValid,
+      message: isValid ? '' : 'Введите корректный email адрес'
+    };
+  }, []);
+
+  // Handle password change with real-time validation
+  const handlePasswordChange = (password: string) => {
+    setRegisterForm(prev => ({ ...prev, password }));
+    setPasswordStrength(validatePassword(password));
+    
+    // Clear password error if validation passes
+    if (password.length > 0) {
+      const validation = validatePassword(password);
+      if (validation.score >= 3) {
+        setErrors(prev => ({ ...prev, password: '' }));
+      }
+    }
+  };
+
+  // Handle email change with validation
+  const handleEmailChange = (email: string) => {
+    setRegisterForm(prev => ({ ...prev, email }));
+    
+    // Clear email error if validation passes
+    if (email.length > 0) {
+      const validation = validateEmail(email);
+      if (validation.isValid) {
+        setErrors(prev => ({ ...prev, email: '' }));
+      }
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
