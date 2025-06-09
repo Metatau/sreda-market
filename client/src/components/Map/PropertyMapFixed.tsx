@@ -278,8 +278,7 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
       try {
         // Clear all map layers first
         console.log('Clearing all map layers');
-        await leafletMapService.clearHeatmap(mapId);
-        await leafletMapService.clearAnalysisLayers(mapId);
+        leafletMapService.clearLayers(mapId);
 
         // Apply new tool
         switch (activeMapTool) {
