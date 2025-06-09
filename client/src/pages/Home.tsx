@@ -90,7 +90,6 @@ export default function Home() {
       <div className="flex-none">
         <Navigation />
       </div>
-
       {/* Fixed Top Section */}
       <div className="flex-none">
         {/* Map Analytics Tools */}
@@ -143,9 +142,7 @@ export default function Home() {
                     <div>
                       <h4 className={`font-semibold text-sm transition-colors ${
                         activeMapTool === 'geoanalysis' ? 'text-green-700' : 'text-gray-900'
-                      }`}>
-                        Геоанализ
-                        {activeMapTool === 'geoanalysis' && <span className="ml-2 text-green-600">●</span>}
+                      }`}>Геоаналитика{activeMapTool === 'geoanalysis' && <span className="ml-2 text-green-600">●</span>}
                       </h4>
                       <p className="text-xs text-gray-600">Анализ районов с ИИ</p>
                     </div>
@@ -169,7 +166,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
       {/* Flexible Bottom Section */}
       <div className="flex-1 min-h-0 overflow-hidden">
         <div className="h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4">
@@ -310,9 +306,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-
-
       {/* Investment Analytics Modal */}
       {selectedProperty && (
         <InvestmentAnalyticsModal
