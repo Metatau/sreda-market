@@ -502,22 +502,28 @@ export class AdsApiService {
     
     // Исключаем нежелательные типы недвижимости
     const isExcluded = cat2 === 'комнаты' || 
+                      cat2 === 'дома, дачи, коттеджи' ||
                       cat2 === 'земельные участки' ||
                       cat2 === 'гаражи и машиноместа' ||
                       title.includes('участок') ||
                       title.includes('гараж') ||
                       title.includes('комната') ||
                       title.includes('склад') ||
-                      title.includes('офис');
+                      title.includes('офис') ||
+                      title.includes('коттедж') ||
+                      title.includes('дача') ||
+                      title.includes('частный дом') ||
+                      title.includes('таунхаус');
 
-    // Принимаем квартиры, дома и новостройки
+    // Принимаем квартиры, студии, многоквартирные дома и новостройки
     const isValidPropertyType = cat2 === 'квартиры' || 
-                               cat2 === 'дома, дачи, коттеджи' ||
                                title.includes('студия') ||
                                title.includes('новостройка') ||
                                title.includes('жк ') ||
+                               title.includes('многоквартирный дом') ||
+                               title.includes('жилой дом') ||
                                (title.includes('квартир') && !title.includes('комната')) ||
-                               (title.includes('дом ') && !title.includes('участок'));
+                               (title.includes('дом ') && !title.includes('участок') && !title.includes('коттедж') && !title.includes('дача'));
 
     if (isExcluded || !isValidPropertyType) {
       throw new Error(`Property type "${cat2}" or title "${title}" is not allowed`);
@@ -713,24 +719,30 @@ export class AdsApiService {
           const cat2 = (adsProperty.cat2 || '').toLowerCase().trim();
           const title = (adsProperty.title || '').toLowerCase().trim();
           
-          // Принимаем квартиры, студии, дома и новостройки (с фильтрацией по году)
+          // Принимаем квартиры, студии, многоквартирные дома и новостройки (с фильтрацией по году)
           const isValidPropertyType = cat2 === 'квартиры' || 
-                                     cat2 === 'дома, дачи, коттеджи' ||
                                      title.includes('студия') ||
                                      title.includes('новостройка') ||
                                      title.includes('жк ') ||
+                                     title.includes('многоквартирный дом') ||
+                                     title.includes('жилой дом') ||
                                      (title.includes('квартир') && !title.includes('комната')) ||
-                                     (title.includes('дом ') && !title.includes('участок'));
+                                     (title.includes('дом ') && !title.includes('участок') && !title.includes('коттедж') && !title.includes('дача'));
           
           // Исключаем нежелательные типы недвижимости
           const isExcluded = cat2 === 'комнаты' || 
+                            cat2 === 'дома, дачи, коттеджи' ||
                             cat2 === 'земельные участки' ||
                             cat2 === 'гаражи и машиноместа' ||
                             title.includes('участок') ||
                             title.includes('гараж') ||
                             title.includes('комната') ||
                             title.includes('склад') ||
-                            title.includes('офис');
+                            title.includes('офис') ||
+                            title.includes('коттедж') ||
+                            title.includes('дача') ||
+                            title.includes('частный дом') ||
+                            title.includes('таунхаус');
 
           if (isExcluded || !isValidPropertyType) {
             console.log(`Skipping property ${adsProperty.id}: cat2="${cat2}", title="${title}" - not an apartment`);
