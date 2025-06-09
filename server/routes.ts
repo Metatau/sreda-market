@@ -112,13 +112,182 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  // Import and use fixed modular auth routes
-  const authRoutes = await import('./routes/authFixed');
-  app.use('/api/auth', authRoutes.default);
+  // Authentication routes
+  const loginSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(1)
+  });
 
-  // All authentication routes are now handled by modular auth routes
+  const registerSchema = z.object({
+    username: z.string().min(1),
+    email: z.string().email(),
+    password: z.string().min(6),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    telegramHandle: z.string().optional(),
+    referralCode: z.string().optional()
+  });
 
-  // Telegram authentication is now handled by modular auth routes
+  // Login endpoint
+  app.post('/api/auth/login', async (req: any, res: any) => {
+    res.setHeader('Content-Type', 'application/json');
+    try {
+      const { email, password } = loginSchema.parse(req.body);
+      
+      const user = await AuthService.login({ email, password });
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          error: 'Неверный email или пароль' 
+        });
+      }
+
+      // Set session and save it
+      req.session.userId = user.id;
+      await new Promise((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(undefined);
+        });
+      });
+      
+      res.json({
+        success: true,
+        data: {
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Ошибка авторизации' 
+      });
+    }
+  });
+
+  // Register endpoint
+  app.post('/api/auth/register', async (req: any, res: any) => {
+    res.setHeader('Content-Type', 'application/json');
+    try {
+      const data = registerSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(data.email);
+      if (existingUser) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Пользователь с таким email уже существует' 
+        });
+      }
+
+      const user = await AuthService.register(data);
+      
+      // Set session and save it
+      req.session.userId = user.id;
+      await new Promise((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) reject(err);
+          else resolve(undefined);
+        });
+      });
+      
+      res.status(201).json({
+        success: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Ошибка регистрации' 
+      });
+    }
+  });
+
+  // Profile endpoint
+  app.get('/api/auth/profile', async (req: any, res: any) => {
+    res.setHeader('Content-Type', 'application/json');
+    try {
+      if (!req.session || !req.session.userId) {
+        return res.status(401).json({ 
+          success: false, 
+          error: 'Необходима авторизация' 
+        });
+      }
+
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'Пользователь не найден' 
+        });
+      }
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        telegramHandle: user.telegramHandle,
+        profileImageUrl: user.profileImageUrl,
+        bonusBalance: user.bonusBalance || '0',
+        authenticated: true,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Profile error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Ошибка получения профиля' 
+      });
+    }
+  });
+
+  // Logout endpoint
+  app.post('/api/auth/logout', async (req: any, res: any) => {
+    res.setHeader('Content-Type', 'application/json');
+    try {
+      req.session.destroy((err: any) => {
+        if (err) {
+          return res.status(500).json({ 
+            success: false, 
+            error: 'Ошибка при выходе' 
+          });
+        }
+        res.json({ success: true });
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Ошибка при выходе' 
+      });
+    }
+  });
 
   // Region routes with caching
   app.get("/api/regions", cacheControl(600, 'api'), etag, responseCacheMiddleware(600), regionController.getRegions);
