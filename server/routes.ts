@@ -22,6 +22,7 @@ import { db } from "./db";
 import { promocodes, favorites, properties, regions, propertyClasses } from "@shared/schema";
 import { sql, eq, and, or, gte, desc, isNotNull } from "drizzle-orm";
 import { generalRateLimit, authRateLimit, aiRateLimit, apiRateLimit } from "./middleware/rateLimiting";
+import rateLimit from 'express-rate-limit';
 import { performanceMonitor } from "./services/performanceService";
 import { responseCacheMiddleware, cacheControl, etag, compression } from "./middleware/cache";
 import { validateBody, validateQuery, aiRequestSchema, propertyFiltersSchema, chatMessageSchema, investmentAnalysisSchema } from "./validation/schemas";
@@ -135,8 +136,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     referralCode: z.string().optional()
   });
 
-  // Login endpoint
-  app.post('/api/auth/login', async (req: any, res: any) => {
+  // Enhanced rate limiting for authentication
+  const registrationLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 3, // maximum 3 registration attempts per 15 minutes per IP
+    message: {
+      success: false,
+      error: 'Слишком много попыток регистрации. Попробуйте через 15 минут.',
+      retryAfter: 15 * 60
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === 'development', // Skip in development
+  });
+
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes  
+    max: 5, // maximum 5 login attempts per 15 minutes per IP
+    message: {
+      success: false,
+      error: 'Слишком много попыток входа. Попробуйте через 15 минут.',
+      retryAfter: 15 * 60
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === 'development', // Skip in development
+  });
+
+  // Login endpoint with rate limiting
+  app.post('/api/auth/login', loginLimiter, async (req: any, res: any) => {
     res.setHeader('Content-Type', 'application/json');
     try {
       const { email, password } = loginSchema.parse(req.body);
@@ -180,8 +208,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register endpoint
-  app.post('/api/auth/register', async (req: any, res: any) => {
+  // Register endpoint with rate limiting
+  app.post('/api/auth/register', registrationLimiter, async (req: any, res: any) => {
     res.setHeader('Content-Type', 'application/json');
     try {
       console.log('Registration attempt with data:', JSON.stringify(req.body, null, 2));

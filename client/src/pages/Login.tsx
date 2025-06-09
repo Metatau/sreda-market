@@ -193,20 +193,45 @@ export default function Login() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setErrors({
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      general: ''
+    });
     
-    // Проверяем согласие с правовой информацией
-    if (!agreementChecked) {
-      toast({
-        title: "Требуется согласие",
-        description: "Необходимо принять соглашение для продолжения регистрации",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
     try {
+      // Проверяем согласие с правовой информацией
+      if (!agreementChecked) {
+        setErrors(prev => ({ ...prev, general: "Необходимо принять соглашение для продолжения регистрации" }));
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Frontend validation before sending request
+      const newErrors: any = {};
+      
+      if (!registerForm.firstName.trim()) newErrors.firstName = 'Обязательное поле';
+      if (!registerForm.lastName.trim()) newErrors.lastName = 'Обязательное поле';
+      if (!registerForm.username.trim()) newErrors.username = 'Обязательное поле';
+      
+      const emailValidation = validateEmail(registerForm.email);
+      if (!emailValidation.isValid) newErrors.email = emailValidation.message;
+      
+      const passwordValidation = validatePassword(registerForm.password);
+      if (passwordValidation.score < 3) {
+        newErrors.password = 'Пароль слишком слабый. ' + passwordValidation.feedback;
+      }
+      
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        setIsSubmitting(false);
+        return;
+      }
+
       const response = await apiRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(registerForm),
@@ -224,20 +249,40 @@ export default function Login() {
         // Redirect to main page after successful registration
         window.location.href = '/';
       } else {
-        toast({
-          title: "Ошибка регистрации",
-          description: response.error || "Произошла ошибка при регистрации",
-          variant: "destructive",
-        });
+        // Handle specific server errors
+        if (response.status === 409) {
+          if (response.error?.includes('email')) {
+            setErrors(prev => ({ ...prev, email: 'Пользователь с таким email уже существует' }));
+          } else if (response.error?.includes('username')) {
+            setErrors(prev => ({ ...prev, username: 'Это имя пользователя уже занято' }));
+          } else {
+            setErrors(prev => ({ ...prev, general: 'Пользователь с такими данными уже существует' }));
+          }
+        } else if (response.status === 429) {
+          setErrors(prev => ({ ...prev, general: response.error || 'Слишком много попыток. Попробуйте позже.' }));
+        } else if (response.status === 422) {
+          // Validation errors from server
+          if (response.errors) {
+            const serverErrors: any = {};
+            response.errors.forEach((err: any) => {
+              serverErrors[err.field] = err.message;
+            });
+            setErrors(serverErrors);
+          } else {
+            setErrors(prev => ({ ...prev, general: response.error || 'Ошибка валидации данных' }));
+          }
+        } else {
+          setErrors(prev => ({ ...prev, general: response.error || 'Произошла ошибка при регистрации' }));
+        }
       }
     } catch (error: any) {
-      toast({
-        title: "Ошибка регистрации",
-        description: "Произошла ошибка при регистрации",
-        variant: "destructive",
-      });
+      console.error('Registration error:', error);
+      setErrors(prev => ({ 
+        ...prev,
+        general: 'Ошибка сети. Проверьте подключение к интернету.' 
+      }));
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
