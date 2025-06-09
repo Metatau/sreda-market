@@ -338,12 +338,13 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
               return false;
             });
 
-            if (regionProperties.length > 0) {
-              const bounds = regionProperties.map(p => p.coordinates);
+            if (propertyMarkers.length > 0) {
+              // Центрируем карту на фактических объектах
+              const bounds = propertyMarkers.map(p => p.coordinates);
               const avgLat = bounds.reduce((sum, coord) => sum + coord[0], 0) / bounds.length;
               const avgLng = bounds.reduce((sum, coord) => sum + coord[1], 0) / bounds.length;
               leafletMapService.setView(mapId, [avgLat, avgLng], 11);
-              console.log(`Focused map on region ${regionId} with ${regionProperties.length} properties`);
+              console.log(`Focused map on region ${regionId} with ${propertyMarkers.length} properties at [${avgLat}, ${avgLng}]`);
             } else {
               // Fallback к координатам региона
               const regionCoords = geolocationService.getRegionCoordinates(regionId);
