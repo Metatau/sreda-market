@@ -14,6 +14,39 @@ export class SchedulerService {
     this.adsApiService = new AdsApiService();
   }
 
+  public getStatus() {
+    return {
+      isRunning: this.isRunning,
+      schedule: {
+        dailySync: '23:00 UTC (02:00 MSK)',
+        periodicValidation: 'Every 6 hours'
+      },
+      lastSync: 'Not recorded yet',
+      nextSync: 'According to cron schedule'
+    };
+  }
+
+  public async forceSyncNow(): Promise<any> {
+    if (this.isRunning) {
+      throw new Error('Synchronization already in progress');
+    }
+
+    try {
+      this.isRunning = true;
+      console.log('Manual synchronization started at', new Date().toISOString());
+      
+      const result = await this.performDailySync();
+      
+      console.log('Manual synchronization completed successfully');
+      return result;
+    } catch (error) {
+      console.error('Manual synchronization failed:', error);
+      throw error;
+    } finally {
+      this.isRunning = false;
+    }
+  }
+
   public start(): void {
     console.log('Starting property synchronization scheduler...');
 

@@ -73,6 +73,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Scheduler status endpoint (public for debugging)
+  app.get('/api/scheduler/status', async (req, res) => {
+    try {
+      const { schedulerService } = await import('../services/schedulerService');
+      const status = schedulerService.getStatus();
+      res.json({
+        success: true,
+        data: status
+      });
+    } catch (error) {
+      console.error('Error getting scheduler status:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get scheduler status'
+      });
+    }
+  });
+
   // Direct ADS API sync endpoint for testing
   app.post('/api/sync-ads', async (req, res) => {
     try {
