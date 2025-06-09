@@ -86,8 +86,10 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <Navigation />
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      <div className="flex-none">
+        <Navigation />
+      </div>
 
       {/* Fixed Top Section */}
       <div className="flex-none">
@@ -169,19 +171,19 @@ export default function Home() {
       </div>
 
       {/* Flexible Bottom Section */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 overflow-hidden">
         <div className="h-full max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4">
           <div className="h-full grid grid-cols-1 lg:grid-cols-4 gap-4">
             {/* Fixed Filters Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="h-full overflow-y-auto">
+            <div className="lg:col-span-1 overflow-hidden">
+              <div className="h-full overflow-y-auto pr-2">
                 <PropertyFilters 
                   filters={filters} 
                   onFiltersChange={handleFilterChange}
                 />
                 
                 {/* Analytics Overview Cards */}
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 space-y-4 pb-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Средняя доходность</CardTitle>
@@ -227,7 +229,7 @@ export default function Home() {
             </div>
 
             {/* Scrollable Properties Content */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 overflow-hidden">
               <div className="h-full flex flex-col">
                 {/* Fixed Controls */}
                 <div className="flex-none bg-white rounded-lg shadow-sm border p-3 mb-4">
@@ -250,7 +252,7 @@ export default function Home() {
                 </div>
 
                 {/* Scrollable Property Grid */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto pr-2">
                   {isLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                       {[...Array(6)].map((_, i) => (
