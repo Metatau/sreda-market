@@ -204,6 +204,52 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
               console.warn(`Coordinates out of bounds for property ${property.id}: lat=${lat}, lng=${lng}`);
               return null;
             }
+
+            // Добавляем небольшое смещение для объектов с одинаковыми координатами
+            // чтобы они не накладывались друг на друга
+            const sameCoordProperties = properties.filter(p => {
+              if (!p.coordinates || p.id === property.id) return false;
+              
+              let otherLat: number, otherLng: number;
+              try {
+                if (p.coordinates.startsWith('POINT(')) {
+                  const coords = p.coordinates.match(/POINT\(([^)]+)\)/)?.[1];
+                  if (coords) {
+                    const [longitude, latitude] = coords.split(' ').map(Number);
+                    otherLng = longitude;
+                    otherLat = latitude;
+                  } else {
+                    return false;
+                  }
+                } else {
+                  const parts = p.coordinates.split(',').map(s => parseFloat(s.trim()));
+                  if (parts.length !== 2 || parts.some(isNaN)) return false;
+                  
+                  if (Math.abs(parts[0]) > Math.abs(parts[1])) {
+                    otherLng = parts[0];
+                    otherLat = parts[1];
+                  } else {
+                    otherLat = parts[0];
+                    otherLng = parts[1];
+                  }
+                }
+                
+                // Проверяем, совпадают ли координаты (с точностью до 4 знаков)
+                return Math.abs(lat - otherLat) < 0.0001 && Math.abs(lng - otherLng) < 0.0001;
+              } catch {
+                return false;
+              }
+            });
+
+            // Если есть объекты с такими же координатами, добавляем смещение
+            if (sameCoordProperties.length > 0) {
+              const index = sameCoordProperties.filter(p => p.id < property.id).length;
+              const offset = 0.001; // Смещение в градусах (~100 метров)
+              const angle = (index * 2 * Math.PI) / (sameCoordProperties.length + 1); // Распределяем по кругу
+              lat += offset * Math.cos(angle);
+              lng += offset * Math.sin(angle);
+              console.log(`Applied offset for property ${property.id}: ${offset} at angle ${angle}`);
+            }
             
             return {
               id: property.id,
@@ -324,12 +370,16 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
         })
         .filter(Boolean) as Array<{lat: number, lng: number, intensity: number}>;
 
+        console.log('Creating heatmap with', heatmapData.length, 'points in mode:', heatmapMode);
+        
         leafletMapService.addHeatmap(mapId, heatmapData, {
-          radius: 25,
+          radius: 300,
           blur: 15,
           maxZoom: 17,
           mode: heatmapMode
         });
+        
+        console.log('Heatmap created successfully');
       } catch (error) {
         console.warn('Error updating heatmap:', error);
       }
