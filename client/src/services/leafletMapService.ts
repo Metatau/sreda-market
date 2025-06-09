@@ -442,6 +442,7 @@ export class LeafletMapService {
         (window as any).selectProperty = (id: number) => {
           const selectedProperty = properties.find(p => p.id === id);
           if (selectedProperty && options?.onMarkerClick) {
+            console.log('Property selected from popup:', selectedProperty);
             options.onMarkerClick(selectedProperty.popup);
           }
         };
