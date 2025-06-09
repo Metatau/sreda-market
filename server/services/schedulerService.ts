@@ -121,7 +121,7 @@ export class SchedulerService {
   }
 
   private async performValidationCheck(): Promise<void> {
-    const { properties } = await storage.getProperties({}, { page: 1, perPage: 10000 });
+    const { properties } = await storage.getProperties({}, { page: 1, limit: 10000 });
     
     let validatedCount = 0;
     let removedCount = 0;
@@ -246,7 +246,7 @@ export class SchedulerService {
       if (rooms) filters.rooms = rooms;
       if (marketType) filters.marketType = marketType;
 
-      const { properties } = await storage.getProperties(filters, { page: 1, perPage: 1000 });
+      const { properties } = await storage.getProperties(filters, { page: 1, limit: 1000 });
 
       if (properties.length === 0) {
         return null;
@@ -334,7 +334,7 @@ export class SchedulerService {
   }
 
   private async recalculateInvestmentAnalytics(): Promise<void> {
-    const { properties } = await storage.getProperties({}, { page: 1, perPage: 10000 });
+    const { properties } = await storage.getProperties({}, { page: 1, limit: 10000 });
     
     let calculatedCount = 0;
 
@@ -489,9 +489,9 @@ export class SchedulerService {
       const syncResult = await this.adsApiService.syncProperties(regionNames);
       
       // Выполняем валидацию после загрузки
-      const beforeCount = (await storage.getProperties({}, { page: 1, perPage: 1 })).total;
+      const beforeCount = (await storage.getProperties({}, { page: 1, limit: 1 })).total;
       await this.performValidationCheck();
-      const afterCount = (await storage.getProperties({}, { page: 1, perPage: 1 })).total;
+      const afterCount = (await storage.getProperties({}, { page: 1, limit: 1 })).total;
       const removed = beforeCount - afterCount;
 
       // Пересчитываем инвестиционную аналитику
