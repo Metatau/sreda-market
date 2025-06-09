@@ -195,15 +195,7 @@ export default function Home() {
               </div>
             )}
             
-            {activeMapTool === 'geoanalysis' && (
-              <div className="bg-white rounded-lg p-4 border">
-                <h3 className="font-semibold mb-3 text-green-600">Анализ районов</h3>
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <p className="text-sm text-green-700 mb-2">📊 Режим анализа районов активен</p>
-                  <p className="text-xs text-green-600">Кликните на любую точку карты для получения детальной аналитики района с помощью ИИ</p>
-                </div>
-              </div>
-            )}
+
             
 
           </div>
