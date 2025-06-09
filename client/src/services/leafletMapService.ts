@@ -350,25 +350,31 @@ export class LeafletMapService {
     
     const color = `rgb(${r}, ${g}, ${b})`;
     
-    // Создаем SVG иконку с градиентным цветом
+    // Создаем увеличенную SVG иконку для лучшей видимости на широких масштабах
+    const baseSize = 40; // Увеличенный базовый размер
+    const dynamicSize = Math.max(baseSize, baseSize + intensity * 20);
+    const radius = dynamicSize / 3;
+    const center = dynamicSize / 2;
+    
     const svgIcon = `
-      <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <svg width="${dynamicSize}" height="${dynamicSize}" viewBox="0 0 ${dynamicSize} ${dynamicSize}" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="2" stdDeviation="1" flood-color="rgba(0,0,0,0.3)"/>
+          <filter id="shadow-${Math.random().toString(36).substr(2, 9)}" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="rgba(0,0,0,0.4)"/>
           </filter>
         </defs>
-        <circle cx="12" cy="12" r="8" fill="${color}" stroke="white" stroke-width="2" filter="url(#shadow)"/>
-        <circle cx="12" cy="12" r="3" fill="white" opacity="0.8"/>
+        <circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" stroke="white" stroke-width="3" filter="url(#shadow-${Math.random().toString(36).substr(2, 9)})"/>
+        <circle cx="${center}" cy="${center}" r="${radius/2.5}" fill="white" opacity="0.9"/>
+        <circle cx="${center}" cy="${center}" r="${radius/5}" fill="${color}" opacity="0.7"/>
       </svg>
     `;
     
     return window.L.divIcon({
       html: svgIcon,
-      className: 'gradient-pin',
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
-      popupAnchor: [0, -12]
+      className: 'gradient-pin-large',
+      iconSize: [dynamicSize, dynamicSize],
+      iconAnchor: [center, center],
+      popupAnchor: [0, -center]
     });
   }
 
