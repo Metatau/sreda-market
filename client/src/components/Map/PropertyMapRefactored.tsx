@@ -205,6 +205,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
               return null;
             }
 
+            console.log(`Processing property ${property.id} with coordinates: lat=${lat}, lng=${lng}`);
+
             // Добавляем небольшое смещение для объектов с одинаковыми координатами
             // чтобы они не накладывались друг на друга
             const sameCoordProperties = properties.filter(p => {
@@ -235,20 +237,28 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
                 }
                 
                 // Проверяем, совпадают ли координаты (с точностью до 4 знаков)
-                return Math.abs(lat - otherLat) < 0.0001 && Math.abs(lng - otherLng) < 0.0001;
+                const isSame = Math.abs(lat - otherLat) < 0.0001 && Math.abs(lng - otherLng) < 0.0001;
+                if (isSame) {
+                  console.log(`Found duplicate coords: Property ${property.id} matches ${p.id} at ${lat},${lng}`);
+                }
+                return isSame;
               } catch {
                 return false;
               }
             });
 
+            console.log(`Property ${property.id}: Found ${sameCoordProperties.length} properties with same coordinates`);
+
             // Если есть объекты с такими же координатами, добавляем смещение
             if (sameCoordProperties.length > 0) {
               const index = sameCoordProperties.filter(p => p.id < property.id).length;
-              const offset = 0.001; // Смещение в градусах (~100 метров)
+              const offset = 0.003; // Увеличиваем смещение до ~300 метров
               const angle = (index * 2 * Math.PI) / (sameCoordProperties.length + 1); // Распределяем по кругу
+              const originalLat = lat;
+              const originalLng = lng;
               lat += offset * Math.cos(angle);
               lng += offset * Math.sin(angle);
-              console.log(`Applied offset for property ${property.id}: ${offset} at angle ${angle}`);
+              console.log(`Applied offset for property ${property.id}: from ${originalLat},${originalLng} to ${lat},${lng} (offset=${offset}, angle=${angle})`);
             }
             
             return {
@@ -309,64 +319,103 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
           return;
         }
 
+        console.log('Generating heatmap data for', properties.length, 'properties in mode:', heatmapMode);
+        
         const heatmapData = properties
-        .filter(p => p.coordinates)
+        .filter(p => {
+          const hasCoords = p.coordinates && p.coordinates.trim() !== '';
+          if (!hasCoords) {
+            console.log(`Property ${p.id} has no coordinates`);
+          }
+          return hasCoords;
+        })
         .map(property => {
           let lat: number, lng: number;
           
-          // Парсинг координат в зависимости от формата
-          if (property.coordinates!.startsWith('POINT(')) {
-            // Формат: POINT(longitude latitude)
-            const coords = property.coordinates!.match(/POINT\(([^)]+)\)/)?.[1];
-            if (coords) {
-              const [longitude, latitude] = coords.split(' ').map(Number);
-              lng = longitude;
-              lat = latitude;
+          try {
+            // Парсинг координат в зависимости от формата
+            if (property.coordinates!.startsWith('POINT(')) {
+              // Формат: POINT(longitude latitude)
+              const coords = property.coordinates!.match(/POINT\(([^)]+)\)/)?.[1];
+              if (coords) {
+                const [longitude, latitude] = coords.split(' ').map(Number);
+                lng = longitude;
+                lat = latitude;
+              } else {
+                console.warn(`Invalid POINT format for property ${property.id}:`, property.coordinates);
+                return null;
+              }
             } else {
-              return null; // Пропускаем некорректные координаты
-            }
-          } else {
-            // Формат: "latitude,longitude"
-            const [latitude, longitude] = property.coordinates!.split(',').map(Number);
-            lat = latitude;
-            lng = longitude;
-          }
-
-          let intensity = 0.5;
-          
-          // Разные алгоритмы расчета интенсивности для разных режимов
-          switch (heatmapMode) {
-            case 'price':
-              // Нормализация цены от 0 до 1
-              const maxPrice = Math.max(...properties.map(p => p.price));
-              const minPrice = Math.min(...properties.map(p => p.price));
-              intensity = maxPrice > minPrice ? 
-                (property.price - minPrice) / (maxPrice - minPrice) : 0.5;
-              intensity = Math.max(0.1, Math.min(1, intensity)); // Ограничиваем от 0.1 до 1
-              break;
-            case 'density':
-              // Показываем одинаковую интенсивность для всех объектов (плотность)
-              intensity = 0.7;
-              break;
-            case 'investment':
-              // Расчет инвестиционного потенциала на основе цены за кв.м
-              const pricePerSqm = property.pricePerSqm || (property.price / (parseFloat(property.area || '50')));
-              // Чем ниже цена за кв.м, тем выше инвестиционный потенциал
-              const maxPricePerSqm = Math.max(...properties.map(p => 
-                p.pricePerSqm || (p.price / (parseFloat(p.area || '50')))
-              ));
-              const minPricePerSqm = Math.min(...properties.map(p => 
-                p.pricePerSqm || (p.price / (parseFloat(p.area || '50')))
-              ));
+              // Формат: "latitude,longitude" или "longitude,latitude"
+              const parts = property.coordinates!.split(',').map(s => parseFloat(s.trim()));
+              if (parts.length !== 2 || parts.some(isNaN)) {
+                console.warn(`Invalid coordinate format for property ${property.id}:`, property.coordinates);
+                return null;
+              }
               
-              // Инвертируем значение - меньшая цена = больший потенциал
-              intensity = maxPricePerSqm > minPricePerSqm ? 
-                1 - ((pricePerSqm - minPricePerSqm) / (maxPricePerSqm - minPricePerSqm)) : 0.6;
-              intensity = Math.max(0.2, Math.min(1, intensity));
-              break;
-          }
+              // Определяем порядок координат по диапазону
+              if (Math.abs(parts[0]) > Math.abs(parts[1])) {
+                lng = parts[0];
+                lat = parts[1];
+              } else {
+                lat = parts[0];
+                lng = parts[1];
+              }
+            }
 
-          return { lat, lng, intensity: intensity * heatmapIntensity };
+            // Валидация координат
+            if (lat < 41 || lat > 82 || lng < 19 || lng > 180) {
+              console.warn(`Coordinates out of bounds for property ${property.id}: lat=${lat}, lng=${lng}`);
+              return null;
+            }
+
+            let intensity = 0.5;
+            
+            // Разные алгоритмы расчета интенсивности для разных режимов
+            switch (heatmapMode) {
+              case 'price':
+                // Нормализация цены от 0 до 1
+                const validPrices = properties.map(p => p.price).filter(p => p > 0);
+                if (validPrices.length > 0) {
+                  const maxPrice = Math.max(...validPrices);
+                  const minPrice = Math.min(...validPrices);
+                  intensity = maxPrice > minPrice ? 
+                    (property.price - minPrice) / (maxPrice - minPrice) : 0.5;
+                  intensity = Math.max(0.1, Math.min(1, intensity));
+                }
+                break;
+              case 'density':
+                // Показываем одинаковую интенсивность для всех объектов (плотность)
+                intensity = 0.8;
+                break;
+              case 'investment':
+                // Расчет инвестиционного потенциала на основе цены за кв.м
+                const area = parseFloat(property.area || '50');
+                const pricePerSqm = property.pricePerSqm || (property.price / area);
+                
+                const validPricePerSqm = properties
+                  .map(p => p.pricePerSqm || (p.price / parseFloat(p.area || '50')))
+                  .filter(p => p > 0);
+                
+                if (validPricePerSqm.length > 0) {
+                  const maxPricePerSqm = Math.max(...validPricePerSqm);
+                  const minPricePerSqm = Math.min(...validPricePerSqm);
+                  
+                  // Инвертируем значение - меньшая цена = больший потенциал
+                  intensity = maxPricePerSqm > minPricePerSqm ? 
+                    1 - ((pricePerSqm - minPricePerSqm) / (maxPricePerSqm - minPricePerSqm)) : 0.6;
+                  intensity = Math.max(0.2, Math.min(1, intensity));
+                }
+                break;
+            }
+
+            const finalIntensity = intensity * heatmapIntensity;
+            console.log(`Heatmap point for property ${property.id}: lat=${lat}, lng=${lng}, intensity=${finalIntensity}`);
+            return { lat, lng, intensity: finalIntensity };
+          } catch (error) {
+            console.warn(`Error processing property ${property.id} for heatmap:`, error);
+            return null;
+          }
         })
         .filter(Boolean) as Array<{lat: number, lng: number, intensity: number}>;
 
