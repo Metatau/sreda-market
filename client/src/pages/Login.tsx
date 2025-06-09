@@ -232,14 +232,20 @@ export default function Login() {
         return;
       }
 
-      const response = await apiRequest('/api/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
         body: JSON.stringify(registerForm),
       });
 
-      if (response.success) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         // Store user email for session management
-        localStorage.setItem('userEmail', response.data.user.email);
+        localStorage.setItem('userEmail', data.data.user.email);
         
         toast({
           title: "Регистрация успешна",
@@ -251,36 +257,50 @@ export default function Login() {
       } else {
         // Handle specific server errors
         if (response.status === 409) {
-          if (response.error?.includes('email')) {
+          if (data.error?.includes('email')) {
             setErrors(prev => ({ ...prev, email: 'Пользователь с таким email уже существует' }));
-          } else if (response.error?.includes('username')) {
+          } else if (data.error?.includes('username')) {
             setErrors(prev => ({ ...prev, username: 'Это имя пользователя уже занято' }));
           } else {
             setErrors(prev => ({ ...prev, general: 'Пользователь с такими данными уже существует' }));
           }
         } else if (response.status === 429) {
-          setErrors(prev => ({ ...prev, general: response.error || 'Слишком много попыток. Попробуйте позже.' }));
+          setErrors(prev => ({ ...prev, general: data.error || 'Слишком много попыток. Попробуйте позже.' }));
         } else if (response.status === 422) {
           // Validation errors from server
-          if (response.errors) {
+          if (data.errors) {
             const serverErrors: any = {};
-            response.errors.forEach((err: any) => {
+            data.errors.forEach((err: any) => {
               serverErrors[err.field] = err.message;
             });
             setErrors(serverErrors);
           } else {
-            setErrors(prev => ({ ...prev, general: response.error || 'Ошибка валидации данных' }));
+            setErrors(prev => ({ ...prev, general: data.error || 'Ошибка валидации данных' }));
           }
         } else {
-          setErrors(prev => ({ ...prev, general: response.error || 'Произошла ошибка при регистрации' }));
+          setErrors(prev => ({ ...prev, general: data.error || 'Произошла ошибка при регистрации' }));
         }
       }
     } catch (error: any) {
       console.error('Registration error:', error);
-      setErrors(prev => ({ 
-        ...prev,
-        general: 'Ошибка сети. Проверьте подключение к интернету.' 
-      }));
+      
+      // Handle different types of errors more specifically
+      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('NetworkError'))) {
+        setErrors(prev => ({ 
+          ...prev,
+          general: 'Ошибка сети. Проверьте подключение к интернету.' 
+        }));
+      } else if (error.message?.includes('JSON')) {
+        setErrors(prev => ({ 
+          ...prev,
+          general: 'Ошибка обработки ответа сервера. Попробуйте еще раз.' 
+        }));
+      } else {
+        setErrors(prev => ({ 
+          ...prev,
+          general: 'Произошла неожиданная ошибка. Попробуйте еще раз.' 
+        }));
+      }
     } finally {
       setIsSubmitting(false);
     }
