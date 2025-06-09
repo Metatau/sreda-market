@@ -1128,6 +1128,13 @@ export default function AdminPanel() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Debug info */}
+                <div className="mb-4 p-3 bg-gray-100 rounded text-sm">
+                  <p>Debug: sourcesLoading = {sourcesLoading.toString()}</p>
+                  <p>Debug: sourcesData = {JSON.stringify(sourcesData)}</p>
+                  <p>Debug: filteredSources.length = {filteredSources.length}</p>
+                </div>
+                
                 {sourcesLoading ? (
                   <div className="text-center py-8">
                     <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
