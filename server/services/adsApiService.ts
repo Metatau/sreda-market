@@ -433,7 +433,7 @@ export class AdsApiService {
 
     // Проверяем год постройки - если есть и недавний, то скорее всего новостройка
     const currentYear = new Date().getFullYear();
-    const buildYear = this.extractBuildYear(combined);
+    const buildYear = this.extractBuildYear(adsProperty);
     if (buildYear && buildYear >= currentYear - 3) {
       return 'new_construction';
     }
@@ -460,38 +460,73 @@ export class AdsApiService {
     return 'secondary';
   }
 
-  private extractBuildYear(text: string): number | null {
+  private extractBuildYear(adsProperty: AdsApiProperty): number | null {
+    // Собираем текст для анализа
+    const combined = [
+      adsProperty.title || '',
+      adsProperty.description || '',
+      JSON.stringify(adsProperty.params || {})
+    ].join(' ').toLowerCase();
+
     // Ищем упоминания года постройки в тексте
-    const yearMatches = text.match(/(?:построен|построенного|года постройки|год постройки).*?(\d{4})/);
+    const yearMatches = combined.match(/(?:построен|построенного|года постройки|год постройки).*?(\d{4})/);
     if (yearMatches && yearMatches[1]) {
       const year = parseInt(yearMatches[1], 10);
       if (year >= 1950 && year <= new Date().getFullYear() + 2) {
         return year;
       }
     }
+
+    // Проверяем параметры объекта на наличие года постройки
+    if (adsProperty.params) {
+      const buildYearParam = adsProperty.params['Год постройки'] || 
+                            adsProperty.params['год постройки'] ||
+                            adsProperty.params['build_year'] ||
+                            adsProperty.params['construction_year'];
+      
+      if (buildYearParam) {
+        const year = parseInt(String(buildYearParam), 10);
+        if (year >= 1950 && year <= new Date().getFullYear() + 2) {
+          return year;
+        }
+      }
+    }
+
     return null;
   }
 
   private async convertAdsProperty(adsProperty: AdsApiProperty): Promise<InsertProperty> {
-    // Дополнительная проверка типа недвижимости - только квартиры
+    // Проверка типа недвижимости - квартиры, дома и новостройки
     const title = (adsProperty.title || '').toLowerCase().trim();
+    const cat2 = (adsProperty.cat2 || '').toLowerCase().trim();
     
-    // Исключаем дома, гаражи, участки, коммерческую недвижимость
-    const isExcluded = title.includes('дом ') || 
-                      title.includes('участок ') || 
-                      title.includes('гараж ') ||
-                      title.includes('помещение ') ||
-                      title.includes('офис ') ||
-                      title.includes('склад ') ||
-                      title.includes('магазин ');
+    // Исключаем нежелательные типы недвижимости
+    const isExcluded = cat2 === 'комнаты' || 
+                      cat2 === 'земельные участки' ||
+                      cat2 === 'гаражи и машиноместа' ||
+                      title.includes('участок') ||
+                      title.includes('гараж') ||
+                      title.includes('комната') ||
+                      title.includes('склад') ||
+                      title.includes('офис');
 
-    // Проверяем, что это именно квартира
-    const isApartment = title.includes('-к кв.') || 
-                       title.includes('квартира') ||
-                       title.includes('студия');
+    // Принимаем квартиры, дома и новостройки
+    const isValidPropertyType = cat2 === 'квартиры' || 
+                               cat2 === 'дома, дачи, коттеджи' ||
+                               title.includes('студия') ||
+                               title.includes('новостройка') ||
+                               title.includes('жк ') ||
+                               (title.includes('квартир') && !title.includes('комната')) ||
+                               (title.includes('дом ') && !title.includes('участок'));
 
-    if (isExcluded || !isApartment) {
-      throw new Error(`Property title "${title}" is not an apartment (only apartments allowed)`);
+    if (isExcluded || !isValidPropertyType) {
+      throw new Error(`Property type "${cat2}" or title "${title}" is not allowed`);
+    }
+
+    // Проверка года постройки - не позднее 2010 года
+    const buildYear = this.extractBuildYear(adsProperty);
+    if (buildYear && buildYear < 2010) {
+      throw new Error(`Property build year ${buildYear} is before 2010 (only 2010+ allowed)`);
     }
 
     // Дополнительная проверка региона на уровне конвертации с картой соответствий
@@ -678,19 +713,24 @@ export class AdsApiService {
           const cat2 = (adsProperty.cat2 || '').toLowerCase().trim();
           const title = (adsProperty.title || '').toLowerCase().trim();
           
-          // Принимаем только квартиры и студии, исключаем комнаты, дома, участки
+          // Принимаем квартиры, студии, дома и новостройки (с фильтрацией по году)
           const isValidPropertyType = cat2 === 'квартиры' || 
+                                     cat2 === 'дома, дачи, коттеджи' ||
                                      title.includes('студия') ||
-                                     (title.includes('квартир') && !title.includes('комната'));
+                                     title.includes('новостройка') ||
+                                     title.includes('жк ') ||
+                                     (title.includes('квартир') && !title.includes('комната')) ||
+                                     (title.includes('дом ') && !title.includes('участок'));
           
           // Исключаем нежелательные типы недвижимости
           const isExcluded = cat2 === 'комнаты' || 
-                            cat2 === 'дома, дачи, коттеджи' ||
                             cat2 === 'земельные участки' ||
                             cat2 === 'гаражи и машиноместа' ||
                             title.includes('участок') ||
                             title.includes('гараж') ||
-                            title.includes('комната');
+                            title.includes('комната') ||
+                            title.includes('склад') ||
+                            title.includes('офис');
 
           if (isExcluded || !isValidPropertyType) {
             console.log(`Skipping property ${adsProperty.id}: cat2="${cat2}", title="${title}" - not an apartment`);
@@ -763,6 +803,13 @@ export class AdsApiService {
           const isRental = this.isRentalProperty(adsProperty);
           if (isRental) {
             console.log(`Skipping property ${adsProperty.id}: detected as rental property`);
+            continue;
+          }
+
+          // ФИЛЬТРАЦИЯ ПО ГОДУ ПОСТРОЙКИ: только новостройки и объекты не позднее 2010 года
+          const buildYear = this.extractBuildYear(adsProperty);
+          if (buildYear && buildYear < 2010) {
+            console.log(`Skipping property ${adsProperty.id}: build year ${buildYear} is before 2010`);
             continue;
           }
 
