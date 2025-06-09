@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireSessionAuth, type SessionAuthenticatedRequest } from '../middleware/sessionAuth';
+import { requireSessionAdmin, type SessionAuthenticatedRequest } from '../middleware/sessionAuth';
 import { adsApiService } from '../services/adsApiService';
 import { schedulerService } from '../services/schedulerService';
 
@@ -25,7 +25,7 @@ router.get('/', (req, res) => {
 });
 
 // ADS API status endpoint
-router.get('/ads-api/status', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
+router.get('/ads-api/status', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res) => {
   try {
     const status = await adsApiService.getStatus();
     res.json({ success: true, data: status });
@@ -42,7 +42,7 @@ router.get('/ads-api/status', requireSessionAuth, async (req: SessionAuthenticat
 });
 
 // ADS API synchronization endpoint
-router.post('/ads-api/sync', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
+router.post('/ads-api/sync', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res) => {
   try {
     const { regions, credentials } = req.body;
     console.log('Starting ADS API sync for regions:', regions);
@@ -64,7 +64,7 @@ router.post('/ads-api/sync', requireSessionAuth, async (req: SessionAuthenticate
 });
 
 // Scheduler status endpoint
-router.get('/scheduler/status', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
+router.get('/scheduler/status', requireSessionAdmin, async (req: SessionAuthenticatedRequest, res) => {
   try {
     const status = {
       isActive: true,
@@ -85,7 +85,7 @@ router.get('/scheduler/status', requireSessionAuth, async (req: SessionAuthentic
 });
 
 // Manual scheduler trigger
-router.post('/scheduler/sync', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/scheduler/sync', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
   try {
     console.log('Manual sync triggered by admin:', req.user?.email);
     
@@ -107,7 +107,7 @@ router.post('/scheduler/sync', requireAdmin, async (req: AuthenticatedRequest, r
 });
 
 // Start scheduler
-router.post('/scheduler/start', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/scheduler/start', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
   try {
     schedulerService.start();
     res.json({ success: true, message: 'Scheduler started successfully' });
@@ -124,7 +124,7 @@ router.post('/scheduler/start', requireAdmin, async (req: AuthenticatedRequest, 
 });
 
 // Stop scheduler
-router.post('/scheduler/stop', requireAdmin, async (req: AuthenticatedRequest, res) => {
+router.post('/scheduler/stop', requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
   try {
     schedulerService.stop();
     res.json({ success: true, message: 'Scheduler stopped successfully' });

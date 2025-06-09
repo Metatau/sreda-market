@@ -86,3 +86,61 @@ export const requireSessionAuth = async (req: SessionAuthenticatedRequest, res: 
     });
   }
 };
+
+// Admin role authentication middleware
+export const requireSessionAdmin = async (req: SessionAuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.session?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          message: 'Authentication required',
+          type: 'AUTH_REQUIRED'
+        }
+      });
+    }
+
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          message: 'User not found',
+          type: 'USER_NOT_FOUND'
+        }
+      });
+    }
+
+    if (user.role !== 'administrator') {
+      return res.status(403).json({
+        success: false,
+        error: {
+          message: 'Administrator privileges required',
+          type: 'INSUFFICIENT_PERMISSIONS'
+        }
+      });
+    }
+
+    req.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role as 'administrator' | 'client',
+      firstName: user.firstName,
+      lastName: user.lastName
+    };
+
+    next();
+  } catch (error) {
+    console.error('Admin authentication error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: 'Authentication service error',
+        type: 'AUTH_SERVICE_ERROR'
+      }
+    });
+  }
+};
