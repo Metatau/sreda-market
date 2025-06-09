@@ -67,12 +67,20 @@ export class AuthService {
     // Генерируем или валидируем реферальный код
     let referralCode: string;
     if (data.referralCode) {
-      // Проверяем, что предоставленный код уникален
-      const existingUser = await storage.getUserByReferralCode(data.referralCode);
-      if (existingUser) {
-        throw new Error('Реферальный код уже используется. Выберите другой код.');
+      // Проверяем, является ли это промокодом (например, TEST30)
+      const promocode = await storage.getPromocodeByCode(data.referralCode);
+      
+      if (promocode && promocode.isMultiUse) {
+        // Это многоразовый промокод - не используем как реферальный код
+        referralCode = await this.generateUniqueReferralCode();
+      } else {
+        // Обычный реферальный код - проверяем уникальность
+        const existingUser = await storage.getUserByReferralCode(data.referralCode);
+        if (existingUser) {
+          throw new Error('Реферальный код уже используется. Выберите другой код.');
+        }
+        referralCode = data.referralCode;
       }
-      referralCode = data.referralCode;
     } else {
       referralCode = await this.generateUniqueReferralCode();
     }
@@ -89,6 +97,18 @@ export class AuthService {
       role: 'client',
       bonusBalance: '0.00',
     });
+
+    // Применяем промокод если предоставлен (например, TEST30)
+    if (data.referralCode) {
+      const promocode = await storage.getPromocodeByCode(data.referralCode);
+      if (promocode && !storage.isPromocodeExpired(promocode)) {
+        // Применяем промокод для нового пользователя
+        const applied = await storage.usePromocode(data.referralCode, newUser.id);
+        if (applied) {
+          console.log(`Promocode ${data.referralCode} applied successfully for user ${newUser.email}`);
+        }
+      }
+    }
 
     // Возвращаем пользователя без пароля
     const { password, ...userWithoutPassword } = newUser;

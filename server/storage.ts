@@ -9,6 +9,7 @@ import {
   insights,
   dataSources,
   promocodes,
+  promocodeUsages,
   type Region,
   type PropertyClass,
   type Property,
@@ -865,14 +866,33 @@ export class DatabaseStorage implements IStorage {
   async usePromocode(code: string, userId: number, clientIp?: string): Promise<boolean> {
     const promocode = await this.getPromocodeByCode(code);
     
-    if (!promocode || promocode.isUsed || this.isPromocodeExpired(promocode)) {
+    if (!promocode || this.isPromocodeExpired(promocode)) {
       return false;
     }
 
-    // Проверка на повторное использование промокодов пользователем
-    const userPromocodeUsage = await this.getUserPromocodeUsage(userId);
-    if (userPromocodeUsage >= 1) { // Максимум 1 промокод на пользователя
-      return false;
+    // Special handling for multi-use promocodes (like TEST30)
+    if (promocode.isMultiUse) {
+      // Check if user has already used this specific promocode
+      const hasUsedThisCode = await this.hasUserUsedPromocode(userId, promocode.id);
+      if (hasUsedThisCode) {
+        return false; // User can't use the same multi-use code twice
+      }
+      
+      // Check if promocode has reached maximum uses
+      if (promocode.currentUses >= promocode.maxUses) {
+        return false;
+      }
+    } else {
+      // Single-use promocode logic
+      if (promocode.isUsed) {
+        return false;
+      }
+      
+      // Проверка на повторное использование промокодов пользователем
+      const userPromocodeUsage = await this.getUserPromocodeUsage(userId);
+      if (userPromocodeUsage >= 1) { // Максимум 1 промокод на пользователя
+        return false;
+      }
     }
 
     // Проверка активной подписки - нельзя использовать промокод при активной подписке
@@ -902,34 +922,78 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Устанавливаем промокод как использованный и привязываем к пользователю
-    await db
-      .update(promocodes)
-      .set({
-        isUsed: true,
-        usedAt: new Date(),
+    // Handle promocode usage based on type
+    if (promocode.isMultiUse) {
+      // For multi-use codes, track individual usage and increment counter
+      await db.insert(promocodeUsages).values({
+        promocodeId: promocode.id,
         userId: userId,
         usedFromIp: clientIp,
-      })
-      .where(eq(promocodes.id, promocode.id));
+      });
+      
+      // Increment current uses counter
+      await db
+        .update(promocodes)
+        .set({
+          currentUses: promocode.currentUses + 1,
+        })
+        .where(eq(promocodes.id, promocode.id));
+    } else {
+      // Single-use promocode - mark as used
+      await db
+        .update(promocodes)
+        .set({
+          isUsed: true,
+          usedAt: new Date(),
+          userId: userId,
+          usedFromIp: clientIp,
+        })
+        .where(eq(promocodes.id, promocode.id));
+    }
 
-    // Обновляем пользователя - даем промо подписку на 24 часа
+    // Give user subscription based on promocode
     const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 24);
-    
-    await this.updateSubscription(userId, 'promo', expiresAt);
+    if (promocode.code === 'TEST30') {
+      // TEST30 gives 30 days of professional access for testers
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      await this.updateSubscription(userId, 'professional', expiresAt);
+    } else {
+      // Other promocodes give 24 hours of promo access
+      expiresAt.setHours(expiresAt.getHours() + 24);
+      await this.updateSubscription(userId, 'promo', expiresAt);
+    }
     
     return true;
   }
 
+  // Check if user has used a specific promocode
+  async hasUserUsedPromocode(userId: number, promocodeId: number): Promise<boolean> {
+    const [usage] = await db
+      .select()
+      .from(promocodeUsages)
+      .where(and(
+        eq(promocodeUsages.userId, userId),
+        eq(promocodeUsages.promocodeId, promocodeId)
+      ));
+    
+    return !!usage;
+  }
+
   // Вспомогательный метод для проверки использования промокодов
   async getUserPromocodeUsage(userId: number): Promise<number> {
-    const result = await db
+    // For single-use promocodes, count from promocodes table
+    const singleUseResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(promocodes)
       .where(eq(promocodes.userId, userId));
     
-    return result[0]?.count || 0;
+    // For multi-use promocodes, count from promocode_usages table
+    const multiUseResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(promocodeUsages)
+      .where(eq(promocodeUsages.userId, userId));
+    
+    return (singleUseResult[0]?.count || 0) + (multiUseResult[0]?.count || 0);
   }
 
   // Проверка количества созданных промокодов с IP за определенный период
