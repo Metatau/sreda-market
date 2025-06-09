@@ -122,13 +122,12 @@ export default function AdminPanel() {
   const filteredSources = useMemo(() => {
     if (!sourcesData?.sources) return [];
     return sourcesData.sources.filter((source: DataSource) => {
-      const matchesSearch = !searchTerm || 
-        source.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        source.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesType = !filterType || source.type === filterType;
-      return matchesSearch && matchesType;
+      const matchesSearch = !sourcesSearchTerm || 
+        source.name.toLowerCase().includes(sourcesSearchTerm.toLowerCase()) ||
+        source.description?.toLowerCase().includes(sourcesSearchTerm.toLowerCase());
+      return matchesSearch;
     });
-  }, [sourcesData?.sources, searchTerm, filterType]);
+  }, [sourcesData?.sources, sourcesSearchTerm]);
 
   // Мутации для источников данных
   const toggleSourceMutation = useMutation({
