@@ -105,7 +105,7 @@ export default function Home() {
       {/* 2. Map Analytics Tools */}
       <div className="w-full bg-white border-b shadow-sm mt-6">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
             <Card 
               className={`hover:shadow-md transition-all cursor-pointer ${
                 activeMapTool === 'heatmap' ? 'ring-2 ring-blue-500 bg-blue-50 shadow-lg' : 'hover:shadow-md'
@@ -162,33 +162,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card 
-              className={`hover:shadow-md transition-all cursor-pointer ${
-                activeMapTool === 'investment' ? 'ring-2 ring-orange-500 bg-orange-50 shadow-lg' : 'hover:shadow-md'
-              }`}
-              onClick={() => setActiveMapTool(activeMapTool === 'investment' ? 'none' : 'investment')}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
-                    activeMapTool === 'investment' ? 'bg-orange-600 shadow-md' : 'bg-orange-100'
-                  }`}>
-                    <TrendingUp className={`h-6 w-6 transition-colors ${
-                      activeMapTool === 'investment' ? 'text-white' : 'text-orange-600'
-                    }`} />
-                  </div>
-                  <div>
-                    <h4 className={`font-semibold transition-colors ${
-                      activeMapTool === 'investment' ? 'text-orange-700' : 'text-gray-900'
-                    }`}>
-                      Инвест-аналитика
-                      {activeMapTool === 'investment' && <span className="ml-2 text-orange-600">●</span>}
-                    </h4>
-                    <p className="text-sm text-gray-600">ROI, доходность и прогнозы</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </div>
@@ -245,34 +219,7 @@ export default function Home() {
               </div>
             )}
             
-            {activeMapTool === 'investment' && (
-              <div className="bg-white rounded-lg p-4 border">
-                <h3 className="font-semibold mb-3 text-orange-600">Инвестиционная аналитика</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="border rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">ROI-зоны</span>
-                      <input type="checkbox" />
-                    </div>
-                    <div className="text-xs text-gray-600">Показать зоны доходности</div>
-                  </div>
-                  <div className="border rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Прогноз роста</span>
-                      <input type="checkbox" />
-                    </div>
-                    <div className="text-xs text-gray-600">Потенциал роста цен</div>
-                  </div>
-                  <div className="border rounded-lg p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Ликвидность</span>
-                      <input type="checkbox" />
-                    </div>
-                    <div className="text-xs text-gray-600">Скорость продажи</div>
-                  </div>
-                </div>
-              </div>
-            )}
+
           </div>
         </div>
       )}
