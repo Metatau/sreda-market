@@ -89,19 +89,6 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
-      {/* Map Section - Responsive Height */}
-      <div className="w-full pt-4 px-2 sm:px-4 mb-6">
-        <div className="relative h-[300px] sm:h-[400px] md:h-[500px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
-          <PropertyMap 
-            properties={properties as any}
-            selectedProperty={selectedProperty}
-            onPropertySelect={handlePropertySelect}
-            regionId={filters.regionId}
-            activeMapTool={activeMapTool}
-          />
-        </div>
-      </div>
-
       {/* 2. Map Analytics Tools */}
       <div className="w-full bg-white border-b shadow-sm mt-6">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6">
@@ -164,6 +151,19 @@ export default function Home() {
 
 
           </div>
+        </div>
+      </div>
+
+      {/* Map Section - Responsive Height */}
+      <div className="w-full pt-4 px-2 sm:px-4 mb-6">
+        <div className="relative h-[300px] sm:h-[400px] md:h-[500px] bg-white border-b rounded-lg shadow-sm overflow-hidden">
+          <PropertyMap 
+            properties={properties as any}
+            selectedProperty={selectedProperty}
+            onPropertySelect={handlePropertySelect}
+            regionId={filters.regionId}
+            activeMapTool={activeMapTool}
+          />
         </div>
       </div>
 
