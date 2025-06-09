@@ -1199,8 +1199,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Data Sources Management API
   // Получить все источники данных
-  app.get("/api/admin/sources", requireAdmin, async (req: AuthenticatedRequest, res) => {
+  app.get("/api/admin/sources", requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
     try {
+      // Check if user is admin
+      if (req.user?.role !== 'administrator') {
+        return res.status(403).json({ success: false, error: "Admin access required" });
+      }
+
       const sources = await db.select().from(dataSources).orderBy(desc(dataSources.createdAt));
       res.json({ 
         success: true, 
@@ -1213,8 +1218,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Создать новый источник данных
-  app.post("/api/admin/sources", requireAdmin, async (req: AuthenticatedRequest, res) => {
+  app.post("/api/admin/sources", requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
     try {
+      // Check if user is admin
+      if (req.user?.role !== 'administrator') {
+        return res.status(403).json({ success: false, error: "Admin access required" });
+      }
+
       const validatedData = insertDataSourceSchema.parse(req.body);
       const [newSource] = await db.insert(dataSources).values({
         ...validatedData,
@@ -1233,8 +1243,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Обновить источник данных
-  app.put("/api/admin/sources/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+  app.put("/api/admin/sources/:id", requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
     try {
+      // Check if user is admin
+      if (req.user?.role !== 'administrator') {
+        return res.status(403).json({ success: false, error: "Admin access required" });
+      }
+
       const sourceId = parseInt(req.params.id);
       if (isNaN(sourceId)) {
         return res.status(400).json({ success: false, error: "Invalid source ID" });
@@ -1265,7 +1280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Удалить источник данных
-  app.delete("/api/admin/sources/:id", requireAdmin, async (req: AuthenticatedRequest, res) => {
+  app.delete("/api/admin/sources/:id", requireSessionAuth, async (req: SessionAuthenticatedRequest, res) => {
     try {
       const sourceId = parseInt(req.params.id);
       if (isNaN(sourceId)) {
