@@ -128,7 +128,7 @@ export default function AdminPanel() {
       const matchesType = !filterType || source.type === filterType;
       return matchesSearch && matchesType;
     });
-  }, [sourcesData?.sources, searchTerm, filterType]);
+  }, [sourcesData?.data, searchTerm, filterType]);
 
   // Мутации для источников данных
   const toggleSourceMutation = useMutation({
@@ -432,6 +432,41 @@ export default function AdminPanel() {
         };
       default:
         return {};
+    }
+  };
+
+  const handleToggleSource = (source: DataSource) => {
+    toggleSourceMutation.mutate(source.id);
+  };
+
+  const handleViewSource = (source: DataSource) => {
+    // Show source details in a modal or navigate to details page
+    console.log('Viewing source:', source);
+  };
+
+  const handleEditSource = (source: DataSource) => {
+    setEditingSource(source);
+    setNewSourceForm({
+      name: source.name,
+      description: source.description || '',
+      type: source.type,
+      frequency: source.frequency,
+      tags: source.tags.join(', '),
+      config: {
+        websiteUrl: source.config?.websiteUrl || '',
+        channelUrl: source.config?.channelUrl || '',
+        channelUsername: source.config?.channelUsername || '',
+        rssUrl: source.config?.rssUrl || '',
+        fileName: source.config?.fileName || '',
+        keywords: source.config?.keywords?.join(', ') || ''
+      }
+    });
+    setIsAddSourceDialogOpen(true);
+  };
+
+  const handleDeleteSource = (source: DataSource) => {
+    if (confirm(`Вы уверены, что хотите удалить источник "${source.name}"?`)) {
+      deleteSourceMutation.mutate(source.id);
     }
   };
 
