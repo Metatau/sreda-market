@@ -75,8 +75,105 @@ export default function Insights() {
     setCurrentPage(1);
   };
 
+  // Функция для определения цвета тегов
+  const getTagColor = (tag: string) => {
+    const tagLower = tag.toLowerCase();
+    
+    if (tagLower.includes('иш') || tagLower.includes('ai') || tagLower.includes('технолог') || tagLower.includes('инновац')) {
+      return {
+        bg: 'bg-gradient-to-r from-purple-500 to-pink-500',
+        text: 'text-white',
+        border: 'border-purple-300',
+        ring: 'ring-purple-300',
+        hoverBg: 'hover:bg-purple-50',
+        dot: 'bg-purple-400'
+      };
+    }
+    
+    if (tagLower.includes('инвестиц') || tagLower.includes('доходност') || tagLower.includes('финанс')) {
+      return {
+        bg: 'bg-gradient-to-r from-green-500 to-emerald-500',
+        text: 'text-white',
+        border: 'border-green-300',
+        ring: 'ring-green-300',
+        hoverBg: 'hover:bg-green-50',
+        dot: 'bg-green-400'
+      };
+    }
+    
+    if (tagLower.includes('москв') || tagLower.includes('спб') || tagLower.includes('регион') || tagLower.includes('район')) {
+      return {
+        bg: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+        text: 'text-white',
+        border: 'border-blue-300',
+        ring: 'ring-blue-300',
+        hoverBg: 'hover:bg-blue-50',
+        dot: 'bg-blue-400'
+      };
+    }
+    
+    if (tagLower.includes('esg') || tagLower.includes('эколог') || tagLower.includes('зелен') || tagLower.includes('энерг')) {
+      return {
+        bg: 'bg-gradient-to-r from-emerald-500 to-teal-500',
+        text: 'text-white',
+        border: 'border-emerald-300',
+        ring: 'ring-emerald-300',
+        hoverBg: 'hover:bg-emerald-50',
+        dot: 'bg-emerald-400'
+      };
+    }
+    
+    if (tagLower.includes('коммерч') || tagLower.includes('офис') || tagLower.includes('склад')) {
+      return {
+        bg: 'bg-gradient-to-r from-orange-500 to-red-500',
+        text: 'text-white',
+        border: 'border-orange-300',
+        ring: 'ring-orange-300',
+        hoverBg: 'hover:bg-orange-50',
+        dot: 'bg-orange-400'
+      };
+    }
+    
+    // По умолчанию
+    return {
+      bg: 'bg-gradient-to-r from-indigo-500 to-blue-500',
+      text: 'text-white',
+      border: 'border-indigo-300',
+      ring: 'ring-indigo-300',
+      hoverBg: 'hover:bg-indigo-50',
+      dot: 'bg-indigo-400'
+    };
+  };
+
   const formatDate = (date: string) => {
     return format(new Date(date), 'd MMMM yyyy', { locale: ru });
+  };
+
+  // Функция для определения цвета тегов  
+  const getTagColorForCard = (tag: string) => {
+    const tagLower = tag.toLowerCase();
+    
+    if (tagLower.includes('иш') || tagLower.includes('ai') || tagLower.includes('технолог') || tagLower.includes('инновац')) {
+      return 'bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border-purple-200';
+    }
+    
+    if (tagLower.includes('инвестиц') || tagLower.includes('доходност') || tagLower.includes('финанс')) {
+      return 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200';
+    }
+    
+    if (tagLower.includes('москв') || tagLower.includes('спб') || tagLower.includes('регион') || tagLower.includes('район')) {
+      return 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border-blue-200';
+    }
+    
+    if (tagLower.includes('esg') || tagLower.includes('эколог') || tagLower.includes('зелен') || tagLower.includes('энерг')) {
+      return 'bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 border-emerald-200';
+    }
+    
+    if (tagLower.includes('коммерч') || tagLower.includes('офис') || tagLower.includes('склад')) {
+      return 'bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 border-orange-200';
+    }
+    
+    return 'bg-gradient-to-r from-indigo-100 to-blue-100 text-indigo-800 border-indigo-200';
   };
 
   const renderCharts = (chartData: any) => {
@@ -199,19 +296,26 @@ export default function Insights() {
         {/* Tags Filter */}
         {availableTags.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Фильтр по тегам:</h3>
-            <div className="flex flex-wrap gap-2">
-              {availableTags.map((tag: string) => (
-                <Badge
-                  key={tag}
-                  variant={filters.tags.includes(tag) ? "default" : "outline"}
-                  className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900"
-                  onClick={() => handleTagFilter(tag)}
-                >
-                  <TagIcon className="h-3 w-3 mr-1" />
-                  {tag}
-                </Badge>
-              ))}
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Популярные темы:</h3>
+            <div className="flex flex-wrap gap-3">
+              {availableTags.map((tag: string) => {
+                const isSelected = filters.tags.includes(tag);
+                const tagColor = getTagColor(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => handleTagFilter(tag)}
+                    className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105 hover:shadow-md ${
+                      isSelected 
+                        ? `${tagColor.bg} ${tagColor.text} shadow-lg ring-2 ring-offset-2 ${tagColor.ring}` 
+                        : `bg-white dark:bg-gray-800 border-2 ${tagColor.border} ${tagColor.hoverBg} text-gray-700 dark:text-gray-300 hover:${tagColor.text}`
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full mr-2 ${isSelected ? 'bg-white/80' : tagColor.dot}`}></span>
+                    {tag}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
