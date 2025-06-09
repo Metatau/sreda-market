@@ -350,6 +350,27 @@ export class GeospatialService {
     }
   }
 
+  /**
+   * Извлечение города из строки адреса
+   */
+  private static extractCityFromLocation(location: string): string {
+    const parts = location.split(',').map(part => part.trim());
+    
+    // Ищем город в конце адреса (обычно последняя или предпоследняя часть)
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const part = parts[i];
+      // Исключаем страну и регион
+      if (!part.toLowerCase().includes('россия') && 
+          !part.toLowerCase().includes('область') && 
+          !part.toLowerCase().includes('край') &&
+          part.length > 2) {
+        return part;
+      }
+    }
+    
+    return parts[0] || 'Неизвестный город';
+  }
+
   // Методы по умолчанию для fallback
 
   private static getDefaultDemographics(): Demographics {
@@ -521,13 +542,7 @@ export class GeospatialService {
     return Math.random() > 0.6 ? 'stable' : 'increasing';
   }
 
-  private static extractCityFromLocation(location: string): string {
-    const cities = ['Москва', 'Санкт-Петербург', 'Екатеринбург', 'Новосибирск', 'Казань', 'Челябинск'];
-    for (const city of cities) {
-      if (location.includes(city)) return city;
-    }
-    return 'Москва'; // По умолчанию
-  }
+
 
   // AI-анализ для Enhanced Analytics
 
