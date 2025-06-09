@@ -7,7 +7,7 @@ import { PropertyCard } from '@/components/PropertyCard';
 import { PropertyFilters } from '@/components/PropertyFilters';
 import { Navigation } from '@/components/Navigation';
 
-import { PropertyMap } from '@/components/Map/PropertyMapRefactored';
+import { PropertyMap } from '@/components/Map/PropertyMapFixed';
 import { InvestmentAnalyticsModal } from '@/components/InvestmentAnalyticsModal';
 
 import { useProperties, useAllProperties, useRegions } from '@/hooks/useProperties';
