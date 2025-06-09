@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { Property } from '@/types';
 import { leafletMapService } from '@/services/leafletMapService';
 import { geolocationService } from '@/services/geolocationService';
+import { QuarterAnalyticsPopup } from './components/QuarterAnalyticsPopup';
+import { openStreetMapService } from '@/services/openStreetMapService';
 
 // Расширяем интерфейс Window для глобальной функции
 declare global {
@@ -68,6 +70,8 @@ export function PropertyMap({ properties, selectedProperty, onPropertySelect, re
   const [mapId, setMapId] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState<HeatmapMode>('none');
+  const [analyticsPosition, setAnalyticsPosition] = useState<[number, number] | null>(null);
+  const [analyticsAddress, setAnalyticsAddress] = useState<string | null>(null);
 
   // Создаем глобальную функцию для открытия модального окна из popup
   useEffect(() => {
